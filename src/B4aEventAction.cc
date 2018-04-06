@@ -1,0 +1,175 @@
+//
+// ********************************************************************
+// * License and Disclaimer                                           *
+// *                                                                  *
+// * The  Geant4 software  is  copyright of the Copyright Holders  of *
+// * the Geant4 Collaboration.  It is provided  under  the terms  and *
+// * conditions of the Geant4 Software License,  included in the file *
+// * LICENSE and available at  http://cern.ch/geant4/license .  These *
+// * include a list of copyright holders.                             *
+// *                                                                  *
+// * Neither the authors of this software system, nor their employing *
+// * institutes,nor the agencies providing financial support for this *
+// * work  make  any representation or  warranty, express or implied, *
+// * regarding  this  software system or assume any liability for its *
+// * use.  Please see the license in the file  LICENSE  and URL above *
+// * for the full disclaimer and the limitation of liability.         *
+// *                                                                  *
+// * This  code  implementation is the result of  the  scientific and *
+// * technical work of the GEANT4 collaboration.                      *
+// * By using,  copying,  modifying or  distributing the software (or *
+// * any work based  on the software)  you  agree  to acknowledge its *
+// * use  in  resulting  scientific  publications,  and indicate your *
+// * acceptance of all terms of the Geant4 Software license.          *
+// ********************************************************************
+//
+// $Id: B4aEventAction.cc 100946 2016-11-03 11:28:08Z gcosmo $
+// 
+/// \file B4aEventAction.cc
+/// \brief Implementation of the B4aEventAction class
+
+#include "B4aEventAction.hh"
+#include "B4RunAction.hh"
+#include "B4Analysis.hh"
+
+#include "G4RunManager.hh"
+#include "G4Event.hh"
+#include "G4UnitsTable.hh"
+
+#include "Randomize.hh"
+#include <iomanip>
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+B4aEventAction::B4aEventAction()
+ : G4UserEventAction(),
+   fEnergyAbs(0.),
+   fEnergyGap(0.),
+   fTrackLAbs(0.),
+   fTrackLGap(0.),
+   generator_(0)
+{
+	//create vector ntuple here
+	auto analysisManager = G4AnalysisManager::Instance();
+	analysisManager->CreateNtupleDColumn("rechit_energy",rechit_energy_);
+	analysisManager->CreateNtupleDColumn("rechit_x",rechit_x_);
+	analysisManager->CreateNtupleDColumn("rechit_y",rechit_y_);
+	analysisManager->CreateNtupleDColumn("rechit_z",rechit_z_);
+	analysisManager->CreateNtupleDColumn("rechit_varea",rechit_varea_);
+	analysisManager->CreateNtupleDColumn("rechit_vr",rechit_vr_);
+	analysisManager->CreateNtupleDColumn("rechit_vl",rechit_vl_);
+
+	analysisManager->FinishNtuple();
+
+
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+B4aEventAction::~B4aEventAction()
+{}
+
+
+void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Step* step){
+
+	auto prestep=step->GetPreStepPoint();
+	const auto& activesensors=detector_->getActiveSensors();
+
+	size_t idx=activesensors->size();
+	for(size_t i=0;i<activesensors->size();i++){
+		if(volume == activesensors->at(i).getVol()){
+			idx=i;
+			break;
+		}
+	}
+
+	if(idx==activesensors->size())return;//not active volume
+	size_t currentindex=0;
+
+	size_t hitidx=allvolumes_.size();
+	hitidx = std::find(allvolumes_.begin(),allvolumes_.end(),volume)-allvolumes_.begin();
+
+	if(hitidx != allvolumes_.size()){
+		currentindex=hitidx;
+	}
+	else{
+		currentindex=allvolumes_.size();
+		allvolumes_.push_back(volume);
+		rechit_energy_.push_back(0);
+		rechit_x_.push_back(0);
+		rechit_y_.push_back(0);
+		rechit_z_.push_back(0);
+		rechit_varea_.push_back(0);
+		rechit_vr_.push_back(0);
+		rechit_vl_.push_back(0);
+	}
+
+	const auto& energy=step->GetTotalEnergyDeposit();
+
+	rechit_energy_.at(currentindex)+=energy * activesensors->at(idx).getEnergyscalefactor();
+	rechit_x_.at     (currentindex)=activesensors->at(idx).getPosx();
+	rechit_y_.at     (currentindex)=activesensors->at(idx).getPosy();
+	rechit_z_.at     (currentindex)=activesensors->at(idx).getPosz();
+	rechit_varea_.at (currentindex)=activesensors->at(idx).getArea();
+	rechit_vr_.at    (currentindex)=activesensors->at(idx).getDimxy();
+	rechit_vl_.at    (currentindex)=activesensors->at(idx).getDimxy();
+
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void B4aEventAction::BeginOfEventAction(const G4Event* /*event*/)
+{  
+  // initialisation per event
+  fEnergyAbs = 0.;
+  fEnergyGap = 0.;
+  fTrackLAbs = 0.;
+  fTrackLGap = 0.;
+  clear();
+
+  //set generator stuff
+//random particle
+  //random energy
+  /*
+  do this in the generator
+  */
+
+  //
+  //
+
+
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void B4aEventAction::EndOfEventAction(const G4Event* event)
+{
+  // Accumulate statistics
+  //
+
+
+
+  // get analysis manager
+  auto analysisManager = G4AnalysisManager::Instance();
+
+  // fill histograms
+  analysisManager->FillH1(0, fEnergyAbs);
+  analysisManager->FillH1(1, fEnergyGap);
+  analysisManager->FillH1(2, fTrackLAbs);
+  analysisManager->FillH1(3, fTrackLGap);
+  
+  // fill ntuple
+  analysisManager->FillNtupleDColumn(0, fEnergyAbs);
+  analysisManager->FillNtupleDColumn(1, fEnergyGap);
+  analysisManager->FillNtupleDColumn(2, fTrackLAbs);
+  analysisManager->FillNtupleDColumn(3, fTrackLGap);
+
+  //filling deposits and volume info for all volumes automatically..
+
+
+  analysisManager->AddNtupleRow();  
+
+  clear();
+}  
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
