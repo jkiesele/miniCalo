@@ -52,7 +52,8 @@ B4aActionInitialization::~B4aActionInitialization()
 
 void B4aActionInitialization::BuildForMaster() const
 {
-  SetUserAction(new B4RunAction);
+	auto gen=new B4PrimaryGeneratorAction;
+  SetUserAction(new B4RunAction(gen));
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -61,7 +62,8 @@ void B4aActionInitialization::Build() const
 {
 	auto gen=new B4PrimaryGeneratorAction;
   SetUserAction(new B4PrimaryGeneratorAction);
-  SetUserAction(new B4RunAction);
+  auto runact=new B4RunAction(gen);
+  SetUserAction(runact);
   auto eventAction = new B4aEventAction;
   eventAction->setGenerator(gen);
   eventAction->setDetector(fDetConstruction);

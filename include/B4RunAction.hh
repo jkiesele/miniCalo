@@ -35,7 +35,7 @@
 #include "globals.hh"
 
 class G4Run;
-
+class B4PrimaryGeneratorAction;
 /// Run action class
 ///
 /// It accumulates statistic and computes dispersion of the energy deposit 
@@ -57,11 +57,17 @@ class G4Run;
 class B4RunAction : public G4UserRunAction
 {
   public:
-    B4RunAction();
+    B4RunAction(B4PrimaryGeneratorAction *);
     virtual ~B4RunAction();
+
+    void linkGenerator(B4PrimaryGeneratorAction* g){
+    	generator_=g;
+    }
 
     virtual void BeginOfRunAction(const G4Run*);
     virtual void   EndOfRunAction(const G4Run*);
+  private:
+    B4PrimaryGeneratorAction * generator_;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

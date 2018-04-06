@@ -40,6 +40,8 @@
 #include "G4ParticleDefinition.hh"
 #include "G4SystemOfUnits.hh"
 #include "Randomize.hh"
+#include "G4INCLRandom.hh"
+#include <G4INCLGeant4Random.hh>
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -53,10 +55,14 @@ B4PrimaryGeneratorAction::B4PrimaryGeneratorAction()
   // default particle kinematic
   //
   auto particleDefinition 
-    = G4ParticleTable::GetParticleTable()->FindParticle("e-");
+    = G4ParticleTable::GetParticleTable()->FindParticle("gamma");
   fParticleGun->SetParticleDefinition(particleDefinition);
   fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
   fParticleGun->SetParticleEnergy(100.*GeV);
+
+
+  G4INCL::Random::setGenerator( new G4INCL::Geant4RandomGenerator());
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -64,6 +70,50 @@ B4PrimaryGeneratorAction::B4PrimaryGeneratorAction()
 B4PrimaryGeneratorAction::~B4PrimaryGeneratorAction()
 {
   delete fParticleGun;
+}
+std::vector<G4String> B4PrimaryGeneratorAction::generateAvailableParticles(){
+	std::vector<G4String> out;
+	auto oldid=particleid_;
+	for(int i=0;i<particles_size;i++)
+		out.push_back(setParticleID((B4PrimaryGeneratorAction::particles)i));
+	setParticleID(oldid);
+	return out;
+}
+
+G4String B4PrimaryGeneratorAction::setParticleID(enum particles p){
+	particleid_=p;
+	G4ParticleDefinition * particleDefinition =0;
+	if(p==gamma){
+		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("gamma");
+		fParticleGun->SetParticleDefinition(particleDefinition);
+		return "isGamma";
+	}
+	if(p==elec){
+		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("e-");
+		fParticleGun->SetParticleDefinition(particleDefinition);
+		return "isElectron";
+	}
+	if(p==muon){
+		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("mu-");
+		fParticleGun->SetParticleDefinition(particleDefinition);
+		return "isMuon";
+	}
+	if(p==pioncharged){
+		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("pi+");
+		fParticleGun->SetParticleDefinition(particleDefinition);
+		return "isPionCharged";
+	}
+	if(p==pionneutral){
+		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("pi0");
+		fParticleGun->SetParticleDefinition(particleDefinition);
+		return "isPionNeutral";
+	}
+	if(p==tau){
+		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("tau-");
+		fParticleGun->SetParticleDefinition(particleDefinition);
+		return "isTau";
+	}
+	return "isInvalid";
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -103,6 +153,21 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
   //generate a few of them
 
+
+  G4double rand =  G4INCL::Random::shoot();
+  energy_=99*rand+1;
+  fParticleGun->SetParticleEnergy(energy_ * GeV);
+
+   int id=(int)particleid_;
+   if(id<(int)particles_size-1)
+	   id++;
+   else
+	   id=0;
+   particleid_=(particles)id;
+  G4cout << "shooting " <<  setParticleID(particleid_)
+		  << " with " << energy_ <<" GeV "<<G4endl;
+
+
   fParticleGun->GeneratePrimaryVertex(anEvent);
 
   /*
@@ -113,6 +178,8 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
   fParticleGun->GeneratePrimaryVertex(anEvent); */
 }
+
+
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 

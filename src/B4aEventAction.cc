@@ -152,17 +152,15 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
   // get analysis manager
   auto analysisManager = G4AnalysisManager::Instance();
 
-  // fill histograms
-  analysisManager->FillH1(0, fEnergyAbs);
-  analysisManager->FillH1(1, fEnergyGap);
-  analysisManager->FillH1(2, fTrackLAbs);
-  analysisManager->FillH1(3, fTrackLGap);
   
   // fill ntuple
-  analysisManager->FillNtupleDColumn(0, fEnergyAbs);
-  analysisManager->FillNtupleDColumn(1, fEnergyGap);
-  analysisManager->FillNtupleDColumn(2, fTrackLAbs);
-  analysisManager->FillNtupleDColumn(3, fTrackLGap);
+  int i=0;
+  int ispart[B4PrimaryGeneratorAction::particles_size];
+  for( ;i<B4PrimaryGeneratorAction::particles_size;i++){
+	  ispart[i]=generator_->isParticle(i);
+	  analysisManager->FillNtupleIColumn(i,ispart[i]);
+  }
+  analysisManager->FillNtupleDColumn(0,generator_->getEnergy());
 
   //filling deposits and volume info for all volumes automatically..
 

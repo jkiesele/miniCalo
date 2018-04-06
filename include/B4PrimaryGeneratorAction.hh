@@ -33,6 +33,7 @@
 
 #include "G4VUserPrimaryGeneratorAction.hh"
 #include "globals.hh"
+#include <vector>
 
 class G4ParticleGun;
 class G4Event;
@@ -57,8 +58,31 @@ public:
 
   G4ParticleGun* getGun(){return fParticleGun;}
 
+  G4double getEnergy()const{return energy_;}
+
+
+  enum particles{
+	  gamma=0,elec,muon,pioncharged,pionneutral,tau,
+
+	  particles_size //leave this one
+  };
+
+  std::vector<G4String> generateAvailableParticles();
+
+  particles getParticle()const{return particleid_;}
+
+  int isParticle(int i)const{
+	  return i==particleid_;
+  }
+
 private:
   G4ParticleGun*  fParticleGun; // G4 particle gun
+
+  G4String setParticleID(enum particles );
+
+  G4double energy_;
+  particles particleid_;
+
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
