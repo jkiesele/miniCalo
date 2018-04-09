@@ -42,6 +42,9 @@
 #include "Randomize.hh"
 #include "G4INCLRandom.hh"
 #include <G4INCLGeant4Random.hh>
+#include <G4INCLRandomSeedVector.hh>
+#include<ctime>
+#include<sys/types.h>
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -62,8 +65,10 @@ B4PrimaryGeneratorAction::B4PrimaryGeneratorAction()
   fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
   fParticleGun->SetParticleEnergy(100.*GeV);
 
+  G4INCL::Random::SeedVector sv;
+  sv<< std::time(0) + getpid();
 
-  G4INCL::Random::setGenerator( new G4INCL::Geant4RandomGenerator());
+  G4INCL::Random::setGenerator( new G4INCL::Geant4RandomGenerator(sv));
   globalgen=this;
 
 }
