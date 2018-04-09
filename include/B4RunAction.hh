@@ -59,7 +59,7 @@ class B4aEventAction;
 class B4RunAction : public G4UserRunAction
 {
   public:
-    B4RunAction(B4PrimaryGeneratorAction * gen, B4aEventAction* e);
+    B4RunAction(B4PrimaryGeneratorAction * gen, B4aEventAction* e, G4String fn);
     virtual ~B4RunAction();
 
     void linkGenerator(B4PrimaryGeneratorAction* g){

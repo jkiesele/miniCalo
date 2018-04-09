@@ -54,7 +54,7 @@ void B4aActionInitialization::BuildForMaster() const
 {
 	auto gen=new B4PrimaryGeneratorAction;
   auto ev=new B4aEventAction;
-  SetUserAction(new B4RunAction(gen,ev));
+  SetUserAction(new B4RunAction(gen,ev,""));
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -66,8 +66,7 @@ void B4aActionInitialization::Build() const
   auto eventAction = new B4aEventAction;
   eventAction->setGenerator(gen);
   eventAction->setDetector(fDetConstruction);
-  auto runact=new B4RunAction(gen,eventAction);
-  runact->setFileName(fname_);
+  auto runact=new B4RunAction(gen,eventAction,fname_);
   SetUserAction(runact);
   SetUserAction(eventAction);
   SetUserAction(new B4aSteppingAction(fDetConstruction,eventAction));
