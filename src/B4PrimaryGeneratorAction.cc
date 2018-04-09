@@ -62,6 +62,7 @@ B4PrimaryGeneratorAction::B4PrimaryGeneratorAction()
 
 
   G4INCL::Random::setGenerator( new G4INCL::Geant4RandomGenerator());
+  globalgen=this;
 
 }
 

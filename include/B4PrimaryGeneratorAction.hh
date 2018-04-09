@@ -44,6 +44,8 @@ class G4Event;
 /// perpendicular to the input face. The type of the particle
 /// can be changed via the G4 build-in commands of G4ParticleGun class 
 /// (see the macros provided with this example).
+class B4PrimaryGeneratorAction;
+B4PrimaryGeneratorAction * globalgen;
 
 class B4PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 {
