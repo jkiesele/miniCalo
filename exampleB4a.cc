@@ -126,10 +126,10 @@ int main(int argc,char** argv)
   
   // Initialize visualization
   //
-  auto visManager = new G4VisExecutive;
+//  auto visManager = new G4VisExecutive;
   // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
   // G4VisManager* visManager = new G4VisExecutive("Quiet");
-  visManager->Initialize();
+//  visManager->Initialize();
 
   // Get the pointer to the User Interface manager
   auto UImanager = G4UImanager::GetUIpointer();
@@ -143,12 +143,12 @@ int main(int argc,char** argv)
   }
   else  {  
     // interactive mode : define UI session
-    UImanager->ApplyCommand("/control/execute init_vis.mac");
-    if (ui->IsGUI()) {
-      UImanager->ApplyCommand("/control/execute gui.mac");
-    }
-    ui->SessionStart();
-    delete ui;
+  //  UImanager->ApplyCommand("/control/execute init_vis.mac");
+  //  if (ui->IsGUI()) {
+   //   UImanager->ApplyCommand("/control/execute gui.mac");
+   // }
+   // ui->SessionStart();
+   // delete ui;
   }
 
   // Job termination
@@ -156,7 +156,7 @@ int main(int argc,char** argv)
   // owned and deleted by the run manager, so they should not be deleted 
   // in the main() program !
 
-  delete visManager;
+//  delete visManager;
   delete runManager;
 }
 

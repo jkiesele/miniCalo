@@ -50,7 +50,7 @@ B4aEventAction::B4aEventAction()
    generator_(0)
 {
 	//create vector ntuple here
-	auto analysisManager = G4AnalysisManager::Instance();
+//	auto analysisManager = G4AnalysisManager::Instance();
 
 
 }
