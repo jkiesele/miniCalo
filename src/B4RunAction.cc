@@ -67,7 +67,7 @@ B4RunAction::B4RunAction(B4PrimaryGeneratorAction *g, B4aEventAction* ev, G4Stri
 
   // Creating ntuple
   //
-  analysisManager->CreateNtuple(fname_, "Edep and TrackL");
+  analysisManager->CreateNtuple("B4", "Edep and TrackL");
   generator_=g;
   G4cout << "creating particle entries" << G4endl;
   auto parts=generator_->generateAvailableParticles();
@@ -110,7 +110,7 @@ void B4RunAction::BeginOfRunAction(const G4Run* /*run*/)
 
   // Open an output file
   //
-  G4String fileName = "B4";
+  G4String fileName = fname_;
   analysisManager->OpenFile(fileName);
 }
 
