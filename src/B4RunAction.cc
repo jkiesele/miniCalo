@@ -37,6 +37,7 @@
 #include "G4SystemOfUnits.hh"
 #include "B4PrimaryGeneratorAction.hh"
 
+#include "B4aEventAction.hh"
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 B4RunAction::B4RunAction(B4PrimaryGeneratorAction *g, B4aEventAction* ev)

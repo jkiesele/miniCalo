@@ -53,7 +53,8 @@ B4aActionInitialization::~B4aActionInitialization()
 void B4aActionInitialization::BuildForMaster() const
 {
 	auto gen=new B4PrimaryGeneratorAction;
-  SetUserAction(new B4RunAction(gen));
+  auto ev=new B4aEventAction;
+  SetUserAction(new B4RunAction(gen,ev));
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
