@@ -68,11 +68,16 @@ class B4RunAction : public G4UserRunAction
     	eventact_=e;
     }
 
+    void setFileName(G4String fname){
+    	fname_=fname;
+    }
+
     virtual void BeginOfRunAction(const G4Run*);
     virtual void   EndOfRunAction(const G4Run*);
   private:
     B4PrimaryGeneratorAction * generator_;
     B4aEventAction* eventact_;
+    G4String fname_;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

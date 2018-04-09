@@ -75,7 +75,7 @@ int main(int argc,char** argv)
   
   G4String macro;
   G4String session;
-  long rseed=0;
+  G4String outfile="out";
 #ifdef G4MULTITHREADED
   G4int nThreads = 0;
 #endif
@@ -87,15 +87,15 @@ int main(int argc,char** argv)
       nThreads = G4UIcommand::ConvertToInt(argv[i+1]);
     }
 #endif
-    else if (G4String(argv[i]) == "-s" ) {
-    	rseed = G4UIcommand::ConvertToInt(argv[i+1]);
+    else if (G4String(argv[i]) == "-f" ) {
+    	outfile = argv[i+1];
     }
     else {
       PrintUsage();
       return 1;
     }
   }  
-  
+  long rseed=0;
   // Detect interactive mode (if no macro provided) and define UI session
   //
   G4UIExecutive* ui = nullptr;
@@ -127,6 +127,7 @@ int main(int argc,char** argv)
   runManager->SetUserInitialization(physicsList);
     
   auto actionInitialization = new B4aActionInitialization(detConstruction);
+  actionInitialization->setFilename(outfile);
   runManager->SetUserInitialization(actionInitialization);
   
   // Initialize visualization

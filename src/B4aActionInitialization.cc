@@ -67,6 +67,7 @@ void B4aActionInitialization::Build() const
   eventAction->setGenerator(gen);
   eventAction->setDetector(fDetConstruction);
   auto runact=new B4RunAction(gen,eventAction);
+  runact->setFileName(fname_);
   SetUserAction(runact);
   SetUserAction(eventAction);
   SetUserAction(new B4aSteppingAction(fDetConstruction,eventAction));

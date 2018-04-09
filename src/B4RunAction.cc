@@ -40,9 +40,10 @@
 #include "B4aEventAction.hh"
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-B4RunAction::B4RunAction(B4PrimaryGeneratorAction *g, B4aEventAction* ev)
+B4RunAction::B4RunAction(B4PrimaryGeneratorAction *g, B4aEventAction* ev, G4String fname)
  : G4UserRunAction()
 { 
+	fname_=fname;
 	eventact_=ev;
   // set printing event number per each event
   G4RunManager::GetRunManager()->SetPrintProgress(1);     
@@ -66,7 +67,7 @@ B4RunAction::B4RunAction(B4PrimaryGeneratorAction *g, B4aEventAction* ev)
 
   // Creating ntuple
   //
-  analysisManager->CreateNtuple("B4", "Edep and TrackL");
+  analysisManager->CreateNtuple(fname_, "Edep and TrackL");
   generator_=g;
   G4cout << "creating particle entries" << G4endl;
   auto parts=generator_->generateAvailableParticles();

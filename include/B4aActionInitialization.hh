@@ -47,8 +47,13 @@ class B4aActionInitialization : public G4VUserActionInitialization
     virtual void BuildForMaster() const;
     virtual void Build() const;
 
+    void setFilename(G4String fname){
+    	fname_=fname;
+    }
+
   private:
     B4DetectorConstruction* fDetConstruction;
+    G4String fname_;
 };
 
 #endif
