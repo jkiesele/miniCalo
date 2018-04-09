@@ -165,6 +165,10 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
   //generate a few of them
 
+  G4INCL::Random::SeedVector sv;
+  sv.push_back(std::time(0) + getpid());
+  G4INCL::Random::setSeeds(sv);
+
   G4double rand =  G4INCL::Random::shoot();
   energy_=99*rand+1;
   fParticleGun->SetParticleEnergy(energy_ * GeV);
