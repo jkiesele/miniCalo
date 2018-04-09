@@ -67,8 +67,12 @@ B4PrimaryGeneratorAction::B4PrimaryGeneratorAction()
 
   G4INCL::Random::SeedVector sv;
   sv.push_back(std::time(0) + getpid());
+  sv.push_back(std::time(0) + getpid()+1);
+  sv.push_back(std::time(0) + getpid()+2);
 
   G4INCL::Random::setGenerator( new G4INCL::Geant4RandomGenerator(sv));
+
+  G4INCL::Random::setSeeds(sv);
   globalgen=this;
 
 }
@@ -160,7 +164,6 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
     ->SetParticlePosition(G4ThreeVector(0., 0., -worldZHalfLength));
 
   //generate a few of them
-
 
   G4double rand =  G4INCL::Random::shoot();
   energy_=99*rand+1;
