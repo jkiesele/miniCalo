@@ -148,10 +148,10 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
   int i=0;
   int ispart[B4PrimaryGeneratorAction::particles_size];
   for( ;i<B4PrimaryGeneratorAction::particles_size;i++){
-	  ispart[i]=globalgen->isParticle(i);
+	  ispart[i]=B4PrimaryGeneratorAction::globalgen->isParticle(i);
 	  analysisManager->FillNtupleIColumn(i,ispart[i]);
   }
-  analysisManager->FillNtupleDColumn(i,globalgen->getEnergy());
+  analysisManager->FillNtupleDColumn(i,B4PrimaryGeneratorAction::globalgen->getEnergy());
 
   //filling deposits and volume info for all volumes automatically..
 

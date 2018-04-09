@@ -45,6 +45,8 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+ B4PrimaryGeneratorAction * globalgen=0;
+
 B4PrimaryGeneratorAction::B4PrimaryGeneratorAction()
  : G4VUserPrimaryGeneratorAction(),
    fParticleGun(nullptr)
