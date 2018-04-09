@@ -32,6 +32,10 @@
 #include "B4aActionInitialization.hh"
 
 #ifdef G4MULTITHREADED
+#undef G4MULTITHREADED
+#endif
+
+#ifdef G4MULTITHREADED
 #include "G4MTRunManager.hh"
 #else
 #include "G4RunManager.hh"

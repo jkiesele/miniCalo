@@ -51,15 +51,6 @@ B4aEventAction::B4aEventAction()
 {
 	//create vector ntuple here
 	auto analysisManager = G4AnalysisManager::Instance();
-	analysisManager->CreateNtupleDColumn("rechit_energy",rechit_energy_);
-	analysisManager->CreateNtupleDColumn("rechit_x",rechit_x_);
-	analysisManager->CreateNtupleDColumn("rechit_y",rechit_y_);
-	analysisManager->CreateNtupleDColumn("rechit_z",rechit_z_);
-	analysisManager->CreateNtupleDColumn("rechit_varea",rechit_varea_);
-	analysisManager->CreateNtupleDColumn("rechit_vr",rechit_vr_);
-	analysisManager->CreateNtupleDColumn("rechit_vl",rechit_vl_);
-
-	analysisManager->FinishNtuple();
 
 
 }

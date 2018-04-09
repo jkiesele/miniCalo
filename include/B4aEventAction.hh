@@ -38,7 +38,7 @@
 #include "sensorContainer.h"
 #include "B4DetectorConstruction.hh"
 #include "G4Step.hh"
-
+#include "B4RunAction.hh"
 /// Event action class
 ///
 /// It defines data members to hold the energy deposit and track lengths
@@ -49,6 +49,7 @@
 class G4VPhysicalVolume;
 class B4aEventAction : public G4UserEventAction
 {
+	friend B4RunAction;
   public:
     B4aEventAction();
     virtual ~B4aEventAction();
