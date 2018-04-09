@@ -49,6 +49,7 @@
 
 #include "G4VisExecutive.hh"
 #include "G4UIExecutive.hh"
+#include "G4RandomTools.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -74,6 +75,7 @@ int main(int argc,char** argv)
   
   G4String macro;
   G4String session;
+  long rseed=0;
 #ifdef G4MULTITHREADED
   G4int nThreads = 0;
 #endif
@@ -85,6 +87,9 @@ int main(int argc,char** argv)
       nThreads = G4UIcommand::ConvertToInt(argv[i+1]);
     }
 #endif
+    else if (G4String(argv[i]) == "-s" ) {
+    	rseed = G4UIcommand::ConvertToInt(argv[i+1]);
+    }
     else {
       PrintUsage();
       return 1;
@@ -139,6 +144,7 @@ int main(int argc,char** argv)
   if ( macro.size() ) {
     // batch mode
     G4String command = "/control/execute ";
+    G4Random::setTheSeeds(&rseed);
     UImanager->ApplyCommand(command+macro);
   }
   else  {  
