@@ -66,7 +66,7 @@ B4PrimaryGeneratorAction::B4PrimaryGeneratorAction()
   fParticleGun->SetParticleEnergy(100.*GeV);
 
   G4INCL::Random::SeedVector sv;
-  sv<< std::time(0) + getpid();
+  sv.push_back(std::time(0) + getpid());
 
   G4INCL::Random::setGenerator( new G4INCL::Geant4RandomGenerator(sv));
   globalgen=this;
