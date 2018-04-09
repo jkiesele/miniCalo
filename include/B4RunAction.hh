@@ -33,6 +33,7 @@
 
 #include "G4UserRunAction.hh"
 #include "globals.hh"
+#include "G4String.hh"
 
 class G4Run;
 class B4PrimaryGeneratorAction;

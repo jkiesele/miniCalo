@@ -32,6 +32,7 @@
 #define B4aActionInitialization_h 1
 
 #include "G4VUserActionInitialization.hh"
+#include "G4String.hh"
 
 class B4DetectorConstruction;
 
