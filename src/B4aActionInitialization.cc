@@ -62,11 +62,10 @@ void B4aActionInitialization::Build() const
 {
 	auto gen=new B4PrimaryGeneratorAction;
   SetUserAction(new B4PrimaryGeneratorAction);
-  auto runact=new B4RunAction(gen);
   auto eventAction = new B4aEventAction;
   eventAction->setGenerator(gen);
   eventAction->setDetector(fDetConstruction);
-  runact->linkEventAction(eventAction);
+  auto runact=new B4RunAction(gen,eventAction);
   SetUserAction(runact);
   SetUserAction(eventAction);
   SetUserAction(new B4aSteppingAction(fDetConstruction,eventAction));

@@ -39,9 +39,10 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-B4RunAction::B4RunAction(B4PrimaryGeneratorAction *g)
+B4RunAction::B4RunAction(B4PrimaryGeneratorAction *g, B4aEventAction* ev)
  : G4UserRunAction()
 { 
+	eventact_=ev;
   // set printing event number per each event
   G4RunManager::GetRunManager()->SetPrintProgress(1);     
 
