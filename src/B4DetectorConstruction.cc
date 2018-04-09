@@ -186,7 +186,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createSandwich(G4LogicalVolume* layer
 				layerLV,          // its mother  volume
 				false,            // no boolean operation
 				0,                // copy number
-				true);  // checking overlaps
+				fCheckOverlaps);  // checking overlaps
 
 	return activeMaterial;
 
@@ -263,8 +263,6 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 						lname+"_sensor_"+createString(xi)+"_"+createString(yi),
 						absfractio);
 
-				G4cout << "placed sensor at: " << posx <<", "<<posy << ", "<<pos.z()
-					<<	" size: "<<sensorsize << G4endl;
 
 				sensorContainer sensordesc(activesensor,
 						sensorsize,sensorsize*sensorsize,
