@@ -87,7 +87,7 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
     G4VPhysicalVolume* createLayer(G4LogicalVolume * caloLV,
     		G4double thickness,G4int granularity,
     		G4double absfraction,G4ThreeVector position,
-    		G4String name);
+    		G4String name, int number);
   
     // data members
     //

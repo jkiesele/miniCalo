@@ -196,7 +196,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createSandwich(G4LogicalVolume* layer
 G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 		G4double thickness,
 		G4int granularity, G4double absfraction,G4ThreeVector position,
-		G4String name){
+		G4String name, int layernumber){
 
 
 
@@ -247,7 +247,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 			G4LogicalVolume* layerlogV,
 			B4DetectorConstruction* drec,
 			G4ThreeVector patentpos,
-			G4double absfractio) {
+			G4double absfractio, int laynum) {
 		for(int xi=0;xi<gran;xi++){
 			G4double posx=startcorner.x()+sensorsize/2+sensorsize*(G4double)xi;
 			for(int yi=0;yi<gran;yi++){
@@ -270,7 +270,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 						sensorsize,sensorsize*sensorsize,
 						patentpos.x()+posx,
 						patentpos.y()+posy,
-						patentpos.z()+0);
+						patentpos.z()+0,laynum);
 				sensordesc.setEnergyscalefactor(1/(1-absfractio)/thickness);
 				acells->push_back(sensordesc);
 			}
@@ -286,9 +286,11 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 
 	//place LG sensors:
 	placeSensors(lowerleftcorner, false,largesensordxy,thickness,
-			granularity,G4ThreeVector(0,0,0),name,&activecells_,layerLV,this,position,absfraction);
+			granularity,G4ThreeVector(0,0,0),name,&activecells_,layerLV,this,
+			position,absfraction,layernumber);
 	placeSensors(G4ThreeVector(0,0,0), true,smallsensordxy,thickness,
-			nsmallsensorsrow,G4ThreeVector(0,0,0),name,&activecells_,layerLV,this,position,absfraction);
+			nsmallsensorsrow,G4ThreeVector(0,0,0),name,&activecells_,layerLV,
+			this,position,absfraction,layernumber);
 
 
 	return layerPV;
@@ -399,7 +401,7 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 				granularity,
 				absfraction,
 				G4ThreeVector(0,0,lastzpos+thickness),
-				"layer"+createString(i));
+				"layer"+createString(i),i);
 		lastzpos+=thickness;
 	}
 

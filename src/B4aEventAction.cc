@@ -90,6 +90,7 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 		rechit_x_.push_back(0);
 		rechit_y_.push_back(0);
 		rechit_z_.push_back(0);
+		rechit_layer_.push_back(0);
 		rechit_varea_.push_back(0);
 		rechit_vr_.push_back(0);
 		rechit_vl_.push_back(0);
@@ -101,6 +102,7 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 	rechit_x_.at     (currentindex)=activesensors->at(idx).getPosx();
 	rechit_y_.at     (currentindex)=activesensors->at(idx).getPosy();
 	rechit_z_.at     (currentindex)=activesensors->at(idx).getPosz();
+	rechit_layer_.at (currentindex)=activesensors->at(idx).getLayer();
 	rechit_varea_.at (currentindex)=activesensors->at(idx).getArea();
 	rechit_vr_.at    (currentindex)=activesensors->at(idx).getDimxy();
 	rechit_vl_.at    (currentindex)=activesensors->at(idx).getDimxy();

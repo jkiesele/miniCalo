@@ -22,9 +22,11 @@ public:
 	G4double area,
 	G4double posx,
 	G4double posy,
-	G4double posz):
+	G4double posz,
+	G4double layer):
 		vol_(vol),dimxy_(dimxy),area_(area),
-		posx_(posx),posy_(posy),posz_(posz),energyscalefactor_(1)
+		posx_(posx),posy_(posy),posz_(posz),energyscalefactor_(1),
+		layer_(layer)
 	{}
 
 
@@ -61,6 +63,10 @@ public:
 		energyscalefactor_ = energyscalefactor;
 	}
 
+	const G4double& getLayer() const {
+		return layer_;
+	}
+
 private:
 	G4VPhysicalVolume * vol_;
 	G4double dimxy_;
@@ -71,6 +77,8 @@ private:
 	G4double posz_;
 
 	G4double energyscalefactor_;
+
+	G4double layer_;
 
 };
 

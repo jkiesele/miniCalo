@@ -88,6 +88,7 @@ class B4aEventAction : public G4UserEventAction
     std::vector<G4double>  rechit_x_;
     std::vector<G4double>  rechit_y_;
     std::vector<G4double>  rechit_z_;
+    std::vector<G4double>  rechit_layer_;
     std::vector<G4double>  rechit_vr_;
     std::vector<G4double>  rechit_varea_;
     std::vector<G4double>  rechit_vl_;
