@@ -171,9 +171,10 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
    else
 	   id=0;
    particleid_=(particles)id;
+   if(false){
   G4cout << "shooting " <<  setParticleID(particleid_)
 		  << " with " << energy_ <<" GeV "<<G4endl;
-
+   }
 
   fParticleGun->GeneratePrimaryVertex(anEvent);
 
