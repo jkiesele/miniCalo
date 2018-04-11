@@ -96,9 +96,10 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 		rechit_vl_.push_back(0);
 	}
 
-	const auto& energy=step->GetTotalEnergyDeposit();
+	auto energy=step->GetTotalEnergyDeposit();
+	energy *= activesensors->at(idx).getEnergyscalefactor();
 
-	rechit_energy_.at(currentindex)+=energy * activesensors->at(idx).getEnergyscalefactor();
+	rechit_energy_.at(currentindex)+=energy;
 	rechit_x_.at     (currentindex)=activesensors->at(idx).getPosx();
 	rechit_y_.at     (currentindex)=activesensors->at(idx).getPosy();
 	rechit_z_.at     (currentindex)=activesensors->at(idx).getPosz();
@@ -156,7 +157,9 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
   analysisManager->FillNtupleDColumn(i,B4PrimaryGeneratorAction::globalgen->getEnergy());
 
   //filling deposits and volume info for all volumes automatically..
-
+  for(auto& e:rechit_energy_){
+	  if(e<0.01)e=0; //threshold
+  }
 
   analysisManager->AddNtupleRow();  
 

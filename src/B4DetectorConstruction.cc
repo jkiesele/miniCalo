@@ -340,7 +340,7 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 	G4int nofEELayers = 10;
 	G4int nofHB=15;
 	calorSizeXY  = 30.*cm;
-	layerThicknessEE=25*mm;
+	layerThicknessEE=15*mm;
 	layerThicknessHB=115*mm;
 
 
