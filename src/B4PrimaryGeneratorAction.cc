@@ -174,6 +174,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
    }
    setParticleID(particleid_);
 
+   energy_=101;
    while(energy_>100){//somehow sometimes the random gen shoots >1??
 	   G4double rand =  G4INCL::Random::shoot();
 	   energy_=99*rand+1;
