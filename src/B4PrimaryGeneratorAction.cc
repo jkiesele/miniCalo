@@ -161,9 +161,6 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   //generate a few of them
 
 
-  G4double rand =  G4INCL::Random::shoot();
-  energy_=99*rand+1;
-  fParticleGun->SetParticleEnergy(energy_ * GeV);
 
    int id=(int)particleid_;
    if(id<(int)particles_size-1)
@@ -175,6 +172,11 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   G4cout << "shooting " <<  setParticleID(particleid_)
 		  << " with " << energy_ <<" GeV "<<G4endl;
    }
+   setParticleID(particleid_);
+
+   G4double rand =  G4INCL::Random::shoot();
+   energy_=99*rand+1;
+   fParticleGun->SetParticleEnergy(energy_ * GeV);
 
   fParticleGun->GeneratePrimaryVertex(anEvent);
 
