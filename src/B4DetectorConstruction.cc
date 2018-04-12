@@ -430,7 +430,7 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 				granularity,
 				absfraction,
 				G4ThreeVector(0,0,lastzpos+thickness),
-				"layer"+createString(i),i,1);//calibrations[i]);
+				"layer"+createString(i),i,calibrations[i]);
 		lastzpos+=thickness;
 	}
 
