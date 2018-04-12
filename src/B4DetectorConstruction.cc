@@ -347,31 +347,31 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 	layerThicknessHB=115*mm;
 
 	G4double calibrations[nofEELayers+nofHB];
-	calibrations[0]=23.4;
-	calibrations[1]=22.6;
-	calibrations[2]=22.5;
-	calibrations[3]=22.4;
-	calibrations[4]=22.2;
-	calibrations[5]=22.3;
-	calibrations[6]=22.8;
-	calibrations[7]=22.7;
-	calibrations[8]=22.3;
-	calibrations[9]=22.4;
-	calibrations[10]=22.3;
-	calibrations[11]=23.9;
-	calibrations[12]=111;
-	calibrations[13]=111;
-	calibrations[14]=111;
-	calibrations[15]=111;
-	calibrations[16]=111;
-	calibrations[17]=111;
-	calibrations[18]=111;
-	calibrations[19]=111;
-	calibrations[20]=111;
-	calibrations[21]=111;
-	calibrations[22]=111;
-	calibrations[23]=111;
-	calibrations[24]=111;
+	calibrations[0]=25.5;
+	calibrations[1]=24.6;
+	calibrations[2]=24.3;
+	calibrations[3]=24.3;
+	calibrations[4]=24.2;
+	calibrations[5]=24.3;
+	calibrations[6]=24.1;
+	calibrations[7]=24.1;
+	calibrations[8]=24.1;
+	calibrations[9]=24.0;
+	calibrations[10]=24.3;
+	calibrations[11]=25.8;
+	calibrations[12]=27.8;
+	calibrations[13]=29.5;
+	calibrations[14]=30.3;
+	calibrations[15]=30.8;
+	calibrations[16]=31.4;
+	calibrations[17]=31.8;
+	calibrations[18]=31.2;
+	calibrations[19]=32.4;
+	calibrations[20]=33.9;
+	calibrations[21]=33.4;
+	calibrations[22]=34.5;
+	calibrations[23]=36.5;
+	calibrations[24]=38.0;
 
 
 
