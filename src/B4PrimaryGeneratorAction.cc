@@ -164,12 +164,12 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   G4cout << "shooting " <<  setParticleID(particleid_)
 		  << " with " << energy_ <<" GeV "<<G4endl;
    }
-   setParticleID(particleid_);
+   //setParticleID(particleid_);
 
-   energy_=101;
-   while(energy_>100){//somehow sometimes the random gen shoots >1??
+   energy_=10100;
+   while(energy_>10000){//somehow sometimes the random gen shoots >1??
 	   G4double rand =  G4INCL::Random::shoot();
-	   energy_=99*rand+1;
+	   energy_=9999*rand+1;
    }
    fParticleGun->SetParticleEnergy(energy_ * GeV);
 
