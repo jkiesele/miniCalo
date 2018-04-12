@@ -111,7 +111,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createSandwich(G4LogicalVolume* layer
 		G4ThreeVector position,
 		G4String name,
 		G4double absorberfraction,
-		G4VPhysicalVolume* absorber){
+		G4VPhysicalVolume*& absorber){
 
 	auto absdz=absorberfraction*dz;
 	auto gapdz=(1-absorberfraction)*dz;
@@ -179,7 +179,8 @@ G4VPhysicalVolume* B4DetectorConstruction::createSandwich(G4LogicalVolume* layer
 
 	//place the sandwich
 
-	auto sandwichPV = new G4PVPlacement(
+	//auto sandwichPV =
+			new G4PVPlacement(
 				0,                // no rotation
 				position, // its position
 				sandwichLV,       // its logical volume
@@ -240,7 +241,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 			G4ThreeVector startcorner,
 			bool small,
 			G4double sensorsize,
-			G4double thickness,
+			G4double Thickness,
 			int gran,
 			G4ThreeVector pos,
 			G4String lname,
@@ -262,7 +263,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 
 				G4VPhysicalVolume * absorber=0;
 				auto activesensor=drec->createSandwich(layerlogV,sensorsize,sensorsize,
-						thickness,sandwichposition,
+						Thickness,sandwichposition,
 						lname+"_sensor_"+createString(xi)+"_"+createString(yi),
 						absfractio,absorber);
 

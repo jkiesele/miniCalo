@@ -62,13 +62,6 @@ void B4aSteppingAction::UserSteppingAction(const G4Step* step)
 	//step->GetPreStepPoint()->GetTouchableHandle()->Get
 
 	// energy deposit
-	auto edep = step->GetTotalEnergyDeposit();
-
-	// step length
-	G4double stepLength = 0.;
-	if ( step->GetTrack()->GetDefinition()->GetPDGCharge() != 0. ) {
-		stepLength = step->GetStepLength();
-	}
 
 	fEventAction->accumulateVolumeInfo(volume, step);
 

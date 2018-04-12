@@ -63,7 +63,6 @@ B4aEventAction::~B4aEventAction()
 
 void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Step* step){
 
-	auto prestep=step->GetPreStepPoint();
 	const auto& activesensors=detector_->getActiveSensors();
 
 	bool issensor=true;
