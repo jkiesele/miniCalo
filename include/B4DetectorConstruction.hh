@@ -82,8 +82,8 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
     		G4double dy,
 			G4double dz,
 			G4ThreeVector position,
-			G4String name, G4double absorberfraction=2./3.,
-			G4VPhysicalVolume*& absorber=0);
+			G4String name, G4double absorberfraction,
+			G4VPhysicalVolume*& absorber);
 
     G4VPhysicalVolume* createLayer(G4LogicalVolume * caloLV,
     		G4double thickness,G4int granularity,
