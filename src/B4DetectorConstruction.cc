@@ -110,7 +110,8 @@ G4VPhysicalVolume* B4DetectorConstruction::createSandwich(G4LogicalVolume* layer
 		G4double dz,
 		G4ThreeVector position,
 		G4String name,
-		G4double absorberfraction){
+		G4double absorberfraction,
+		G4VPhysicalVolume* absorber){
 
 	auto absdz=absorberfraction*dz;
 	auto gapdz=(1-absorberfraction)*dz;
@@ -140,7 +141,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createSandwich(G4LogicalVolume* layer
 			absorberMaterial, // its material
 			"Abso_"+name);          // its name
 
-	auto absorberPV
+	absorber
 	= new G4PVPlacement(
 			0,                // no rotation
 			G4ThreeVector(0., 0., -absdz/2), // its position
@@ -196,7 +197,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createSandwich(G4LogicalVolume* layer
 G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 		G4double thickness,
 		G4int granularity, G4double absfraction,G4ThreeVector position,
-		G4String name, int layernumber){
+		G4String name, int layernumber, G4double calibration){
 
 
 
@@ -247,7 +248,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 			G4LogicalVolume* layerlogV,
 			B4DetectorConstruction* drec,
 			G4ThreeVector patentpos,
-			G4double absfractio, int laynum) {
+			G4double absfractio, int laynum, G4double calib) {
 		for(int xi=0;xi<gran;xi++){
 			G4double posx=startcorner.x()+sensorsize/2+sensorsize*(G4double)xi;
 			for(int yi=0;yi<gran;yi++){
@@ -258,18 +259,19 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 				}
 				auto sandwichposition=G4ThreeVector(posx,posy,pos.z());
 
+
+				G4VPhysicalVolume * absorber=0;
 				auto activesensor=drec->createSandwich(layerlogV,sensorsize,sensorsize,
 						thickness,sandwichposition,
 						lname+"_sensor_"+createString(xi)+"_"+createString(yi),
-						absfractio);
-
+						absfractio,absorber);
 
 				sensorContainer sensordesc(activesensor,
 						sensorsize,sensorsize*sensorsize,
 						patentpos.x()+posx,
 						patentpos.y()+posy,
-						patentpos.z()+0,laynum);
-				sensordesc.setEnergyscalefactor(1/(1-absfractio)/thickness);
+						patentpos.z()+0,laynum,absorber);
+				sensordesc.setEnergyscalefactor(calib);
 				acells->push_back(sensordesc);
 			}
 
@@ -342,6 +344,8 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 	calorSizeXY  = 30.*cm;
 	layerThicknessEE=15*mm;
 	layerThicknessHB=115*mm;
+	G4double calibrationEE=1;
+	G4double calibrationHB=1;
 
 
 	auto calorThickness = nofEELayers * layerThicknessEE + nofHB*layerThicknessHB;
@@ -383,6 +387,7 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 		int granularity=8;
 		G4double absfraction=0.75;
 		G4double thickness=layerThicknessEE;
+		G4double calibration=calibrationEE;
 		if(i>3)
 			granularity=6;
 		if(i>7){
@@ -393,18 +398,19 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 		if(i>=nofEELayers){
 			absfraction=0.95;
 			thickness=layerThicknessHB;
+			calibration=calibrationHB;
 		}
 		createLayer(
 				worldLV,thickness,
 				granularity,
 				absfraction,
 				G4ThreeVector(0,0,lastzpos+thickness),
-				"layer"+createString(i),i);
+				"layer"+createString(i),i,calibration);
 		lastzpos+=thickness;
 	}
 
 
-	G4cout << "created in total "<< activecells_.size()<<" sensors" <<G4endl;
+	G4cout << "created in total "<< activecells_.size()/2<<" sensors" <<G4endl;
 
 	//
 	// Visualization attributes

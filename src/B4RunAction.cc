@@ -78,6 +78,7 @@ B4RunAction::B4RunAction(B4PrimaryGeneratorAction *g, B4aEventAction* ev, G4Stri
 
 //if(false){
   analysisManager->CreateNtupleDColumn("rechit_energy",eventact_->rechit_energy_);
+  analysisManager->CreateNtupleDColumn("rechit_absorber_energy",eventact_->rechit_absorber_energy_);
   analysisManager->CreateNtupleDColumn("rechit_x",eventact_->rechit_x_);
   analysisManager->CreateNtupleDColumn("rechit_y",eventact_->rechit_y_);
   analysisManager->CreateNtupleDColumn("rechit_z",eventact_->rechit_z_);

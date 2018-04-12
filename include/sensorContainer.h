@@ -14,7 +14,7 @@
 class sensorContainer{
 public:
 	sensorContainer():vol_(0),dimxy_(0),area_(0),
-	posx_(0),posy_(0),posz_(0),energyscalefactor_(1){
+	posx_(0),posy_(0),posz_(0),energyscalefactor_(1),absvol_(0){
 
 	}
 	sensorContainer(G4VPhysicalVolume * vol,
@@ -23,10 +23,10 @@ public:
 	G4double posx,
 	G4double posy,
 	G4double posz,
-	G4double layer):
+	G4double layer, G4VPhysicalVolume * absvol=0):
 		vol_(vol),dimxy_(dimxy),area_(area),
 		posx_(posx),posy_(posy),posz_(posz),energyscalefactor_(1),
-		layer_(layer)
+		layer_(layer),absvol_(absvol)
 	{}
 
 
@@ -67,6 +67,10 @@ public:
 		return layer_;
 	}
 
+	G4VPhysicalVolume * getAbsorberVol()const{
+		return absvol_;
+	}
+
 private:
 	G4VPhysicalVolume * vol_;
 	G4double dimxy_;
@@ -79,6 +83,8 @@ private:
 	G4double energyscalefactor_;
 
 	G4double layer_;
+
+	G4VPhysicalVolume *  absvol_;
 
 };
 

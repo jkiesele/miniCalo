@@ -66,10 +66,17 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 	auto prestep=step->GetPreStepPoint();
 	const auto& activesensors=detector_->getActiveSensors();
 
+	bool issensor=true;
+
 	size_t idx=activesensors->size();
 	for(size_t i=0;i<activesensors->size();i++){
 		if(volume == activesensors->at(i).getVol()){
 			idx=i;
+			break;
+		}
+		if(volume == activesensors->at(i).getAbsorberVol()){
+			idx=i;
+			issensor=false;
 			break;
 		}
 	}
@@ -78,15 +85,16 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 	size_t currentindex=0;
 
 	size_t hitidx=allvolumes_.size();
-	hitidx = std::find(allvolumes_.begin(),allvolumes_.end(),volume)-allvolumes_.begin();
+	hitidx = std::find(allvolumes_.begin(),allvolumes_.end(),activesensors->at(idx).getVol())-allvolumes_.begin();
 
 	if(hitidx != allvolumes_.size()){
 		currentindex=hitidx;
 	}
 	else{
 		currentindex=allvolumes_.size();
-		allvolumes_.push_back(volume);
+		allvolumes_.push_back(activesensors->at(idx).getVol());
 		rechit_energy_.push_back(0);
+		rechit_absorber_energy_.push_back(0);
 		rechit_x_.push_back(0);
 		rechit_y_.push_back(0);
 		rechit_z_.push_back(0);
@@ -97,9 +105,13 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 	}
 
 	auto energy=step->GetTotalEnergyDeposit();
-	energy *= activesensors->at(idx).getEnergyscalefactor();
-
-	rechit_energy_.at(currentindex)+=energy;
+	if(issensor){
+		energy *= activesensors->at(idx).getEnergyscalefactor();
+		rechit_energy_.at(currentindex)+=energy;
+	}
+	else{
+		rechit_absorber_energy_.at(currentindex)+=energy;
+	}
 	rechit_x_.at     (currentindex)=activesensors->at(idx).getPosx();
 	rechit_y_.at     (currentindex)=activesensors->at(idx).getPosy();
 	rechit_z_.at     (currentindex)=activesensors->at(idx).getPosz();
