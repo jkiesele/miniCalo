@@ -100,10 +100,7 @@ int main(int argc,char** argv)
   long rseed=0;
   // Detect interactive mode (if no macro provided) and define UI session
   //
-  G4UIExecutive* ui = nullptr;
-  if ( ! macro.size() ) {
-    ui = new G4UIExecutive(argc, argv, session);
-  }
+
 
   // Choose the Random engine
   //
