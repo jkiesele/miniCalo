@@ -90,11 +90,7 @@ std::vector<G4String> B4PrimaryGeneratorAction::generateAvailableParticles(){
 G4String B4PrimaryGeneratorAction::setParticleID(enum particles p){
 	particleid_=p;
 	G4ParticleDefinition * particleDefinition =0;
-	if(p==gamma){
-		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("gamma");
-		fParticleGun->SetParticleDefinition(particleDefinition);
-		return "isGamma";
-	}
+
 	if(p==elec){
 		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("e-");
 		fParticleGun->SetParticleDefinition(particleDefinition);
@@ -115,11 +111,7 @@ G4String B4PrimaryGeneratorAction::setParticleID(enum particles p){
 		fParticleGun->SetParticleDefinition(particleDefinition);
 		return "isPionNeutral";
 	}
-	if(p==tau){
-		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("tau-");
-		fParticleGun->SetParticleDefinition(particleDefinition);
-		return "isTau";
-	}
+
 	return "isInvalid";
 }
 

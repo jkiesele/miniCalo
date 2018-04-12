@@ -340,13 +340,39 @@ void B4DetectorConstruction::DefineMaterials()
 G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 {
 	// Geometry parameters
-	G4int nofEELayers = 10;
-	G4int nofHB=15;
+	const G4int nofEELayers = 10;
+	const G4int nofHB=15;
 	calorSizeXY  = 30.*cm;
 	layerThicknessEE=15*mm;
 	layerThicknessHB=115*mm;
-	G4double calibrationEE=1;
-	G4double calibrationHB=1;
+
+	G4double calibrations[nofEELayers+nofHB];
+	calibrations[0]=23.4;
+	calibrations[1]=22.6;
+	calibrations[2]=22.5;
+	calibrations[3]=22.4;
+	calibrations[4]=22.2;
+	calibrations[5]=22.3;
+	calibrations[6]=22.8;
+	calibrations[7]=22.7;
+	calibrations[8]=22.3;
+	calibrations[9]=22.4;
+	calibrations[10]=22.3;
+	calibrations[11]=23.9;
+	calibrations[12]=111;
+	calibrations[13]=111;
+	calibrations[14]=111;
+	calibrations[15]=111;
+	calibrations[16]=111;
+	calibrations[17]=111;
+	calibrations[18]=111;
+	calibrations[19]=111;
+	calibrations[20]=111;
+	calibrations[21]=111;
+	calibrations[22]=111;
+	calibrations[23]=111;
+	calibrations[24]=111;
+
 
 
 	auto calorThickness = nofEELayers * layerThicknessEE + nofHB*layerThicknessHB;
@@ -388,7 +414,6 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 		int granularity=8;
 		G4double absfraction=0.75;
 		G4double thickness=layerThicknessEE;
-		G4double calibration=calibrationEE;
 		if(i>3)
 			granularity=6;
 		if(i>7){
@@ -399,14 +424,13 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 		if(i>=nofEELayers){
 			absfraction=0.95;
 			thickness=layerThicknessHB;
-			calibration=calibrationHB;
 		}
 		createLayer(
 				worldLV,thickness,
 				granularity,
 				absfraction,
 				G4ThreeVector(0,0,lastzpos+thickness),
-				"layer"+createString(i),i,calibration);
+				"layer"+createString(i),i,1);//calibrations[i]);
 		lastzpos+=thickness;
 	}
 
