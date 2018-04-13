@@ -194,6 +194,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 		  xycoords.first*=ringsize/magnitude;
 		  xycoords.second*=ringsize/magnitude;
 		  position=G4ThreeVector(xycoords.first, xycoords.second, -5*cm);
+		  G4cout << "adding particle at " << position << " " << id <<  G4endl;
 	  }
 
 	  fParticleGun->SetParticleEnergy(energy_ * GeV);
