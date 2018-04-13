@@ -344,6 +344,8 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 	calorSizeXY  = 30.*cm;
 	layerThicknessEE=15*mm;
 	layerThicknessHB=115*mm;
+	G4double absorberFractionEE=0.75;
+	G4double absorberFractionHB=0.95;
 
 	G4double calibrations[nofEELayers+nofHB];
 	calibrations[0]=25.5;
@@ -411,7 +413,7 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
     G4double lastzpos=-layerThicknessEE;
 	for(int i=0;i<nofEELayers+nofHB;i++){
 		int granularity=8;
-		G4double absfraction=0.75;
+		G4double absfraction=absorberFractionEE;
 		G4double thickness=layerThicknessEE;
 		if(i>3)
 			granularity=6;
@@ -421,7 +423,7 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 		if(i>15)
 			granularity=2;
 		if(i>=nofEELayers){
-			absfraction=0.95;
+			absfraction=absorberFractionHB;
 			thickness=layerThicknessHB;
 		}
 		createLayer(
@@ -429,7 +431,7 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 				granularity,
 				absfraction,
 				G4ThreeVector(0,0,lastzpos+thickness),
-				"layer"+createString(i),i,calibrations[i]);
+				"layer"+createString(i),i,1);//calibrations[i]);
 		lastzpos+=thickness;
 	}
 
