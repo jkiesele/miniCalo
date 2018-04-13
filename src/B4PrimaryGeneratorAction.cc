@@ -186,7 +186,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 		  mainid=particleid_;
 	  }
 	  else{
-		  G4double ringsize=5*cm;
+		  G4double ringsize=10*cm;
 		  //make a ring
 		  auto xycoords=G4INCL::Random::correlatedUniform(-1);
 		  G4double magnitude=xycoords.first*xycoords.first+xycoords.second*xycoords.second;
