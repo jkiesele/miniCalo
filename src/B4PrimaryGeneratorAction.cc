@@ -61,6 +61,7 @@ B4PrimaryGeneratorAction::B4PrimaryGeneratorAction()
   //
   auto particleDefinition 
     = G4ParticleTable::GetParticleTable()->FindParticle("gamma");
+ // G4ParticleTable::GetParticleTable()->DumpTable();
   fParticleGun->SetParticleDefinition(particleDefinition);
   fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
   fParticleGun->SetParticleEnergy(100.*GeV);
@@ -112,12 +113,12 @@ G4String B4PrimaryGeneratorAction::setParticleID(enum particles p){
 		return "isPionNeutral";
 	}
 	if(p==klong){
-		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("KL");
+		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("kaon0L");
 		fParticleGun->SetParticleDefinition(particleDefinition);
 		return "isPionNeutral";
 	}
 	if(p==kshort){
-		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("KS");
+		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("kaon0S");
 		fParticleGun->SetParticleDefinition(particleDefinition);
 		return "isPionNeutral";
 	}
