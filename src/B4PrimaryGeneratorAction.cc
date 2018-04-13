@@ -115,12 +115,12 @@ G4String B4PrimaryGeneratorAction::setParticleID(enum particles p){
 	if(p==klong){
 		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("kaon0L");
 		fParticleGun->SetParticleDefinition(particleDefinition);
-		return "isPionNeutral";
+		return "isK0Long";
 	}
 	if(p==kshort){
 		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("kaon0S");
 		fParticleGun->SetParticleDefinition(particleDefinition);
-		return "isPionNeutral";
+		return "isK0Short";
 	}
 
 	return "isInvalid";
