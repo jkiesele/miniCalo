@@ -111,6 +111,16 @@ G4String B4PrimaryGeneratorAction::setParticleID(enum particles p){
 		fParticleGun->SetParticleDefinition(particleDefinition);
 		return "isPionNeutral";
 	}
+	if(p==klong){
+		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("KL");
+		fParticleGun->SetParticleDefinition(particleDefinition);
+		return "isPionNeutral";
+	}
+	if(p==kshort){
+		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("KS");
+		fParticleGun->SetParticleDefinition(particleDefinition);
+		return "isPionNeutral";
+	}
 
 	return "isInvalid";
 }
@@ -147,34 +157,48 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   } 
   
   // Set gun position
-  fParticleGun
-    ->SetParticlePosition(G4ThreeVector(0., 0., -worldZHalfLength));
 
   //generate a few of them
 
+  particles mainid=particleid_;
+  int nshoots=10;
 
+  for(int i=0;i<nshoots;i++){
 
-   int id=(int)particleid_;
-   if(id<(int)particles_size-1)
-	   id++;
-   else
-	   id=0;
-   particleid_=(particles)id;
-   if(false){
-  G4cout << "shooting " <<  setParticleID(particleid_)
-		  << " with " << energy_ <<" GeV "<<G4endl;
-   }
-   //setParticleID(particleid_);
+	  int id=(int)particleid_;
+	  if(id<(int)particles_size-1)
+		  id++;
+	  else
+		  id=0;
+	  particleid_=(particles)id;
+	  setParticleID(particleid_);
 
-   energy_=10100;
-   while(energy_>10000){//somehow sometimes the random gen shoots >1??
-	   G4double rand =  G4INCL::Random::shoot();
-	   energy_=9999*rand+1;
-   }
-   fParticleGun->SetParticleEnergy(energy_ * GeV);
+	  energy_=101;
+	  while(energy_>100 && energy_<90){//somehow sometimes the random gen shoots >1??
+		  G4double rand =  G4INCL::Random::shoot();
+		  energy_=99*rand+1;
+	  }
 
-  fParticleGun->GeneratePrimaryVertex(anEvent);
+	  G4ThreeVector position(0., 0., -5*cm);
 
+	  if(i==0){
+		  mainid=particleid_;
+	  }
+	  else{
+		  G4double ringsize=5*cm;
+		  //make a ring
+		  auto xycoords=G4INCL::Random::correlatedUniform(-1);
+		  G4double magnitude=xycoords.first*xycoords.first+xycoords.second*xycoords.second;
+		  magnitude=sqrt(magnitude);
+		  xycoords.first*=ringsize/magnitude;
+		  xycoords.second*=ringsize/magnitude;
+		  position=G4ThreeVector(xycoords.first, xycoords.second, -5*cm);
+	  }
+
+	  fParticleGun->SetParticleEnergy(energy_ * GeV);
+	  fParticleGun->SetParticlePosition(position);
+	  fParticleGun->GeneratePrimaryVertex(anEvent);
+  }
   /*
   fParticleGun
     ->SetParticlePosition(G4ThreeVector(15.*cm, 0., -worldZHalfLength));

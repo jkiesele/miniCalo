@@ -65,7 +65,7 @@ public:
   static B4PrimaryGeneratorAction * globalgen;
 
   enum particles{
-	  elec=0,muon,pioncharged,pionneutral,
+	  elec=0,muon,pioncharged,pionneutral,klong,kshort,
 
 	  particles_size //leave this one
   };
