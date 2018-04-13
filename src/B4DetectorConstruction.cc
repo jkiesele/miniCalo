@@ -255,7 +255,6 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 			for(int yi=0;yi<gran;yi++){
 				G4double posy=startcorner.y()+sensorsize/2+sensorsize*(G4double)yi;
 				if(!small && posy>pos.y() && posx > pos.x()){
-					G4cout << startcorner << " --- " << posx << ", "<< posy << G4endl;
 					continue; //here are the small sensors
 				}
 				auto sandwichposition=G4ThreeVector(posx,posy,pos.z());

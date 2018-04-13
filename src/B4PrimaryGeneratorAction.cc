@@ -163,6 +163,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
   particles mainid=particleid_;
   int nshoots=10;
+  G4double sign=1;
 
   for(int i=0;i<nshoots;i++){
 
@@ -191,10 +192,11 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 		  auto xycoords=G4INCL::Random::correlatedUniform(-1);
 		  G4double magnitude=xycoords.first*xycoords.first+xycoords.second*xycoords.second;
 		  magnitude=sqrt(magnitude);
-		  xycoords.first*=ringsize/magnitude;
-		  xycoords.second*=ringsize/magnitude;
+		  xycoords.first*=ringsize/magnitude*sign;
+		  xycoords.second*=ringsize/magnitude*sign;
 		  position=G4ThreeVector(xycoords.first, xycoords.second, -5*cm);
 		  G4cout << "adding particle at " << position << " " << id <<  G4endl;
+		  sign*=-1.;
 	  }
 
 	  fParticleGun->SetParticleEnergy(energy_ * GeV);
