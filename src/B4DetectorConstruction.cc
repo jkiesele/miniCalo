@@ -267,7 +267,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 						absfractio,absorber);
 
 				sensorContainer sensordesc(activesensor,
-						sensorsize,sensorsize*sensorsize,
+						sensorsize,Thickness,sensorsize*sensorsize,
 						patentpos.x()+posx,
 						patentpos.y()+posy,
 						patentpos.z()+0,laynum,absorber);

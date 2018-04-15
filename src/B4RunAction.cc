@@ -84,8 +84,8 @@ B4RunAction::B4RunAction(B4PrimaryGeneratorAction *gen, B4aEventAction* ev, G4St
   analysisManager->CreateNtupleDColumn("rechit_z",eventact_->rechit_z_);
   analysisManager->CreateNtupleDColumn("rechit_layer",eventact_->rechit_layer_);
   analysisManager->CreateNtupleDColumn("rechit_varea",eventact_->rechit_varea_);
- // analysisManager->CreateNtupleDColumn("rechit_vr",eventact_->rechit_vr_);
-  analysisManager->CreateNtupleDColumn("rechit_vl",eventact_->rechit_vl_);
+  analysisManager->CreateNtupleDColumn("rechit_vz",eventact_->rechit_vz_);
+  analysisManager->CreateNtupleDColumn("rechit_vxy",eventact_->rechit_vxy_);
 //}
   analysisManager->FinishNtuple();
 

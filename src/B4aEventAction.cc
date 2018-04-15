@@ -99,8 +99,8 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 		rechit_z_.push_back(0);
 		rechit_layer_.push_back(0);
 		rechit_varea_.push_back(0);
-		rechit_vr_.push_back(0);
-		rechit_vl_.push_back(0);
+		rechit_vz_.push_back(0);
+		rechit_vxy_.push_back(0);
 	}
 
 	auto energy=step->GetTotalEnergyDeposit();
@@ -116,8 +116,8 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 	rechit_z_.at     (currentindex)=activesensors->at(idx).getPosz();
 	rechit_layer_.at (currentindex)=activesensors->at(idx).getLayer();
 	rechit_varea_.at (currentindex)=activesensors->at(idx).getArea();
-	rechit_vr_.at    (currentindex)=activesensors->at(idx).getDimxy();
-	rechit_vl_.at    (currentindex)=activesensors->at(idx).getDimxy();
+	rechit_vz_.at    (currentindex)=activesensors->at(idx).getDimz();
+	rechit_vxy_.at    (currentindex)=activesensors->at(idx).getDimxy();
 
 }
 

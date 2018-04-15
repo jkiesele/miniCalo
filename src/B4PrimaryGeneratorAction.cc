@@ -173,8 +173,6 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 	  else
 		  id=0;
 
-
-
 	  particleid_=(particles)id;
 	  setParticleID(particleid_);
 
@@ -207,13 +205,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 	  fParticleGun->GeneratePrimaryVertex(anEvent);
   }
   particleid_=mainid;
-  /*
-  fParticleGun
-    ->SetParticlePosition(G4ThreeVector(15.*cm, 0., -worldZHalfLength));
 
-  //generate a few of them
-
-  fParticleGun->GeneratePrimaryVertex(anEvent); */
 }
 
 

@@ -13,18 +13,18 @@
 
 class sensorContainer{
 public:
-	sensorContainer():vol_(0),dimxy_(0),area_(0),
+	sensorContainer():vol_(0),dimxy_(0),dimz_(0),area_(0),
 	posx_(0),posy_(0),posz_(0),energyscalefactor_(1),absvol_(0){
 
 	}
 	sensorContainer(G4VPhysicalVolume * vol,
-	G4double dimxy,
+	G4double dimxy,G4double dimz,
 	G4double area,
 	G4double posx,
 	G4double posy,
 	G4double posz,
 	G4double layer, G4VPhysicalVolume * absvol=0):
-		vol_(vol),dimxy_(dimxy),area_(area),
+		vol_(vol),dimxy_(dimxy),dimz_(dimz),area_(area),
 		posx_(posx),posy_(posy),posz_(posz),energyscalefactor_(1),
 		layer_(layer),absvol_(absvol)
 	{}
@@ -37,6 +37,10 @@ public:
 
 	const G4double& getDimxy() const {
 		return dimxy_;
+	}
+
+	const G4double& getDimz() const {
+		return dimz_;
 	}
 
 	const G4VPhysicalVolume* getVol() const {
@@ -74,6 +78,7 @@ public:
 private:
 	G4VPhysicalVolume * vol_;
 	G4double dimxy_;
+	G4double dimz_;
 	G4double area_;
 
 	G4double posx_;

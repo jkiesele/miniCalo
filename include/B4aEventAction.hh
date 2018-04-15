@@ -69,9 +69,9 @@ class B4aEventAction : public G4UserEventAction
         rechit_x_.clear();
         rechit_y_.clear();
         rechit_z_.clear();
-        rechit_vr_.clear();
+        rechit_vz_.clear();
         rechit_varea_.clear();
-        rechit_vl_.clear();
+        rechit_vxy_.clear();
 
     }
 
@@ -89,9 +89,9 @@ class B4aEventAction : public G4UserEventAction
     std::vector<G4double>  rechit_y_;
     std::vector<G4double>  rechit_z_;
     std::vector<G4double>  rechit_layer_;
-    std::vector<G4double>  rechit_vr_;
+    std::vector<G4double>  rechit_vz_;
     std::vector<G4double>  rechit_varea_;
-    std::vector<G4double>  rechit_vl_;
+    std::vector<G4double>  rechit_vxy_;
     std::vector<const G4VPhysicalVolume * > allvolumes_;
 
     G4double  fEnergyGap;
