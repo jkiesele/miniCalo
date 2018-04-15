@@ -92,7 +92,7 @@ G4String B4PrimaryGeneratorAction::setParticleID(enum particles p){
 	particleid_=p;
 	G4ParticleDefinition * particleDefinition =0;
 
-	if(p==elec){
+	if(true || p==elec){
 		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("e-");
 		fParticleGun->SetParticleDefinition(particleDefinition);
 		return "isElectron";
@@ -162,10 +162,10 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   //generate a few of them
 
   particles mainid=particleid_;
-  int nshoots=10;
+  int nshots=1;
   G4double sign=1;
 
-  for(int i=0;i<nshoots;i++){
+  for(int i=0;i<nshots;i++){
 
 	  int id=(int)particleid_;
 	  if(id<(int)particles_size-1)

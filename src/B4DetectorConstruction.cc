@@ -346,33 +346,10 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 	layerThicknessHB=115*mm;
 	G4double absorberFractionEE=0.75;
 	G4double absorberFractionHB=0.95;
+	G4double calibrationEE=44.8;
+	G4double calibrationHB=512;
 
-	G4double calibrations[nofEELayers+nofHB];
-	calibrations[0]=25.5;
-	calibrations[1]=24.6;
-	calibrations[2]=24.3;
-	calibrations[3]=24.3;
-	calibrations[4]=24.2;
-	calibrations[5]=24.3;
-	calibrations[6]=24.1;
-	calibrations[7]=24.1;
-	calibrations[8]=24.1;
-	calibrations[9]=24.0;
-	calibrations[10]=24.3;
-	calibrations[11]=25.8;
-	calibrations[12]=27.8;
-	calibrations[13]=29.5;
-	calibrations[14]=30.3;
-	calibrations[15]=30.8;
-	calibrations[16]=31.4;
-	calibrations[17]=31.8;
-	calibrations[18]=31.2;
-	calibrations[19]=32.4;
-	calibrations[20]=33.9;
-	calibrations[21]=33.4;
-	calibrations[22]=34.5;
-	calibrations[23]=36.5;
-	calibrations[24]=38.0;
+
 
 
 
@@ -415,6 +392,7 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 		int granularity=8;
 		G4double absfraction=absorberFractionEE;
 		G4double thickness=layerThicknessEE;
+		G4double calibration=calibrationEE;
 		if(i>3)
 			granularity=6;
 		if(i>7){
@@ -425,13 +403,14 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 		if(i>=nofEELayers){
 			absfraction=absorberFractionHB;
 			thickness=layerThicknessHB;
+			calibration=calibrationHB;
 		}
 		createLayer(
 				worldLV,thickness,
 				granularity,
 				absfraction,
 				G4ThreeVector(0,0,lastzpos+thickness),
-				"layer"+createString(i),i,1);//calibrations[i]);
+				"layer"+createString(i),i,1);//calibration);
 		lastzpos+=thickness;
 	}
 
