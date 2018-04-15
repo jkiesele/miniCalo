@@ -173,15 +173,15 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 	  else
 		  id=0;
 
-	  id=(int)elec;
+
 
 	  particleid_=(particles)id;
 	  setParticleID(particleid_);
 
 	  energy_=1101;
-	  while(energy_>300 && energy_<190){//somehow sometimes the random gen shoots >1??
+	  while(energy_>100){//somehow sometimes the random gen shoots >1??
 		  G4double rand =  G4INCL::Random::shoot();
-		  energy_=299*rand+1;
+		  energy_=99*rand+1;
 	  }
 
 	  G4ThreeVector position(0., 0., -5*cm);

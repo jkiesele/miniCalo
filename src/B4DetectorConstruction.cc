@@ -292,6 +292,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 			nsmallsensorsrow,G4ThreeVector(0,0,0),name,&activecells_,layerLV,
 			this,position,absfraction,layernumber,calibration);
 
+	G4cout << "layer position="<<position <<G4endl;
 
 	return layerPV;
 
@@ -304,6 +305,9 @@ void B4DetectorConstruction::DefineMaterials()
 	// Lead material defined using NIST Manager
 	auto nistManager = G4NistManager::Instance();
 	nistManager->FindOrBuildMaterial("G4_Pb");
+	nistManager->FindOrBuildMaterial("G4_PbWO4");
+
+	//nistManager->ListMaterials("all");
 
 	// Liquid argon material
 	G4double a;  // mass of a mole;
@@ -317,13 +321,13 @@ void B4DetectorConstruction::DefineMaterials()
 			kStateGas, 2.73*kelvin, 3.e-18*pascal);
 
 	// Print materials
-	//G4cout << *(G4Material::GetMaterialTable()) << G4endl;
+	G4cout << *(G4Material::GetMaterialTable()) << G4endl;
 
 
 	// Get materials
 	defaultMaterial = G4Material::GetMaterial("Galactic");
 	absorberMaterial = G4Material::GetMaterial("G4_Pb");
-	gapMaterial = G4Material::GetMaterial("liquidArgon");
+	gapMaterial = G4Material::GetMaterial("G4_PbWO4");
 
 	if ( ! defaultMaterial || ! absorberMaterial || ! gapMaterial ) {
 		G4ExceptionDescription msg;
@@ -344,10 +348,10 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 	calorSizeXY  = 30.*cm;
 	layerThicknessEE=15*mm;
 	layerThicknessHB=115*mm;
-	G4double absorberFractionEE=0.75;
-	G4double absorberFractionHB=0.95;
-	G4double calibrationEE=44.8;
-	G4double calibrationHB=512;
+	G4double absorberFractionEE=0.0001;
+	G4double absorberFractionHB=0.0001;
+	G4double calibrationEE=1;
+	G4double calibrationHB=1;
 
 
 
@@ -411,6 +415,7 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 				absfraction,
 				G4ThreeVector(0,0,lastzpos+thickness),
 				"layer"+createString(i),i,1);//calibration);
+		G4cout << "created layer "<<  i<<" at z="<<lastzpos+thickness << G4endl;
 		lastzpos+=thickness;
 	}
 
