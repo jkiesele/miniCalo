@@ -72,7 +72,7 @@ class B4aEventAction : public G4UserEventAction
         rechit_vz_.clear();
         rechit_varea_.clear();
         rechit_vxy_.clear();
-
+        rechit_layer_.clear();
     }
 
     void setGenerator(B4PrimaryGeneratorAction * generator){
