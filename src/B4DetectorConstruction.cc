@@ -270,7 +270,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 						sensorsize,Thickness,sensorsize*sensorsize,
 						patentpos.x()+posx,
 						patentpos.y()+posy,
-						patentpos.z()+0,laynum,absorber);
+						patentpos.z(),laynum,absorber);
 				sensordesc.setEnergyscalefactor(calib);
 				acells->push_back(sensordesc);
 			}

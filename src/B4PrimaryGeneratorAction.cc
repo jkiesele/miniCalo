@@ -71,6 +71,9 @@ B4PrimaryGeneratorAction::B4PrimaryGeneratorAction()
 
   globalgen=this;
 
+  xorig_=0;
+  yorig_=0;
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -181,8 +184,16 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 		  G4double rand =  G4INCL::Random::shoot();
 		  energy_=99*rand+1;
 	  }
+	  double xpos=10;
+	  while(fabs(xpos)>5){
+		  xpos=10*G4INCL::Random::shoot() -5;
+	  }
+	  double ypos=10;
+	  while(fabs(ypos)>5){
+		  ypos=10*G4INCL::Random::shoot() -5;
+	  }
 
-	  G4ThreeVector position(0., 0., -5*cm);
+	  G4ThreeVector position(xpos*cm, ypos*cm, -5*cm);
 
 	  if(i==0){
 		  mainid=particleid_;

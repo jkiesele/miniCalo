@@ -62,6 +62,9 @@ public:
 
   G4double getEnergy()const{return energy_;}
 
+  G4double getX()const{return xorig_;}
+  G4double getY()const{return yorig_;}
+
   static B4PrimaryGeneratorAction * globalgen;
 
   enum particles{
@@ -84,6 +87,7 @@ private:
   G4String setParticleID(enum particles );
 
   G4double energy_;
+  G4double xorig_,yorig_;
   particles particleid_;
 
 };
