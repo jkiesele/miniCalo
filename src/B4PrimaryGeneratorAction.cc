@@ -184,9 +184,11 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 		  G4double rand =  G4INCL::Random::shoot();
 		  energy_=99*rand+1;
 	  }
+	  //G4cout << "shooting particle at " ;
 	  double xpos=10;
 	  while(fabs(xpos)>5){
 		  xpos=10*G4INCL::Random::shoot() -5;
+		  //G4cout << xpos <<  G4endl;
 	  }
 	  double ypos=10;
 	  while(fabs(ypos)>5){
@@ -194,6 +196,10 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 	  }
 
 	  G4ThreeVector position(xpos*cm, ypos*cm, -5*cm);
+	  xorig_=xpos;
+	  yorig_=ypos;
+
+	  //G4cout << position <<  G4endl;
 
 	  if(i==0){
 		  mainid=particleid_;
@@ -214,6 +220,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 	  fParticleGun->SetParticleEnergy(energy_ * GeV);
 	  fParticleGun->SetParticlePosition(position);
 	  fParticleGun->GeneratePrimaryVertex(anEvent);
+
   }
   particleid_=mainid;
 

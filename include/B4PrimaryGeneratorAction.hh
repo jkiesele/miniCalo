@@ -64,6 +64,7 @@ public:
 
   G4double getX()const{return xorig_;}
   G4double getY()const{return yorig_;}
+  G4double getR()const{return std::sqrt(yorig_*yorig_+xorig_*xorig_);}
 
   static B4PrimaryGeneratorAction * globalgen;
 

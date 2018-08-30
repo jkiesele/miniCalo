@@ -168,6 +168,7 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
   analysisManager->FillNtupleDColumn(i,B4PrimaryGeneratorAction::globalgen->getEnergy());
   analysisManager->FillNtupleDColumn(i+1,B4PrimaryGeneratorAction::globalgen->getX());
   analysisManager->FillNtupleDColumn(i+2,B4PrimaryGeneratorAction::globalgen->getY());
+  analysisManager->FillNtupleDColumn(i+3,B4PrimaryGeneratorAction::globalgen->getR());
 
   //filling deposits and volume info for all volumes automatically..
   for(auto& e:rechit_energy_){
