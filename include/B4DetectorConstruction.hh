@@ -76,6 +76,7 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
     void DefineMaterials();
     G4VPhysicalVolume* DefineVolumes();
 
+
     //returns the active material onlu
     G4VPhysicalVolume* createSandwich(G4LogicalVolume* layerLV,
     		G4double dx,
@@ -90,6 +91,7 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
     		G4double absfraction,G4ThreeVector position,
     		G4String name, int number, G4double calibration);
   
+    void createCalo(G4LogicalVolume * caloLV,G4ThreeVector position,G4String name);
     // data members
     //
     static G4ThreadLocal G4GlobalMagFieldMessenger*  fMagFieldMessenger; 
@@ -102,6 +104,7 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
     G4double layerThicknessEE,layerThicknessHB;
     G4double calorSizeXY;
     G4Material * defaultMaterial, *absorberMaterial, *gapMaterial;
+    G4int nofEELayers,nofHB;
 };
 
 // inline functions

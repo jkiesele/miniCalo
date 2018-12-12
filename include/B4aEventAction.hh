@@ -73,6 +73,7 @@ class B4aEventAction : public G4UserEventAction
         rechit_varea_.clear();
         rechit_vxy_.clear();
         rechit_layer_.clear();
+        rechit_detid_.clear();
     }
 
     void setGenerator(B4PrimaryGeneratorAction * generator){
@@ -92,6 +93,7 @@ class B4aEventAction : public G4UserEventAction
     std::vector<G4double>  rechit_vz_;
     std::vector<G4double>  rechit_varea_;
     std::vector<G4double>  rechit_vxy_;
+    std::vector<int>       rechit_detid_;
     std::vector<const G4VPhysicalVolume * > allvolumes_;
 
     G4double  fEnergyGap;

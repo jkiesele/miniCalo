@@ -271,6 +271,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 						patentpos.x()+posx,
 						patentpos.y()+posy,
 						patentpos.z(),laynum,absorber);
+				G4cout << "created sensor with ID "<< sensordesc.getGlobalDetID() << G4endl;
 				sensordesc.setEnergyscalefactor(calib);
 				acells->push_back(sensordesc);
 			}
@@ -295,6 +296,48 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 	G4cout << "layer position="<<position <<G4endl;
 
 	return layerPV;
+
+}
+
+
+void B4DetectorConstruction::createCalo(G4LogicalVolume * caloLV,G4ThreeVector position,G4String name){
+
+	G4double absorberFractionEE=0.0001;
+	G4double absorberFractionHB=0.0001;
+	G4double calibrationEE=1;
+	G4double calibrationHB=1;
+
+	G4double lastzpos=-layerThicknessEE;
+	for(int i=0;i<nofEELayers+nofHB;i++){
+		int granularity=8;
+		G4double absfraction=absorberFractionEE;
+		G4double thickness=layerThicknessEE;
+		G4double calibration=calibrationEE;
+		if(i>3)
+			granularity=6;
+		if(i>7){
+			granularity=4;
+		}
+		if(i>15)
+			granularity=2;
+		if(i>=nofEELayers){
+			absfraction=absorberFractionHB;
+			thickness=layerThicknessHB;
+			calibration=calibrationHB;
+		}
+		G4ThreeVector createatposition=G4ThreeVector(0,0,lastzpos+thickness)+position;
+		createLayer(
+				caloLV,thickness,
+				granularity,
+				absfraction,
+				createatposition,
+				name+"layer"+createString(i),i,1);//calibration);
+		G4cout << "created layer "<<  i<<" at "<< createatposition << G4endl;
+		lastzpos+=thickness;
+	}
+
+	G4cout << "created " << activecells_.size() << " sensors"<<std::endl;
+
 
 }
 
@@ -343,15 +386,11 @@ void B4DetectorConstruction::DefineMaterials()
 G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 {
 	// Geometry parameters
-	const G4int nofEELayers = 10;
-	const G4int nofHB=15;
 	calorSizeXY  = 30.*cm;
 	layerThicknessEE=15*mm;
-	layerThicknessHB=115*mm;
-	G4double absorberFractionEE=0.0001;
-	G4double absorberFractionHB=0.0001;
-	G4double calibrationEE=1;
-	G4double calibrationHB=1;
+	layerThicknessHB=100*mm;
+	nofEELayers = 10;
+	nofHB=15;
 
 
 
@@ -359,7 +398,7 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 
 	auto calorThickness = nofEELayers * layerThicknessEE + nofHB*layerThicknessHB;
 	auto worldSizeXY = 1.2 * calorSizeXY;
-	auto worldSizeZ  = 1.2 * calorThickness;
+	G4double worldSizeZ  = 3 * m;
 
 
 
@@ -390,37 +429,11 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 	//
 	// Calorimeter
 	//
-
-    G4double lastzpos=-layerThicknessEE;
-	for(int i=0;i<nofEELayers+nofHB;i++){
-		int granularity=8;
-		G4double absfraction=absorberFractionEE;
-		G4double thickness=layerThicknessEE;
-		G4double calibration=calibrationEE;
-		if(i>3)
-			granularity=6;
-		if(i>7){
-			granularity=4;
-		}
-		if(i>15)
-			granularity=2;
-		if(i>=nofEELayers){
-			absfraction=absorberFractionHB;
-			thickness=layerThicknessHB;
-			calibration=calibrationHB;
-		}
-		createLayer(
-				worldLV,thickness,
-				granularity,
-				absfraction,
-				G4ThreeVector(0,0,lastzpos+thickness),
-				"layer"+createString(i),i,1);//calibration);
-		G4cout << "created layer "<<  i<<" at z="<<lastzpos+thickness << G4endl;
-		lastzpos+=thickness;
-	}
+	createCalo(worldLV,G4ThreeVector(0,0,0),"");
 
 
-	G4cout << "created in total "<< activecells_.size()/2<<" sensors" <<G4endl;
+
+	G4cout << "created in total "<< activecells_.size()<<" sensors" <<G4endl;
 
 	//
 	// Visualization attributes

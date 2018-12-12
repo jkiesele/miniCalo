@@ -80,9 +80,37 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 		}
 	}
 
-	if(idx==activesensors->size())return;//not active volume
-	size_t currentindex=0;
+	if(idx>=activesensors->size())return;//not active volume
 
+	if(rechit_absorber_energy_.size()<=idx){
+
+		rechit_absorber_energy_.resize(activesensors->size(),0);
+		rechit_energy_.resize(activesensors->size(),0);
+		rechit_x_.resize(activesensors->size(),0);
+		rechit_y_.resize(activesensors->size(),0);
+		rechit_z_.resize(activesensors->size(),0);
+		rechit_layer_.resize(activesensors->size(),0);
+		rechit_varea_.resize(activesensors->size(),0);
+		rechit_vz_.resize(activesensors->size(),0);
+		rechit_vxy_.resize(activesensors->size(),0);
+		rechit_detid_.resize(activesensors->size(),0);
+		for(size_t i=0;i<activesensors->size();i++){
+			rechit_x_.at     (i)=activesensors->at(i).getPosx();
+			rechit_y_.at     (i)=activesensors->at(i).getPosy();
+			rechit_z_.at     (i)=activesensors->at(i).getPosz();
+			rechit_layer_.at (i)=activesensors->at(i).getLayer();
+			rechit_varea_.at (i)=activesensors->at(i).getArea();
+			rechit_vz_.at    (i)=activesensors->at(i).getDimz();
+			rechit_vxy_.at   (i)=activesensors->at(i).getDimxy();
+			rechit_detid_.at (i)=activesensors->at(i).getGlobalDetID();
+		}
+
+	}
+
+	auto energy=step->GetTotalEnergyDeposit();
+	rechit_energy_.at(idx)+=energy;
+
+	/*
 	size_t hitidx=allvolumes_.size();
 	hitidx = std::find(allvolumes_.begin(),allvolumes_.end(),activesensors->at(idx).getVol())-allvolumes_.begin();
 
@@ -101,6 +129,7 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 		rechit_varea_.push_back(0);
 		rechit_vz_.push_back(0);
 		rechit_vxy_.push_back(0);
+		rechit_detid_.push_back(-1);
 	}
 
 	auto energy=step->GetTotalEnergyDeposit();
@@ -117,8 +146,9 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 	rechit_layer_.at (currentindex)=activesensors->at(idx).getLayer();
 	rechit_varea_.at (currentindex)=activesensors->at(idx).getArea();
 	rechit_vz_.at    (currentindex)=activesensors->at(idx).getDimz();
-	rechit_vxy_.at    (currentindex)=activesensors->at(idx).getDimxy();
-
+	rechit_vxy_.at   (currentindex)=activesensors->at(idx).getDimxy();
+	rechit_detid_.at (currentindex)=activesensors->at(idx).getGlobalDetID();
+*/
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

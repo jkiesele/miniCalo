@@ -13,10 +13,7 @@
 
 class sensorContainer{
 public:
-	sensorContainer():vol_(0),dimxy_(0),dimz_(0),area_(0),
-	posx_(0),posy_(0),posz_(0),energyscalefactor_(1),absvol_(0){
 
-	}
 	sensorContainer(G4VPhysicalVolume * vol,
 	G4double dimxy,G4double dimz,
 	G4double area,
@@ -27,7 +24,9 @@ public:
 		vol_(vol),dimxy_(dimxy),dimz_(dimz),area_(area),
 		posx_(posx),posy_(posy),posz_(posz),energyscalefactor_(1),
 		layer_(layer),absvol_(absvol)
-	{}
+	{
+		global_detid_=global_detid_counter_++;
+	}
 
 
 
@@ -75,7 +74,16 @@ public:
 		return absvol_;
 	}
 
+	const int& getGlobalDetID()const{
+		return global_detid_;
+	}
+
 private:
+	sensorContainer():vol_(0),dimxy_(0),dimz_(0),area_(0),
+		posx_(0),posy_(0),posz_(0),energyscalefactor_(1),absvol_(0){
+			global_detid_=global_detid_counter_++;
+		}
+
 	G4VPhysicalVolume * vol_;
 	G4double dimxy_;
 	G4double dimz_;
@@ -89,7 +97,11 @@ private:
 
 	int layer_;
 
+	int global_detid_;
+
 	G4VPhysicalVolume *  absvol_;
+
+	static int global_detid_counter_;
 
 };
 
