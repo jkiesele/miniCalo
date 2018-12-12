@@ -63,12 +63,22 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
     virtual ~B4DetectorConstruction();
 
   public:
+    enum geometry{
+    	standard,
+		homogenous,
+		homogenous_ecal_only,
+		ecal_only,
+		ecal_only_hi_granular
+    };
     virtual G4VPhysicalVolume* Construct();
     virtual void ConstructSDandField();
+
+    void  DefineGeometry(geometry g);
 
     bool isActiveVolume(G4VPhysicalVolume*)const;
 
     const std::vector<sensorContainer>* getActiveSensors()const;
+
      
   private:
     // methods
@@ -89,7 +99,7 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
     G4VPhysicalVolume* createLayer(G4LogicalVolume * caloLV,
     		G4double thickness,G4int granularity,
     		G4double absfraction,G4ThreeVector position,
-    		G4String name, int number, G4double calibration);
+    		G4String name, int number, G4double calibration, G4int    nsmallsensorsrow=-1);
   
     void createCalo(G4LogicalVolume * caloLV,G4ThreeVector position,G4String name);
     // data members
@@ -102,9 +112,15 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
     G4bool  fCheckOverlaps; // option to activate checking of volumes overlaps
 
     G4double layerThicknessEE,layerThicknessHB;
+    std::vector<G4int> layerGranularity;
+    std::vector<G4int> layerSplitGranularity;
     G4double calorSizeXY;
     G4Material * defaultMaterial, *absorberMaterial, *gapMaterial;
     G4int nofEELayers,nofHB;
+    G4double calorThickness;
+
+
+
 };
 
 // inline functions

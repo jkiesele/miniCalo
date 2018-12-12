@@ -84,6 +84,93 @@ B4DetectorConstruction::B4DetectorConstruction()
 
 }
 
+G4VPhysicalVolume* B4DetectorConstruction::Construct()
+{
+	DefineGeometry(homogenous_ecal_only);
+	// Define materials
+	DefineMaterials();
+
+	// Define volumes
+	return DefineVolumes();
+}
+
+void  B4DetectorConstruction::DefineGeometry(geometry g){
+
+	if(g == standard){
+		calorThickness=2000*mm;
+
+	    layerGranularity.clear();
+	    layerSplitGranularity.clear();
+		nofEELayers = 10;
+		nofHB=15;
+		for(int i=0;i<nofEELayers+nofHB;i++){
+			G4double granularity=8;
+			if(i>3)
+				granularity=6;
+			if(i>7){
+				granularity=4;
+			}
+			if(i>15)
+				granularity=2;
+			layerGranularity.push_back(granularity);
+			if(granularity<2)
+				layerSplitGranularity.push_back(0);
+			else
+				layerSplitGranularity.push_back(2*granularity);
+		}
+
+		layerThicknessEE=15*mm;
+		layerThicknessHB=(calorThickness-nofEELayers*layerThicknessEE)/(float)nofHB; //100*mm;
+
+	}
+	else if(g == homogenous || g == homogenous_ecal_only){
+		if (g == homogenous)
+			calorThickness=2000*mm;
+		else
+			calorThickness=300*mm;
+
+	    layerGranularity.clear();
+	    layerSplitGranularity.clear();
+		nofEELayers = 10;
+		nofHB=20;
+		for(int i=0;i<nofEELayers+nofHB;i++){
+			G4double granularity=10;
+			if(i==27)
+				granularity=8;
+			if(i==28)
+				granularity=2;
+			if(i==29)
+				granularity=1;
+			layerGranularity.push_back(granularity);
+
+			layerSplitGranularity.push_back(-granularity/2);
+		}
+
+		layerThicknessEE=80*mm * calorThickness/2000*mm;
+		layerThicknessHB=(calorThickness-nofEELayers*layerThicknessEE)/(float)nofHB; //100*mm;
+
+	}
+	else if(g == ecal_only){
+		calorThickness=200*mm;
+
+		layerGranularity.clear();
+		layerSplitGranularity.clear();
+		nofEELayers = 10;
+		nofHB=0;
+		for(int i=0;i<nofEELayers+nofHB;i++){
+			G4double granularity=10;
+
+			layerGranularity.push_back(granularity);
+
+			layerSplitGranularity.push_back(int(granularity/2));
+		}
+
+		layerThicknessEE=20*mm;
+		layerThicknessHB=(calorThickness-nofEELayers*layerThicknessEE)/(float)nofHB; //100*mm;
+
+	}
+}
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 B4DetectorConstruction::~B4DetectorConstruction()
@@ -92,14 +179,6 @@ B4DetectorConstruction::~B4DetectorConstruction()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-G4VPhysicalVolume* B4DetectorConstruction::Construct()
-{
-	// Define materials
-	DefineMaterials();
-
-	// Define volumes
-	return DefineVolumes();
-}
 
 /*
  * creates a single sandwich tile in a layer
@@ -198,7 +277,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createSandwich(G4LogicalVolume* layer
 G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 		G4double thickness,
 		G4int granularity, G4double absfraction,G4ThreeVector position,
-		G4String name, int layernumber, G4double calibration){
+		G4String name, int layernumber, G4double calibration, G4int    nsmallsensorsrow){
 
 
 
@@ -223,11 +302,14 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 
 	G4double coarsedivider=(G4double)granularity;
 	G4double largesensordxy=calorSizeXY/coarsedivider;
-
-	G4int    nsmallsensorsrow=granularity*2;
+	G4double smallsensordxy=largesensordxy/4;
+	if(nsmallsensorsrow<0){
+    	nsmallsensorsrow=granularity/2;
+    	smallsensordxy=largesensordxy;
+	}
 	if(granularity<2)
 		nsmallsensorsrow=0;
-	G4double smallsensordxy=largesensordxy/4;
+
 
 	//divide into 4 areas:
 	// LG  HG
@@ -286,40 +368,44 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 
 
 	//place LG sensors:
-	placeSensors(lowerleftcorner, false,largesensordxy,thickness,
-			granularity,G4ThreeVector(0,0,0),name,&activecells_,layerLV,this,
-			position,absfraction,layernumber,calibration);
-	placeSensors(G4ThreeVector(0,0,0), true,smallsensordxy,thickness,
-			nsmallsensorsrow,G4ThreeVector(0,0,0),name,&activecells_,layerLV,
-			this,position,absfraction,layernumber,calibration);
+	if(nsmallsensorsrow>0){
+		placeSensors(lowerleftcorner, false,largesensordxy,thickness,
+				granularity,G4ThreeVector(0,0,0),name,&activecells_,layerLV,this,
+				position,absfraction,layernumber,calibration);
+		placeSensors(G4ThreeVector(0,0,0), true,smallsensordxy,thickness,
+				nsmallsensorsrow,G4ThreeVector(0,0,0),name,&activecells_,layerLV,
+				this,position,absfraction,layernumber,calibration);
+	}
+	else{
 
+		placeSensors(lowerleftcorner, true,largesensordxy,thickness,
+				granularity,G4ThreeVector(0,0,0),name,&activecells_,layerLV,this,
+				position,absfraction,layernumber,calibration);
+	}
 	G4cout << "layer position="<<position <<G4endl;
 
 	return layerPV;
 
 }
 
-
 void B4DetectorConstruction::createCalo(G4LogicalVolume * caloLV,G4ThreeVector position,G4String name){
 
 	G4double absorberFractionEE=0.0001;
-	G4double absorberFractionHB=0.0001;
+	G4double absorberFractionHB=absorberFractionEE;
 	G4double calibrationEE=1;
 	G4double calibrationHB=1;
 
+//define the geometries
+
+
 	G4double lastzpos=-layerThicknessEE;
 	for(int i=0;i<nofEELayers+nofHB;i++){
-		int granularity=8;
+		int granularity=layerGranularity.at(i);
+		int splitgranularity = layerSplitGranularity.at(i);
 		G4double absfraction=absorberFractionEE;
 		G4double thickness=layerThicknessEE;
 		G4double calibration=calibrationEE;
-		if(i>3)
-			granularity=6;
-		if(i>7){
-			granularity=4;
-		}
-		if(i>15)
-			granularity=2;
+
 		if(i>=nofEELayers){
 			absfraction=absorberFractionHB;
 			thickness=layerThicknessHB;
@@ -331,7 +417,7 @@ void B4DetectorConstruction::createCalo(G4LogicalVolume * caloLV,G4ThreeVector p
 				granularity,
 				absfraction,
 				createatposition,
-				name+"layer"+createString(i),i,1);//calibration);
+				name+"layer"+createString(i),i,1,splitgranularity);//calibration);
 		G4cout << "created layer "<<  i<<" at "<< createatposition << G4endl;
 		lastzpos+=thickness;
 	}
@@ -387,18 +473,15 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 {
 	// Geometry parameters
 	calorSizeXY  = 30.*cm;
-	layerThicknessEE=15*mm;
-	layerThicknessHB=100*mm;
-	nofEELayers = 10;
-	nofHB=15;
 
 
 
 
 
-	auto calorThickness = nofEELayers * layerThicknessEE + nofHB*layerThicknessHB;
+
+    //auto calorThickness = nofEELayers * layerThicknessEE + nofHB*layerThicknessHB;
 	auto worldSizeXY = 1.2 * calorSizeXY;
-	G4double worldSizeZ  = 3 * m;
+	G4double worldSizeZ  = 11 * m;
 
 
 
