@@ -68,7 +68,8 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
 		homogenous,
 		homogenous_ecal_only,
 		ecal_only,
-		ecal_only_hi_granular
+		ecal_only_hi_granular,
+		hcal_only_irregular
     };
     virtual G4VPhysicalVolume* Construct();
     virtual void ConstructSDandField();

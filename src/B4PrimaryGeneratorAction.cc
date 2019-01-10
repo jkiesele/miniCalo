@@ -183,13 +183,13 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 	  else
 		  particleid_=gamma;
 
-	  //particleid_=pioncharged;
+	  particleid_=pioncharged;
 	  setParticleID(particleid_);
 
 	  energy_=1101;
 	  while(energy_>energy_max){//somehow sometimes the random gen shoots >1??
 		  G4double rand =  G4INCL::Random::shoot();
-		  energy_=(energy_max-1)*rand+1;
+		  energy_=(energy_max-10)*rand+10;
 	  }
 	  //G4cout << "shooting particle at " ;
 	  double xpos=10;
