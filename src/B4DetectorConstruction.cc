@@ -87,7 +87,8 @@ B4DetectorConstruction::B4DetectorConstruction()
 G4VPhysicalVolume* B4DetectorConstruction::Construct()
 {
 	//DefineGeometry(homogenous_ecal_only);
-	DefineGeometry(hcal_only_irregular);
+	//DefineGeometry(hcal_only_irregular);
+	DefineGeometry(ecal_only_irregular);
 	// Define materials
 	DefineMaterials();
 
@@ -170,8 +171,12 @@ void  B4DetectorConstruction::DefineGeometry(geometry g){
 		layerThicknessHB=(calorThickness-nofEELayers*layerThicknessEE)/(float)nofHB; //100*mm;
 
 	}
-	else if(g == hcal_only_irregular){
-		calorThickness=2000*mm;
+	else if(g == hcal_only_irregular || g == ecal_only_irregular){
+
+		if(g== hcal_only_irregular)
+			calorThickness=2000*mm;
+		else
+			calorThickness=250*mm;
 
 		layerGranularity.clear();
 		layerSplitGranularity.clear();

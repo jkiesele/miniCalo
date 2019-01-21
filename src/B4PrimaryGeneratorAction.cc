@@ -173,7 +173,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   int nshots=1;
   G4double sign=1;
 
-  G4double zposition = -500*cm;
+  G4double zposition = -200*cm;
   double energy_max=100;
 
   for(int i=0;i<nshots;i++){
@@ -183,7 +183,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 	  else
 		  particleid_=gamma;
 
-	  particleid_=pioncharged;
+	  //particleid_=pioncharged;
 	  setParticleID(particleid_);
 
 	  energy_=1101;
