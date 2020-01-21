@@ -74,7 +74,9 @@ class B4aEventAction : public G4UserEventAction
         rechit_vxy_.clear();
         rechit_layer_.clear();
         rechit_detid_.clear();
+        nsteps_=0;
     }
+
 
     void setGenerator(B4PrimaryGeneratorAction * generator){
     	generator_=generator;
@@ -103,6 +105,8 @@ class B4aEventAction : public G4UserEventAction
 
     B4PrimaryGeneratorAction * generator_;
     B4DetectorConstruction * detector_;
+
+    size_t nsteps_;
 
 };
 

@@ -70,7 +70,7 @@ public:
 
   enum particles{
 	  elec=0,muon,pioncharged,pionneutral,klong,kshort,gamma,
-
+	  positron,
 	  particles_size //leave this one
   };
 

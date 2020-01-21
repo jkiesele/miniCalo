@@ -73,6 +73,7 @@ B4PrimaryGeneratorAction::B4PrimaryGeneratorAction()
 
   xorig_=0;
   yorig_=0;
+  setParticleID(gamma);
 
 }
 
@@ -99,6 +100,11 @@ G4String B4PrimaryGeneratorAction::setParticleID(enum particles p){
 		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("e-");
 		fParticleGun->SetParticleDefinition(particleDefinition);
 		return "isElectron";
+	}
+	if(p==positron){
+	    particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("e+");
+	    fParticleGun->SetParticleDefinition(particleDefinition);
+	    return "isPositron";
 	}
 	if(p==muon){
 		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("mu-");
@@ -164,73 +170,68 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
     G4Exception("B4PrimaryGeneratorAction::GeneratePrimaries()",
       "MyCode0002", JustWarning, msg);
   } 
-  
+  G4cout << "shooting.. " ;
   // Set gun position
 
   //generate a few of them
+  int noTrackLayers =1;
+  float originpoint = ((float)noTrackLayers)*(-5*cm)-0.5*cm;
 
-  particles mainid=particleid_;
-  int nshots=1;
-  G4double sign=1;
 
-  G4double zposition = -200*cm;
-  double energy_max=100;
+  G4double zposition = originpoint;
+  double energy_max=200;
+  double energy_min=1;
+  //energy_=15;
 
-  for(int i=0;i<nshots;i++){
+  //iterate
+  if(particleid_==gamma)
+      setParticleID(elec);
+  else if(particleid_==elec)
+      setParticleID(gamma);
 
-	  if(particleid_==gamma)
-		  particleid_=pionneutral;
-	  else
-		  particleid_=gamma;
+  //setParticleID(elec);
+  //positron
 
-	  //particleid_=pioncharged;
-	  setParticleID(particleid_);
 
-	  energy_=1101;
-	  while(energy_>energy_max){//somehow sometimes the random gen shoots >1??
-		  G4double rand =  G4INCL::Random::shoot();
-		  energy_=(energy_max-10)*rand+10;
-	  }
-	  //G4cout << "shooting particle at " ;
-	  double xpos=10;
-	  while(fabs(xpos)>5){
-		  xpos=10*G4INCL::Random::shoot() -5;
-		  //G4cout << xpos <<  G4endl;
-	  }
-	  double ypos=10;
-	  while(fabs(ypos)>5){
-		  ypos=10*G4INCL::Random::shoot() -5;
-	  }
 
-	  G4ThreeVector position(xpos*cm, ypos*cm, zposition);
-	  xorig_=xpos;
-	  yorig_=ypos;
 
-	  //G4cout << position <<  G4endl;
 
-	  if(i==0){
-		  mainid=particleid_;
-	  }
-	  else{
-		  G4double ringsize=10*cm;
-		  //make a ring
-		  auto xycoords=G4INCL::Random::correlatedUniform(-1);
-		  G4double magnitude=xycoords.first*xycoords.first+xycoords.second*xycoords.second;
-		  magnitude=sqrt(magnitude);
-		  xycoords.first*=ringsize/magnitude*sign;
-		  xycoords.second*=ringsize/magnitude*sign;
-		  position=G4ThreeVector(xycoords.first, xycoords.second, zposition);
-		  //G4cout << "adding particle at " << position << " " << id <<  G4endl;
-		  sign*=-1.;
-	  }
+  //particleid_=pioncharged;
 
-	  fParticleGun->SetParticleEnergy(energy_ * GeV);
-	  fParticleGun->SetParticlePosition(position);
-	  fParticleGun->GeneratePrimaryVertex(anEvent);
+ energy_=10001;
+ while(energy_>energy_max){//somehow sometimes the random gen shoots >1??
+     G4double rand =  G4INCL::Random::shoot();
+     energy_=(energy_max)*rand+energy_min;
+ }
 
+  //energy_=20;
+
+  //G4cout << "shooting particle at " ;
+  double xpos=50;
+  while(fabs(xpos)>10){
+      xpos=20*G4INCL::Random::shoot() - 10.;
+      //G4cout << xpos <<  G4endl;
   }
-  particleid_=mainid;
+  double ypos=50;
+  while(fabs(ypos)>=10){
+      ypos=20*G4INCL::Random::shoot() -10.;
+  }
 
+  G4ThreeVector position(xpos*cm, ypos*cm, zposition);
+  xorig_=xpos;
+  yorig_=ypos;
+
+
+  G4ThreeVector direction(0.,0.,1.);
+
+
+  fParticleGun->SetParticleMomentumDirection(direction);
+  fParticleGun->SetParticleEnergy(energy_ * GeV);
+  fParticleGun->SetParticlePosition(position);
+  fParticleGun->GeneratePrimaryVertex(anEvent);
+
+
+  G4cout << "Energy: " << energy_ << ", position: "<< position<<  G4endl;
 }
 
 

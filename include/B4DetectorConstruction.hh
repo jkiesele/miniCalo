@@ -70,7 +70,8 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
 		ecal_only,
 		ecal_only_hi_granular,
 		hcal_only_irregular,
-		ecal_only_irregular
+		ecal_only_irregular,
+		homogenous_no_tracker,
     };
     virtual G4VPhysicalVolume* Construct();
     virtual void ConstructSDandField();
@@ -96,12 +97,16 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
 			G4double dz,
 			G4ThreeVector position,
 			G4String name, G4double absorberfraction,
-			G4VPhysicalVolume*& absorber);
+			G4VPhysicalVolume*& absorber,
+			G4Material* material=0,
+			G4double rotation=0);
 
     G4VPhysicalVolume* createLayer(G4LogicalVolume * caloLV,
     		G4double thickness,G4int granularity,
     		G4double absfraction,G4ThreeVector position,
-    		G4String name, int number, G4double calibration, G4int    nsmallsensorsrow=-1);
+    		G4String name, int number, G4double calibration, G4int    nsmallsensorsrow=-1,
+    		G4Material* material=0,
+            G4double sizexy=0);
   
     void createCalo(G4LogicalVolume * caloLV,G4ThreeVector position,G4String name);
     // data members
@@ -117,8 +122,8 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
     std::vector<G4int> layerGranularity;
     std::vector<G4int> layerSplitGranularity;
     G4double calorSizeXY;
-    G4Material * defaultMaterial, *absorberMaterial, *gapMaterial;
-    G4int nofEELayers,nofHB;
+    G4Material * defaultMaterial, *absorberMaterial, *gapMaterial, *trackerMaterial;
+    G4int nofEELayers,nofHB, noTrackLayers;
     G4double calorThickness;
 
 

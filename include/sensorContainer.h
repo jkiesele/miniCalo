@@ -22,7 +22,7 @@ public:
 	G4double posz,
 	int layer, G4VPhysicalVolume * absvol=0):
 		vol_(vol),dimxy_(dimxy),dimz_(dimz),area_(area),
-		posx_(posx),posy_(posy),posz_(posz),energyscalefactor_(1),
+		posx_(posx),posy_(posy),posz_(posz-dimz/2.),energyscalefactor_(1),
 		layer_(layer),absvol_(absvol)
 	{
 		global_detid_=global_detid_counter_++;
