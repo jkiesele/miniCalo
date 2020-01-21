@@ -451,7 +451,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 						patentpos.x()+posx,
 						patentpos.y()+posy,
 						patentpos.z(),laynum,absorber);
-				G4cout << "created sensor with ID "<< sensordesc.getGlobalDetID() <<" sizexy "<< sensorsize <<"mm" << G4endl;
+				G4cout << "created sensor with ID "<< sensordesc.getGlobalDetID() <<" sizexy "<< sensorsize <<"mm at "<< sandwichposition << G4endl;
 				sensordesc.setEnergyscalefactor(calib);
 				acells->push_back(sensordesc);
 			}
@@ -465,21 +465,12 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 			0);
 
 
-	//place LG sensors:
-	if(nsmallsensorsrow>0){
-		placeSensors(lowerleftcorner, false,largesensordxy,thickness,
-				granularity,G4ThreeVector(0,0,0),name,&activecells_,layerLV,this,
-				position,absfraction,layernumber,calibration,material);
-		placeSensors(G4ThreeVector(0,0,0), true,smallsensordxy,thickness,
-				nsmallsensorsrow,G4ThreeVector(0,0,0),name,&activecells_,layerLV,
-				this,position,absfraction,layernumber,calibration,material);
-	}
-	else{
 
-		placeSensors(lowerleftcorner, true,largesensordxy,thickness,
-				granularity,G4ThreeVector(0,0,0),name,&activecells_,layerLV,this,
-				position,absfraction,layernumber,calibration,material);
-	}
+
+	placeSensors(lowerleftcorner, true,largesensordxy,thickness,
+	        granularity,G4ThreeVector(0,0,0),name,&activecells_,layerLV,this,
+	        position,absfraction,layernumber,calibration,material);
+
 	G4cout << "layer position="<<position <<G4endl;
 
 	return layerPV;
