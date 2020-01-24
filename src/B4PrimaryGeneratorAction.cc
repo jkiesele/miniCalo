@@ -218,8 +218,8 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   }
 
   G4ThreeVector position(xpos*cm, ypos*cm, zposition);
-  xorig_=xpos;
-  yorig_=ypos;
+  xorig_=xpos*cm;
+  yorig_=ypos*cm;
 
 
   G4ThreeVector direction(0.,0.,1.);

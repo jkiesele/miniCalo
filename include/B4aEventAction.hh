@@ -75,6 +75,7 @@ class B4aEventAction : public G4UserEventAction
         rechit_layer_.clear();
         rechit_detid_.clear();
         nsteps_=0;
+        totalen_=0;
     }
 
 
@@ -87,6 +88,7 @@ class B4aEventAction : public G4UserEventAction
 
   private:
     G4double  fEnergyAbs;
+    G4double totalen_;
     std::vector<G4double>  rechit_energy_,rechit_absorber_energy_;
     std::vector<G4double>  rechit_x_;
     std::vector<G4double>  rechit_y_;

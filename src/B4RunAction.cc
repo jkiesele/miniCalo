@@ -78,6 +78,7 @@ B4RunAction::B4RunAction(B4PrimaryGeneratorAction *gen, B4aEventAction* ev, G4St
   analysisManager->CreateNtupleDColumn("true_x");
   analysisManager->CreateNtupleDColumn("true_y");
   analysisManager->CreateNtupleDColumn("track_momentum");
+  analysisManager->CreateNtupleDColumn("total_dep_energy");
 
 //if(false){
   analysisManager->CreateNtupleDColumn("rechit_energy",eventact_->rechit_energy_);

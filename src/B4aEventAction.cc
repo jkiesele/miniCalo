@@ -88,9 +88,10 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 
 
 	auto energy=step->GetTotalEnergyDeposit();
-	if(idx<rechit_energy_.size())
+	if(idx<rechit_energy_.size()){
 	    rechit_energy_.at(idx)+=energy/1000.; //GeV
-
+	    totalen_+=energy/1000.; //GeV
+	}
 
 
 }
@@ -105,6 +106,7 @@ void B4aEventAction::BeginOfEventAction(const G4Event* /*event*/)
   fTrackLAbs = 0.;
   fTrackLGap = 0.;
   clear();
+  totalen_=0;
   nsteps_=0;
   //set generator stuff
 //random particle
@@ -118,8 +120,8 @@ void B4aEventAction::BeginOfEventAction(const G4Event* /*event*/)
 
   const auto& activesensors=detector_->getActiveSensors();
 
-  rechit_absorber_energy_.resize(activesensors->size(),0);
-  rechit_energy_.resize(activesensors->size(),0);
+  rechit_absorber_energy_ = std::vector<double>(activesensors->size(),0);//reset
+  rechit_energy_ = std::vector<double>(activesensors->size(),0);//reset
   rechit_x_.resize(activesensors->size(),0);
   rechit_y_.resize(activesensors->size(),0);
   rechit_z_.resize(activesensors->size(),0);
@@ -162,9 +164,8 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
     double trackmom = getTrackMomentum(B4PrimaryGeneratorAction::globalgen->getEnergy(),isgamma);
     if(trackmom>0){
         for(size_t i=0;i<rechit_layer_.size();i++){
-            if(rechit_layer_.at (i)<0){//give track points track momentum
+            if(rechit_layer_.at (i)<-0.1){//give track points track momentum
                 if(rechit_energy_.at (i)>0){
-
                     rechit_energy_.at (i)=trackmom;
                 }
             }
@@ -186,6 +187,8 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
   analysisManager->FillNtupleDColumn(i+1,B4PrimaryGeneratorAction::globalgen->getX());
   analysisManager->FillNtupleDColumn(i+2,B4PrimaryGeneratorAction::globalgen->getY());
   analysisManager->FillNtupleDColumn(i+3,trackmom);
+  analysisManager->FillNtupleDColumn(i+4,totalen_);
+
 
   //filling deposits and volume info for all volumes automatically..
 
