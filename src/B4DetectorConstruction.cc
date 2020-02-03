@@ -56,11 +56,14 @@
 #include "G4TransportationManager.hh"
 #include "G4PropagatorInField.hh"
 
+#include "G4Cons.hh"
+#include <cmath>
+
 #include "sensorContainer.h"
 
 #include <cstdlib>
+#include "Math/Vector3D.h"
 
-static G4double epsilon=0.0*mm;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -93,7 +96,7 @@ G4VPhysicalVolume* B4DetectorConstruction::Construct()
 {
 	//DefineGeometry(homogenous_ecal_only);
 	//DefineGeometry(hcal_only_irregular);
-	DefineGeometry(homogenous_no_tracker);
+	DefineGeometry(fullendcap);
 	// Define materials
 	DefineMaterials();
 
@@ -103,148 +106,36 @@ G4VPhysicalVolume* B4DetectorConstruction::Construct()
 
 void  B4DetectorConstruction::DefineGeometry(geometry geo){
 
-	if(geo == standard){
-		calorThickness=2000*mm;
+	if(geo == fullendcap){
+		calorThickness=2200*mm;
 
-	    layerGranularity.clear();
-	    layerSplitGranularity.clear();
-		nofEELayers = 10;
-		nofHB=15;
+        nofEELayers = 1;
+        Ncalowedges=4;
+        nofHB=1;
+        int etasegments=1;
+
+        Calo_start_eta=1.5;
+        Calo_end_eta=3.0;
+        Calo_start_z=200*cm;
+
 		for(int i=0;i<nofEELayers+nofHB;i++){
-			G4double granularity=8;
-			if(i>3)
-				granularity=6;
-			if(i>7){
-				granularity=4;
-			}
-			if(i>15)
-				granularity=2;
-			layerGranularity.push_back(granularity);
-			if(granularity<2)
-				layerSplitGranularity.push_back(0);
-			else
-				layerSplitGranularity.push_back(2*granularity);
+		    if(i<nofEELayers)
+		        layerThicknesses.push_back(26*cm / (float)nofEELayers);//CMS like about 30 X0
+		    else
+		        layerThicknesses.push_back((calorThickness - 26*cm) / (float)nofHB);
+
+		    layerGranularity.push_back(etasegments);
 		}
 
-		layerThicknessEE=15*mm;
+		layerThicknessEE=26*cm / (float)nofEELayers;
 		layerThicknessHB=(calorThickness-nofEELayers*layerThicknessEE)/(float)nofHB; //100*mm;
 
 	}
-	else if(geo == homogenous || geo == homogenous_ecal_only){
-		if (geo == homogenous)
-			calorThickness=2000*mm;
-		else
-			calorThickness=300*mm;
-
-	    layerGranularity.clear();
-	    layerSplitGranularity.clear();
-		nofEELayers = 10;
-		nofHB=20;
-		for(int i=0;i<nofEELayers+nofHB;i++){
-			G4double granularity=10;
-			if(i==27)
-				granularity=8;
-			if(i==28)
-				granularity=2;
-			if(i==29)
-				granularity=1;
-			layerGranularity.push_back(granularity);
-
-			layerSplitGranularity.push_back(-granularity/2);
-		}
-
-		layerThicknessEE=80*mm * calorThickness/2000*mm;
-		layerThicknessHB=(calorThickness-nofEELayers*layerThicknessEE)/(float)nofHB; //100*mm;
-
-	}
-	else if(geo == ecal_only){
-		calorThickness=200*mm;
-
-		layerGranularity.clear();
-		layerSplitGranularity.clear();
-		nofEELayers = 10;
-		nofHB=0;
-		for(int i=0;i<nofEELayers+nofHB;i++){
-			G4double granularity=10;
-
-			layerGranularity.push_back(granularity);
-
-			layerSplitGranularity.push_back(int(granularity/2));
-		}
-
-		layerThicknessEE=20*mm;
-		layerThicknessHB=(calorThickness-nofEELayers*layerThicknessEE)/(float)nofHB; //100*mm;
-
-	}
-	else if(geo == hcal_only_irregular || geo == ecal_only_irregular){
-
-		if(geo== hcal_only_irregular)
-			calorThickness=2000*mm;
-		else
-			calorThickness=250*mm;
-
-		layerGranularity.clear();
-		layerSplitGranularity.clear();
-		nofEELayers = 0;
-		nofHB=20;
-		for(int i=0;i<nofEELayers+nofHB;i++){
-			G4double granularity=1;
-			if(i==0)
-				granularity=8;
-			if(i==1)
-				granularity=12;
-			if(i>=2)
-				granularity=16;
-			if(i>=4)
-				granularity=12;
-			if(i>=8)
-				granularity=8;
-			if(i>=12)
-				granularity=4;
-			if(i>=14)
-				granularity=2;
-
-			G4double splitgranularity=granularity;
-
-			if(granularity==16)
-				splitgranularity=10;
-			if(granularity==12)
-				splitgranularity=8;
-
-
-			layerGranularity.push_back(granularity);
-			if(granularity<2)
-				layerSplitGranularity.push_back(0);
-			else
-				layerSplitGranularity.push_back(splitgranularity);
-		}
-
-		layerThicknessEE=15*mm;
-		layerThicknessHB=(calorThickness-nofEELayers*layerThicknessEE)/(float)nofHB; //100*mm;
-
-	}
-	else if(geo == homogenous_no_tracker){
-	    calorThickness=2000*mm;
-
-	    layerGranularity.clear();
-	    layerSplitGranularity.clear();
-	    nofEELayers = 1;
-	    nofHB=0;
-	    for(int i=0;i<nofEELayers+nofHB;i++){
-	        G4double granularity=16;
-	        layerGranularity.push_back(granularity);
-	        layerSplitGranularity.push_back(-granularity/2);
-	    }
-
-	    layerThicknessEE=26*8.903*mm ;//* calorThickness/2000*mm; //26 radiation lengths like CMS (23.2cm
-	    layerThicknessHB=(calorThickness-nofEELayers*layerThicknessEE)/(float)nofHB;  //the rest 1'768, about 8.7 nuclear int lengths
-
-	    if(nofHB<1)
-	        calorThickness=layerThicknessEE*(float)nofEELayers;
-	    noTrackLayers = 1;
-
-
-
+	else{
+	    G4ExceptionDescription msg;
+	            msg << "Geometry not supported in this branch";
+	            G4Exception("B4DetectorConstruction::DefineGeometry()",
+	                    "MyCode0001", FatalException, msg);
 	}
 }
 
@@ -257,301 +148,234 @@ B4DetectorConstruction::~B4DetectorConstruction()
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 
+G4double computeTheta(const G4double& eta )
+        { return 2. * atan( exp( -eta ) ); }
+
+double etaToR(const G4double& eta, const G4double& z){
+    G4double atoBP = M_PI/2. - computeTheta(eta);
+    return z * tan(atoBP);
+}
+G4Cons * createCons(
+        G4String name,
+        G4double start_eta,
+        G4double eta_width,
+        G4double start_z,
+        G4double z_length,
+        G4double start_phi,
+        G4double end_phi){
+
+
+    G4cout << "created Cons "<< name <<"with size (eta, deta, phi,endphi,z,dz): "
+            << start_eta <<", "<< eta_width <<", "
+            << start_phi << ", "<<end_phi<<", "
+            << start_z << ", "<< z_length  << G4endl;
+
+    G4cout << "(pRmin1,pRmax1) " << etaToR(start_eta+eta_width ,start_z) <<", " << etaToR(start_eta ,start_z)<< G4endl;
+    G4cout << "(pRmin2,pRmax2) " << etaToR(start_eta+eta_width ,start_z+z_length) <<", " << etaToR(start_eta ,start_z+z_length)<< G4endl;
+
+
+    return new G4Cons(
+            name,
+            etaToR(start_eta+eta_width ,start_z),
+            etaToR(start_eta ,start_z),
+            etaToR(start_eta+eta_width ,start_z+z_length),
+            etaToR(start_eta ,start_z+z_length),
+            z_length/2.,
+            start_phi,
+            end_phi);
+}
 /*
  * creates a single sandwich tile in a layer
  */
-G4VPhysicalVolume* B4DetectorConstruction::createSandwich(G4LogicalVolume* layerLV,
-		G4double dx,
-		G4double dy,
-		G4double dz,
-		G4ThreeVector position,
-		G4String name,
-		G4double absorberfraction,
-		G4VPhysicalVolume*& absorber,
-		G4Material* material,
-		G4double rotation){
-
-	auto absdz=absorberfraction*dz;
-	auto gapdz=(1-absorberfraction)*dz;
-
-	//auto layerThickness = absoThickness + gapThickness;
-
-	auto sandwichS   = new G4Box("Sandwich_"+name,           // its name
-			dx/2-epsilon, dy/2-epsilon, dz/2-epsilon); // its size
-
-	auto sandwichLV  = new G4LogicalVolume(
-			sandwichS,           // its solid
-			defaultMaterial,  // its material
-			"Sandwich_"+name);         // its name
-
-	G4RotationMatrix * rot =0;
-	if(rotation){
-	    //rotation part:
-	    rot = new G4RotationMatrix();
-	    rot->set( G4ThreeVector(1,0,0),  rotation );//delta in 2pi?
-	}
-
-	//
-	// Absorber, technically this is empty
-	//
-	if(absorberfraction>0){
-	    auto absorberS
-	    = new G4Box("Abso_"+name,            // its name
-	            dx/2-2*epsilon, dy/2-2*epsilon, absdz/2-2*epsilon); // its size
-
-	    auto absorberLV
-	    = new G4LogicalVolume(
-	            absorberS,        // its solid
-	            absorberMaterial, // its material
-	            "Abso_"+name);          // its name
-
-	    absorber
-	    = new G4PVPlacement(
-	            rot,                //  rotation
-	            G4ThreeVector(0., 0., -absdz/2), // its position
-	            absorberLV,       // its logical volume
-	            "Abso_"+name,           // its name
-	            sandwichLV,          // its mother  volume
-	            false,            // no boolean operation
-	            0,                // copy number
-	            fCheckOverlaps);  // checking overlaps
-
-	}
-
-	G4Material* gapmaterial=material;
-	if(!gapmaterial)
-	    gapmaterial=gapMaterial;
-	//
-	// Gap
-	//
-	auto gapS
-	= new G4Box("Gap_"+name,             // its name
-			dx/2-2*epsilon, dy/2-2*epsilon, gapdz/2-2*epsilon); // its size
-
-	auto gapLV
-	= new G4LogicalVolume(
-			gapS,             // its solid
-			gapmaterial,      // its material
-			"Gap_"+name);           // its name
+G4VPhysicalVolume* B4DetectorConstruction::createCell(
+        G4LogicalVolume* layerLV,
+		G4double start_eta,
+        G4double eta_width,
+		G4double start_z,
+        G4double z_length,
+        G4double starting_angle_rad,
+        G4double width_rad,
+        G4int layernum,
+        G4int cellnum){
 
 
-    G4double maxStep = dz/20.;
+    G4double  end_phi = width_rad+starting_angle_rad;
+    while(end_phi> 2*M_PI){
+        end_phi -= 2*M_PI;
+    }
+    while(end_phi < 0){
+        end_phi += 2*M_PI;
+    }
+
+    //create the volume
+
+    G4String name = createString(layernum)+"_"+createString(cellnum);
+
+	auto cellS   = createCons("Cell_"+name,
+	        start_eta,
+	        eta_width,
+	        start_z,
+	        z_length,
+	        starting_angle_rad,
+	        end_phi);
+
+
+	auto cellLV  = new G4LogicalVolume(
+	        cellS,           // its solid
+			gapMaterial,  // its material
+			"Cell_LV_"+name);         // its name
+
+
+
+    G4double maxStep = z_length/200.;
     G4double maxTime = 2.*s;
     G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
-    gapLV->SetUserLimits(stepLimit);
+    cellLV->SetUserLimits(stepLimit);
 
 
-	auto activeMaterial
-	= new G4PVPlacement(
-	        rot,                // no rotation
-			G4ThreeVector(0., 0., gapdz/2), // its position
-			gapLV,            // its logical volume
-			"Gap_"+name,            // its name
-			sandwichLV,          // its mother  volume
-			false,            // no boolean operation
-			0,                // copy number
-			fCheckOverlaps);  // checking overlaps
+    auto activeMaterial
+    = new G4PVPlacement(
+            0,                // no rotation
+            G4ThreeVector(0., 0., 0.), // its position, relative to layerLV
+            cellLV,            // its logical volume
+            "Cell_x_"+name,            // its name
+            layerLV,          // its mother  volume
+            false,            // no boolean operation
+            0,                // copy number
+            true);//fCheckOverlaps);  // checking overlaps
 
-	//place the sandwich
+    ROOT::Math::DisplacementVector3D<ROOT::Math::CylindricalEta3D<double> > RhoEtaPhiVector(etaToR(start_eta+eta_width/2. ,start_z+z_length/2.),
+            start_eta+eta_width/2., starting_angle_rad+width_rad/2.);
 
-	//auto sandwichPV =
-			new G4PVPlacement(
-			        rot,                // no rotation
-				position, // its position
-				sandwichLV,       // its logical volume
-				"Sandwich_"+name,           // its name
-				layerLV,          // its mother  volume
-				false,            // no boolean operation
-				0,                // copy number
-				fCheckOverlaps);  // checking overlaps
+    activecells_.push_back(
+            sensorContainer(
+                    activeMaterial,
+                    start_eta+eta_width/2.,//sensor size   // G4double dimxy
+                    z_length,                              // G4double dimz,
+                    starting_angle_rad+width_rad/2.,       // G4double area,
+                    RhoEtaPhiVector.x(),                   // G4double posx,
+                    RhoEtaPhiVector.y(),                   // G4double posy,
+                    start_z+z_length/2.,                   // G4double posz,
+                    layernum,
+                    0
+            )
+    );
 
-	return activeMaterial;
-
+    return activeMaterial;
 
 }
 
-G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
-		G4double thickness,
-		G4int granularity, G4double absfraction,G4ThreeVector position,
-		G4String name, int layernumber, G4double calibration, G4int    nsmallsensorsrow,
-		G4Material* material,
-		G4double sizexy){
+G4VPhysicalVolume* B4DetectorConstruction::createLayer(
+        G4LogicalVolume * caloLV,
+        G4double start_eta,
+        G4double end_eta,
+        G4int n_cells_eta,
+        G4int n_cells_phi,
+        G4double start_z,
+        G4double z_length,
+        G4ThreeVector position,
+		G4String name, int layernumber){
 
-    if(!sizexy)
-        sizexy=calorSizeXY;
 
-    position += G4ThreeVector(0,0,thickness/2.);
+    //create the volume
 
-    auto layerS   = new G4Box("Layer_"+name,           // its name
-            sizexy/2, sizexy/2, thickness/2); // its size
+    auto layerS   = createCons("Layer_"+name,
+            start_eta,
+            end_eta-start_eta,
+            start_z,
+            z_length,
+            0,
+            2*M_PI);
+
 
     auto layerLV  = new G4LogicalVolume(
             layerS,           // its solid
             defaultMaterial,  // its material
 			"Layer_"+name);         // its name
 
-    //if(layernumber<0){
-
-    //needs to be put into any LV
-        G4double maxStep = thickness/20.;
-        G4double maxTime = 2.*s;
-        G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
-        layerLV->SetUserLimits(stepLimit);
-
-    //}
-	auto layerPV = new G4PVPlacement(
-			0,                // no rotation
-			position, // its position
-			layerLV,       // its logical volume
-			"Layer_"+name,           // its name
-			caloLV,          // its mother  volume
-			false,            // no boolean operation
-			0,                // copy number
-			fCheckOverlaps);  // checking overlaps
+    G4double maxStep = z_length/200.;
+    G4double maxTime = 2.*s;
+    G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
+    layerLV->SetUserLimits(stepLimit);
 
 
-	G4double coarsedivider=(G4double)granularity;
-	G4double largesensordxy=sizexy/coarsedivider;
-	G4double smallsensordxy=sizexy/2./(double)nsmallsensorsrow;
+	double cell_etawidth = (end_eta-start_eta) / (double)n_cells_eta;
+	double cell_phiwidth = 2*M_PI/(double)n_cells_phi;
 
-			//largesensordxy/4;
-	if(nsmallsensorsrow<0){
-    	nsmallsensorsrow=granularity/2;
-    	smallsensordxy=largesensordxy;
+	//create cells
+	for(int ieta=0; ieta<n_cells_eta; ieta++){
+	    double startEta = Calo_start_eta + cell_etawidth* (double)ieta;
+
+	    for(int iphi=0;iphi<n_cells_phi;iphi++){
+	        double starting_angle_rad = cell_phiwidth * (double)iphi;
+
+	        createCell(layerLV,
+	                startEta,
+	                cell_etawidth,
+	                start_z,
+	                z_length,
+	                starting_angle_rad,
+	                cell_phiwidth,
+	                layernumber,
+	                (ieta+1)*(iphi+1)+iphi);
+
+	    }
 	}
-	if(granularity<2)
-		nsmallsensorsrow=0;
 
 
-	//divide into 4 areas:
-	// LG  HG
-	// LG  LG
-	//
-	// LG: low granularity
-	// HG: high granularity
+	auto layerPV = new G4PVPlacement(
+	            0,                // no rotation
+	            position, // its position
+	            layerLV,       // its logical volume
+	            "Layer_"+name,           // its name
+	            caloLV,          // its mother  volume
+	            false,            // no boolean operation
+	            0,                // copy number
+	            fCheckOverlaps);  // checking overlaps
 
 
-	auto placeSensors = [] (
-			G4ThreeVector startcorner,
-			bool small,
-			G4double sensorsize,
-			G4double Thickness,
-			int gran,
-			G4ThreeVector pos,
-			G4String lname,
-			std::vector<sensorContainer >* acells,
-			G4LogicalVolume* layerlogV,
-			B4DetectorConstruction* drec,
-			G4ThreeVector patentpos,
-			G4double absfractio, int laynum, G4double calib, G4Material* sw_material) {
-		for(int xi=0;xi<gran;xi++){
-			G4double posx=startcorner.x()+sensorsize/2+sensorsize*(G4double)xi;
-			for(int yi=0;yi<gran;yi++){
-				G4double posy=startcorner.y()+sensorsize/2+sensorsize*(G4double)yi;
-				if(!small && posy>pos.y() && posx > pos.x()){
-					continue; //here are the small sensors
-				}
-				auto sandwichposition=G4ThreeVector(posx,posy,pos.z());
-
-
-				G4VPhysicalVolume * absorber=0;
-				auto activesensor=drec->createSandwich(layerlogV,sensorsize,sensorsize,
-						Thickness,sandwichposition,
-						lname+"_sensor_"+createString(xi)+"_"+createString(yi),
-						absfractio,absorber,sw_material);
-
-				sensorContainer sensordesc(activesensor,
-						sensorsize,Thickness,sensorsize*sensorsize,
-						patentpos.x()+posx,
-						patentpos.y()+posy,
-						patentpos.z(),laynum,absorber);
-				G4cout << "created sensor with ID "<< sensordesc.getGlobalDetID() <<" sizexy "<< sensorsize <<"mm at "<< sandwichposition << G4endl;
-				sensordesc.setEnergyscalefactor(calib);
-				acells->push_back(sensordesc);
-			}
-
-		}
-	};
-
-	G4ThreeVector lowerleftcorner=G4ThreeVector(
-			0-sizexy/2,
-			0-sizexy/2,
-			0);
-
-
-
-
-	placeSensors(lowerleftcorner, true,largesensordxy,thickness,
-	        granularity,G4ThreeVector(0,0,0),name,&activecells_,layerLV,this,
-	        position,absfraction,layernumber,calibration,material);
-
-	G4cout << "layer position="<<position <<G4endl;
+	G4cout << "layer "<<name<<" position="<<position << " " << layerPV->GetTranslation () <<G4endl;
 
 	return layerPV;
 
 }
 
-void B4DetectorConstruction::createCalo(G4LogicalVolume * caloLV,G4ThreeVector position,G4String name){
+void B4DetectorConstruction::createCalo(G4LogicalVolume * worldLV,
+        G4ThreeVector position,G4String name){
 
-	G4double absorberFractionEE=0;//1e-5;
-	G4double absorberFractionHB=absorberFractionEE;
-	G4double calibrationEE=1;
-	G4double calibrationHB=1;
 
 //define the geometries
+    /*
+     *
+    G4double layerThicknessEE,layerThicknessHB;
+    std::vector<G4double> layerThicknesses;
+    G4int Ncalowedges;
+    std::vector<G4int> layerGranularity;
+    std::vector<G4int> layerSplitGranularity;
+    layerGranularity -> neta
+     *
+     */
 
 
-	G4double lastzpos=-layerThicknessEE;
+	G4double lastzpos=0;//;
 	for(int i=0;i<nofEELayers+nofHB;i++){
-		int granularity=layerGranularity.at(i);
-		int splitgranularity = layerSplitGranularity.at(i);
-		G4double absfraction=absorberFractionEE;
-		G4double thickness=layerThicknessEE;
-		G4double calibration=calibrationEE;
 
-		if(i>=nofEELayers){
-			absfraction=absorberFractionHB;
-			thickness=layerThicknessHB;
-			calibration=calibrationHB;
-		}
-		G4ThreeVector createatposition=G4ThreeVector(0,0,lastzpos+thickness)+position;
-		createLayer(
-				caloLV,thickness,
-				granularity,
-				absfraction,
-				createatposition,
-				name+"layer"+createString(i),i,1,splitgranularity);//calibration);
-		G4cout << "created layer "<<  i<<" at "<< createatposition << G4endl;
+	    auto thickness = layerThicknesses.at(i);
+	    auto newheels = layerGranularity.at(i);
+
+		G4ThreeVector createatposition=G4ThreeVector(0,0,lastzpos)+position;
+
+		createLayer(worldLV,
+		        Calo_start_eta,
+		        Calo_end_eta,
+		        newheels, //n_cells_eta
+		        Ncalowedges, // n_cells_phi,
+		        lastzpos, // start_z,
+		        thickness, // z_length,
+		        G4ThreeVector(0,0,lastzpos),
+		        "Layer_"+createString(i),  i);
+
 		lastzpos+=thickness;
-	}
-
-	G4cout << "Calo: created " << activecells_.size() << " sensors"<<std::endl;
-
-	lastzpos=((float)noTrackLayers)*(-5*cm);
-	float originpoint = ((float)noTrackLayers+1)*(-5*cm);
-
-	for(int i=0;i<noTrackLayers;i++){
-
-	    int granularity=32;
-	    int splitgranularity = -1;
-	    G4double absfraction=0;
-	    G4double thickness=0.3*mm;
-	    G4double calibration=1;
-	    G4double layersizexy=calorSizeXY * (1. - (lastzpos)/originpoint);
-	    G4cout << "layersizexy " << layersizexy << G4endl;
-
-	    G4ThreeVector createatposition=G4ThreeVector(0,0,lastzpos+thickness)+position;
-
-	    createLayer(
-	            caloLV,thickness,
-	            granularity,
-	            absfraction,
-	            createatposition,
-	            name+"tracker"+createString(i),-100+i,1,splitgranularity,
-	            trackerMaterial, layersizexy);//calibration);
-	    G4cout << "created tracker "<<  i<<" at "<< createatposition << G4endl;
-	    lastzpos+=5*cm;
-
 	}
 
 
@@ -604,7 +428,7 @@ void B4DetectorConstruction::DefineMaterials()
 G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 {
 	// Geometry parameters
-	calorSizeXY  = 35.2*cm;
+	//calorSizeXY  = 200*cm;
 
 
 
@@ -612,8 +436,8 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 
 
     //auto calorThickness = nofEELayers * layerThicknessEE + nofHB*layerThicknessHB;
-	auto worldSizeXY = 1.2 * calorSizeXY;
-	G4double worldSizeZ  = 4 * m;
+    G4double worldSizeXY = 2. * m;
+	G4double worldSizeZ  = 8. * m;
 
 
 
@@ -651,7 +475,7 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 	//
 	// Calorimeter
 	//
-	createCalo(worldLV,G4ThreeVector(0,0,0),"");
+	createCalo(worldLV,G4ThreeVector(0,0,Calo_start_z),"");
 
 
 
@@ -660,6 +484,8 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 	//
 	// Visualization attributes
 	//
+
+
 	worldLV->SetVisAttributes (G4VisAttributes::GetInvisible());
 
 	auto simpleBoxVisAtt= new G4VisAttributes(G4Colour(1.0,.0,.0));
@@ -681,7 +507,7 @@ void B4DetectorConstruction::ConstructSDandField()
 	// Create global magnetic field messenger.
 	// Uniform magnetic field is then created automatically if
 	// the field value is not zero.
-	G4ThreeVector fieldValue(100,0,0);
+	G4ThreeVector fieldValue;//(100,0,0);
 	fMagFieldMessenger = new G4GlobalMagFieldMessenger(fieldValue);
 	fMagFieldMessenger->SetVerboseLevel(2);
 

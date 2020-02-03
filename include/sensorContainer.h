@@ -15,7 +15,8 @@ class sensorContainer{
 public:
 
 	sensorContainer(G4VPhysicalVolume * vol,
-	G4double dimxy,G4double dimz,
+	G4double dimxy,
+	G4double dimz,
 	G4double area,
 	G4double posx,
 	G4double posy,

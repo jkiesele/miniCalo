@@ -86,8 +86,11 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 
 	if(idx>=activesensors->size())return;//not active volume
 
+	G4cout << activesensors->at(idx).getVol()->GetName() << G4endl;
 
 	auto energy=step->GetTotalEnergyDeposit();
+	if(energy>0)
+	    G4cout << "hit " << energy << G4endl;
 	if(idx<rechit_energy_.size()){
 	    rechit_energy_.at(idx)+=energy/1000.; //GeV
 	    totalen_+=energy/1000.; //GeV
@@ -131,13 +134,13 @@ void B4aEventAction::BeginOfEventAction(const G4Event* /*event*/)
   rechit_vxy_.resize(activesensors->size(),0);
   rechit_detid_.resize(activesensors->size(),0);
   for(size_t i=0;i<activesensors->size();i++){
-      rechit_x_.at     (i)=activesensors->at(i).getPosx();
-      rechit_y_.at     (i)=activesensors->at(i).getPosy();
-      rechit_z_.at     (i)=activesensors->at(i).getPosz();
+      rechit_x_.at     (i)=activesensors->at(i).getPosx();//eta
+      rechit_y_.at     (i)=activesensors->at(i).getPosy();//phi
+      rechit_z_.at     (i)=activesensors->at(i).getPosz();//z
       rechit_layer_.at (i)=activesensors->at(i).getLayer();
-      rechit_varea_.at (i)=activesensors->at(i).getArea();
-      rechit_vz_.at    (i)=activesensors->at(i).getDimz();
-      rechit_vxy_.at   (i)=activesensors->at(i).getDimxy();
+      rechit_varea_.at (i)=activesensors->at(i).getArea();//0
+      rechit_vz_.at    (i)=activesensors->at(i).getDimz();//lengthz
+      rechit_vxy_.at   (i)=activesensors->at(i).getDimxy();//0
       rechit_detid_.at (i)=activesensors->at(i).getGlobalDetID();
   }
 
@@ -160,23 +163,6 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
   //
 
     G4cout << "nsteps_ "<<nsteps_ <<G4endl;
-    bool isgamma = B4PrimaryGeneratorAction::globalgen->isParticle(B4PrimaryGeneratorAction::gamma);
-    double trackmom = getTrackMomentum(B4PrimaryGeneratorAction::globalgen->getEnergy(),isgamma);
-    if(trackmom>0){
-        int ti_he=-1;
-        double highest_e=0;
-        for(size_t ti=0;ti<rechit_layer_.size();ti++){
-            if(rechit_layer_.at (ti)<-0.1 && rechit_energy_.at (ti)>0){
-                if(highest_e<rechit_energy_.at (ti)){
-                    highest_e=rechit_energy_.at (ti);
-                    ti_he=ti;
-                }
-            }
-        }
-        if(ti_he>=0){
-            rechit_energy_.at (ti_he)=trackmom;
-        }
-    }
 
   // get analysis manager
   auto analysisManager = G4AnalysisManager::Instance();
@@ -192,7 +178,7 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
   analysisManager->FillNtupleDColumn(i,B4PrimaryGeneratorAction::globalgen->getEnergy());
   analysisManager->FillNtupleDColumn(i+1,B4PrimaryGeneratorAction::globalgen->getX());
   analysisManager->FillNtupleDColumn(i+2,B4PrimaryGeneratorAction::globalgen->getY());
-  analysisManager->FillNtupleDColumn(i+3,trackmom);
+  analysisManager->FillNtupleDColumn(i+3,0); //maybe this could be displacement?
   analysisManager->FillNtupleDColumn(i+4,totalen_);
 
 

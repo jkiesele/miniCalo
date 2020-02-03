@@ -72,6 +72,7 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
 		hcal_only_irregular,
 		ecal_only_irregular,
 		homogenous_no_tracker,
+		fullendcap
     };
     virtual G4VPhysicalVolume* Construct();
     virtual void ConstructSDandField();
@@ -90,25 +91,29 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
     G4VPhysicalVolume* DefineVolumes();
 
 
-    //returns the active material onlu
-    G4VPhysicalVolume* createSandwich(G4LogicalVolume* layerLV,
-    		G4double dx,
-    		G4double dy,
-			G4double dz,
-			G4ThreeVector position,
-			G4String name, G4double absorberfraction,
-			G4VPhysicalVolume*& absorber,
-			G4Material* material=0,
-			G4double rotation=0);
+    G4VPhysicalVolume* createCell(
+            G4LogicalVolume* layerLV,
+            G4double start_eta,
+            G4double eta_width,
+            G4double start_z,
+            G4double z_length,
+            G4double starting_angle_rad,
+            G4double width_rad,
+            G4int layernum,
+            G4int cellnum);
 
-    G4VPhysicalVolume* createLayer(G4LogicalVolume * caloLV,
-    		G4double thickness,G4int granularity,
-    		G4double absfraction,G4ThreeVector position,
-    		G4String name, int number, G4double calibration, G4int    nsmallsensorsrow=-1,
-    		G4Material* material=0,
-            G4double sizexy=0);
+    G4VPhysicalVolume* createLayer(
+            G4LogicalVolume * caloLV,
+            G4double start_eta,
+            G4double end_eta,
+            G4int n_cells_eta,
+            G4int n_cells_phi,
+            G4double start_z,
+            G4double z_length,
+            G4ThreeVector position,
+            G4String name, int layernumber);
   
-    void createCalo(G4LogicalVolume * caloLV,G4ThreeVector position,G4String name);
+    void createCalo(G4LogicalVolume * worldLV,G4ThreeVector position,G4String name);
     // data members
     //
     static G4ThreadLocal G4GlobalMagFieldMessenger*  fMagFieldMessenger; 
@@ -119,6 +124,11 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
     G4bool  fCheckOverlaps; // option to activate checking of volumes overlaps
 
     G4double layerThicknessEE,layerThicknessHB;
+    G4double Calo_start_eta;
+    G4double Calo_end_eta;
+    G4double Calo_start_z;
+    std::vector<G4double> layerThicknesses;
+    G4int Ncalowedges;
     std::vector<G4int> layerGranularity;
     std::vector<G4int> layerSplitGranularity;
     G4double calorSizeXY;

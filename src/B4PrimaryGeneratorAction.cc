@@ -198,31 +198,20 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
   //particleid_=pioncharged;
 
- energy_=10001;
- while(energy_>energy_max){//somehow sometimes the random gen shoots >1??
-     G4double rand =  G4INCL::Random::shoot();
-     energy_=(energy_max)*rand+energy_min;
- }
-
-  //energy_=20;
-
-  //G4cout << "shooting particle at " ;
-  double xpos=50;
-  while(fabs(xpos)>7.5){
-      xpos=15*G4INCL::Random::shoot() - 7.5;
-      //G4cout << xpos <<  G4endl;
-  }
-  double ypos=50;
-  while(fabs(ypos)>=7.5){
-      ypos=15*G4INCL::Random::shoot() -7.5;
+  energy_=10001;
+  while(energy_>energy_max){//somehow sometimes the random gen shoots >1??
+      G4double rand =  G4INCL::Random::shoot();
+      energy_=(energy_max)*rand+energy_min;
   }
 
-  G4ThreeVector position(xpos*cm, ypos*cm, zposition);
-  xorig_=xpos*cm;
-  yorig_=ypos*cm;
 
 
-  G4ThreeVector direction(0.,0.,1.);
+  G4ThreeVector position(0,0,300*cm);
+  xorig_=0;
+  yorig_=0;
+
+
+  G4ThreeVector direction(0.2*G4INCL::Random::shoot(),0.2*G4INCL::Random::shoot(),G4INCL::Random::shoot());
 
 
   fParticleGun->SetParticleMomentumDirection(direction);

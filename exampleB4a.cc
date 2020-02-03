@@ -77,6 +77,7 @@ namespace {
 
 void enable_physlimits(void)
 {
+    return;
   // cf. Geant 4 HyperNews, Forum "Physics List", Message 129
   // http://geant4-hn.slac.stanford.edu:5090/HyperNews/public/get/phys-list/129.html
 
@@ -142,6 +143,10 @@ int main(int argc,char** argv)
   long rseed=0;
   // Detect interactive mode (if no macro provided) and define UI session
   //
+  G4UIExecutive* ui = 0;
+    if ( ! macro.size() ) {
+      ui = new G4UIExecutive(argc, argv, session);
+    }
 
 
   // Choose the Random engine
@@ -177,10 +182,12 @@ int main(int argc,char** argv)
   enable_physlimits();
   // Initialize visualization
   //
-//  auto visManager = new G4VisExecutive;
+ // auto visManager = new G4VisExecutive;
   // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
-  // G4VisManager* visManager = new G4VisExecutive("Quiet");
-//  visManager->Initialize();
+ // G4VisManager* visManager = new G4VisExecutive("Quiet");
+ // visManager->Initialize();
+  //auto visManager = new G4VisExecutive();
+  //    visManager->Initialize();
 
   // Get the pointer to the User Interface manager
   auto UImanager = G4UImanager::GetUIpointer();
@@ -195,12 +202,12 @@ int main(int argc,char** argv)
   }
   else  {  
     // interactive mode : define UI session
-  //  UImanager->ApplyCommand("/control/execute init_vis.mac");
-  //  if (ui->IsGUI()) {
-   //   UImanager->ApplyCommand("/control/execute gui.mac");
-   // }
-   // ui->SessionStart();
-   // delete ui;
+    UImanager->ApplyCommand("/control/execute init_vis.mac");
+    if (ui->IsGUI()) {
+      UImanager->ApplyCommand("/control/execute gui.mac");
+    }
+    ui->SessionStart();
+    delete ui;
   }
 
   // Job termination
