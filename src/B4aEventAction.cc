@@ -163,12 +163,18 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
     bool isgamma = B4PrimaryGeneratorAction::globalgen->isParticle(B4PrimaryGeneratorAction::gamma);
     double trackmom = getTrackMomentum(B4PrimaryGeneratorAction::globalgen->getEnergy(),isgamma);
     if(trackmom>0){
-        for(size_t i=0;i<rechit_layer_.size();i++){
-            if(rechit_layer_.at (i)<-0.1){//give track points track momentum
-                if(rechit_energy_.at (i)>0){
-                    rechit_energy_.at (i)=trackmom;
+        int ti_he=-1;
+        double highest_e=0;
+        for(size_t ti=0;ti<rechit_layer_.size();ti++){
+            if(rechit_layer_.at (ti)<-0.1 && rechit_energy_.at (ti)>0){
+                if(highest_e<rechit_energy_.at (ti)){
+                    highest_e=rechit_energy_.at (ti);
+                    ti_he=ti;
                 }
             }
+        }
+        if(ti_he>=0){
+            rechit_energy_.at (ti_he)=trackmom;
         }
     }
 

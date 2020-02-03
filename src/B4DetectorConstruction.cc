@@ -52,6 +52,9 @@
 
 #include "G4PhysicalConstants.hh"
 #include "G4SystemOfUnits.hh"
+#include "G4FieldManager.hh"
+#include "G4TransportationManager.hh"
+#include "G4PropagatorInField.hh"
 
 #include "sensorContainer.h"
 
@@ -331,6 +334,13 @@ G4VPhysicalVolume* B4DetectorConstruction::createSandwich(G4LogicalVolume* layer
 			gapmaterial,      // its material
 			"Gap_"+name);           // its name
 
+
+    G4double maxStep = dz/20.;
+    G4double maxTime = 2.*s;
+    G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
+    gapLV->SetUserLimits(stepLimit);
+
+
 	auto activeMaterial
 	= new G4PVPlacement(
 	        rot,                // no rotation
@@ -380,11 +390,15 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
             defaultMaterial,  // its material
 			"Layer_"+name);         // its name
 
-    if(layernumber<0){
+    //if(layernumber<0){
+
+    //needs to be put into any LV
         G4double maxStep = thickness/20.;
-        auto fStepLimit = new G4UserLimits(maxStep);
-        layerLV->SetUserLimits(fStepLimit);
-    }
+        G4double maxTime = 2.*s;
+        G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
+        layerLV->SetUserLimits(stepLimit);
+
+    //}
 	auto layerPV = new G4PVPlacement(
 			0,                // no rotation
 			position, // its position
@@ -617,9 +631,11 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 			"World");         // its name
 
 
-    G4double maxStep = worldSizeXY/20.;
-    auto fStepLimit = new G4UserLimits(maxStep);
-    worldLV->SetUserLimits(fStepLimit);
+	G4double maxStep = 1.0*mm;
+	G4double maxTime = 20.*s;
+	G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
+	worldLV->SetUserLimits(stepLimit);
+
 
 	auto worldPV
 	= new G4PVPlacement(
@@ -665,12 +681,18 @@ void B4DetectorConstruction::ConstructSDandField()
 	// Create global magnetic field messenger.
 	// Uniform magnetic field is then created automatically if
 	// the field value is not zero.
-	G4ThreeVector fieldValue;//(0.1,0,0);
+	G4ThreeVector fieldValue(100,0,0);
 	fMagFieldMessenger = new G4GlobalMagFieldMessenger(fieldValue);
 	fMagFieldMessenger->SetVerboseLevel(2);
 
 	// Register the field messenger for deleting
 	G4AutoDelete::Register(fMagFieldMessenger);
+
+
+	auto* fieldprop = G4TransportationManager::GetTransportationManager()->GetPropagatorInField();
+	fieldprop->SetMaxLoopCount(10) ;
+
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
