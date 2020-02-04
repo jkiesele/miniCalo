@@ -71,16 +71,22 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 
 	nsteps_++;
 
+	G4StepPoint* preStepPoint = step->GetPreStepPoint();
+	G4TouchableHistory* theTouchable =
+	(G4TouchableHistory*)(preStepPoint->GetTouchable());
+	G4int copyNo = theTouchable->GetVolume()->GetCopyNo();
+//	G4int motherCopyNo
+//	= theTouchable->GetVolume(1)->GetCopyNo();
+
 	size_t idx=activesensors->size();
 	for(size_t i=0;i<activesensors->size();i++){
 		if(volume == activesensors->at(i).getVol()){
-			idx=i;
-			break;
-		}
-		if(volume == activesensors->at(i).getAbsorberVol()){
-			idx=i;
-			issensor=false;
-			break;
+		    if(copyNo == activesensors->at(i).getCopyNo()){
+
+		        idx=i;
+		        break;
+
+		    }
 		}
 	}
 
@@ -90,7 +96,6 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 	auto energy=step->GetTotalEnergyDeposit();
 	if(idx<rechit_energy_.size()){
 	    rechit_energy_.at(idx)+=energy/1000.; //GeV
-	    totalen_+=energy/1000.; //GeV
 	}
 
 

@@ -91,14 +91,13 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
     G4VPhysicalVolume* DefineVolumes();
 
 
-    G4VPhysicalVolume* createCell(
+    G4VPhysicalVolume* createCellWheel(
             G4LogicalVolume* layerLV,
             G4double start_eta,
             G4double eta_width,
             G4double start_z,
             G4double z_length,
-            G4double starting_angle_rad,
-            G4double width_rad,
+            G4int nphi,
             G4int layernum,
             G4int cellnum);
 

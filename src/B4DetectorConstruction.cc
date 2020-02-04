@@ -186,25 +186,18 @@ G4Cons * createCons(
 /*
  * creates a single sandwich tile in a layer
  */
-G4VPhysicalVolume* B4DetectorConstruction::createCell(
+G4VPhysicalVolume* B4DetectorConstruction::createCellWheel(
         G4LogicalVolume* layerLV,
 		G4double start_eta,
         G4double eta_width,
 		G4double start_z,
         G4double z_length,
-        G4double starting_angle_rad,
-        G4double width_rad,
+        G4int nphi,
         G4int layernum,
         G4int cellnum){
 
 
-    G4double  end_phi = width_rad+starting_angle_rad;
-    while(end_phi> 2*M_PI){
-        end_phi -= 2*M_PI;
-    }
-    while(end_phi < 0){
-        end_phi += 2*M_PI;
-    }
+
 
     //create the volume
 
@@ -215,8 +208,8 @@ G4VPhysicalVolume* B4DetectorConstruction::createCell(
 	        eta_width,
 	        start_z,
 	        z_length,
-	        starting_angle_rad,
-	        end_phi);
+	        0,
+	        2*M_PI/(double)nphi);
 
 
 	auto cellLV  = new G4LogicalVolume(
@@ -232,34 +225,48 @@ G4VPhysicalVolume* B4DetectorConstruction::createCell(
     cellLV->SetUserLimits(stepLimit);
 
 
-    auto activeMaterial
-    = new G4PVPlacement(
-            0,                // no rotation
-            G4ThreeVector(0., 0., 0.), // its position, relative to layerLV
-            cellLV,            // its logical volume
-            "Cell_x_"+name,            // its name
-            layerLV,          // its mother  volume
-            false,            // no boolean operation
-            0,                // copy number
-            fCheckOverlaps);//fCheckOverlaps);  // checking overlaps
+    G4VPhysicalVolume* activeMaterial
+        = new G4PVReplica("Cell_rep_"+name, cellLV,
+                layerLV, kPhi, nphi, 2.*M_PI/(double)nphi);
 
+
+    G4int maxcopies = activeMaterial->GetMultiplicity();
+    //activeMaterial->GetCopyNo()
+   // auto activeMaterial
+   // = new G4PVPlacement(
+   //         0,                // no rotation
+   //         G4ThreeVector(0., 0., 0.), // its position, relative to layerLV
+   //         cellLV,            // its logical volume
+   //         "Cell_x_"+name,            // its name
+   //         layerLV,          // its mother  volume
+   //         false,            // no boolean operation
+   //         0,                // copy number
+   //         fCheckOverlaps);//fCheckOverlaps);  // checking overlaps
+   //
    // ROOT::Math::DisplacementVector3D<ROOT::Math::CylindricalEta3D<double> > RhoEtaPhiVector(etaToR(start_eta+eta_width/2. ,start_z+z_length/2.),
     //        start_eta+eta_width/2., starting_angle_rad+width_rad/2.);
 
-    activecells_.push_back(
-            sensorContainer(
-                    activeMaterial,
-                    start_eta+eta_width/2.,//sensor size   // G4double dimxy
-                    z_length,                              // G4double dimz,
-                    starting_angle_rad+width_rad/2.,       // G4double area,
-                    0,                   // G4double posx,
-                    0,                   // G4double posy,
-                    start_z+z_length/2.,                   // G4double posz,
-                    layernum,
-                    0
-            )
-    );
+    double width_rad = 2*M_PI/(double)nphi;
+    for(G4int i =0;i<maxcopies;i++){
+        double phi=width_rad/2. + 2*M_PI/(double)nphi*(double)i;
 
+        double x = cos(phi)*etaToR(start_eta+eta_width/2. ,start_z+z_length/2.);
+        double y = sin(phi)*etaToR(start_eta+eta_width/2. ,start_z+z_length/2.);
+
+        activecells_.push_back(
+                sensorContainer(
+                        activeMaterial,
+                        start_eta+eta_width/2.,//sensor size   // G4double dimxy
+                        z_length,                              // G4double dimz,
+                        0,       // G4double area,
+                        x,                   // G4double posx,
+                        y,                   // G4double posy,
+                        start_z+z_length/2.,                   // G4double posz,
+                        layernum,
+                        i //copyno
+                )
+        );
+    }
     return activeMaterial;
 
 }
@@ -292,6 +299,17 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(
             defaultMaterial,  // its material
 			"Layer_"+name);         // its name
 
+
+    auto layerPV = new G4PVPlacement(
+                0,                // no rotation
+                position+G4ThreeVector(0,0,z_length/2.), // its position
+                layerLV,       // its logical volume
+                "Layer_"+name,           // its name
+                caloLV,          // its mother  volume
+                false,            // no boolean operation
+                0,                // copy number
+                fCheckOverlaps);  // checking overlaps
+
     G4double maxStep = z_length/2.;
     G4double maxTime = 2.*s;
     G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
@@ -306,32 +324,43 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(
 	for(int ieta=0; ieta<n_cells_eta; ieta++){
 	    double startEta = Calo_start_eta + cell_etawidth* (double)ieta;
 
-	    for(int iphi=0;iphi<n_cells_phi;iphi++){
-	        double starting_angle_rad = cell_phiwidth * (double)iphi;
+	    auto ringSvol = createCons("Ring_"+createString(ieta) +"_"+name,
+	            startEta,
+	            cell_etawidth,
+	            start_z,
+	            z_length,
+	            0,
+	            2*M_PI);
+	    auto RingLV  = new G4LogicalVolume(
+	            ringSvol,           // its solid
+	                defaultMaterial,  // its material
+	                "RingLV_"+createString(ieta) +"_"+name);         // its name
+	    auto RingPV = new G4PVPlacement(
+	                    0,                // no rotation
+	                    G4ThreeVector(0,0,0), // its position
+	                    RingLV,       // its logical volume
+	                    "RingPV_"+createString(ieta) +"_"+name,           // its name
+	                    layerLV,          // its mother  volume
+	                    false,            // no boolean operation
+	                    0,                // copy number
+	                    fCheckOverlaps);  // checking overlaps
 
-	        createCell(layerLV,
+	   // for(int iphi=0;iphi<n_cells_phi;iphi++){
+	     //   double starting_angle_rad = cell_phiwidth * (double)iphi;
+
+	        createCellWheel(RingLV,
 	                startEta,
 	                cell_etawidth,
 	                start_z,
 	                z_length,
-	                starting_angle_rad,
-	                cell_phiwidth,
+	                n_cells_phi,
 	                layernumber,
 	                cellno);
 	        cellno++;
-	    }
+	  //  }
 	}
 
 
-	auto layerPV = new G4PVPlacement(
-	            0,                // no rotation
-	            position+G4ThreeVector(0,0,z_length/2.), // its position
-	            layerLV,       // its logical volume
-	            "Layer_"+name,           // its name
-	            caloLV,          // its mother  volume
-	            false,            // no boolean operation
-	            0,                // copy number
-	            fCheckOverlaps);  // checking overlaps
 
 
 	G4cout << "layer "<<name<<" position="<<position << " " << layerPV->GetTranslation () <<G4endl;

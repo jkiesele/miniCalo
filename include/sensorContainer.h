@@ -21,10 +21,10 @@ public:
 	G4double posx,
 	G4double posy,
 	G4double posz,
-	int layer, G4VPhysicalVolume * absvol=0):
+	int layer, G4int copyno):
 		vol_(vol),dimxy_(dimxy),dimz_(dimz),area_(area),
 		posx_(posx),posy_(posy),posz_(posz-dimz/2.),energyscalefactor_(1),
-		layer_(layer),absvol_(absvol)
+		layer_(layer),copyno_(copyno)
 	{
 		global_detid_=global_detid_counter_++;
 	}
@@ -71,8 +71,8 @@ public:
 		return layer_;
 	}
 
-	G4VPhysicalVolume * getAbsorberVol()const{
-		return absvol_;
+	G4int getCopyNo()const{
+	    return copyno_;
 	}
 
 	const int& getGlobalDetID()const{
@@ -80,8 +80,7 @@ public:
 	}
 
 private:
-	sensorContainer():vol_(0),dimxy_(0),dimz_(0),area_(0),
-		posx_(0),posy_(0),posz_(0),energyscalefactor_(1),absvol_(0){
+	sensorContainer(){
 			global_detid_=global_detid_counter_++;
 		}
 
@@ -100,7 +99,7 @@ private:
 
 	int global_detid_;
 
-	G4VPhysicalVolume *  absvol_;
+	G4int  copyno_;
 
 	static int global_detid_counter_;
 
