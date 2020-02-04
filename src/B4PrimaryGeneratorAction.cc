@@ -170,24 +170,21 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
     G4Exception("B4PrimaryGeneratorAction::GeneratePrimaries()",
       "MyCode0002", JustWarning, msg);
   } 
-  G4cout << "shooting.. " ;
+  G4cout << "shooting.. " <<G4endl;
   // Set gun position
 
-  //generate a few of them
-  int noTrackLayers =1;
-  float originpoint = ((float)noTrackLayers)*(-5*cm)-0.5*cm;
 
-
-  G4double zposition = originpoint;
   double energy_max=200;
   double energy_min=1;
   //energy_=15;
 
   //iterate
-  if(particleid_==gamma)
+  if(particleid_==pioncharged)
       setParticleID(elec);
   else if(particleid_==elec)
       setParticleID(gamma);
+  else if(particleid_==gamma)
+      setParticleID(pioncharged);
 
   //setParticleID(elec);
   //positron
@@ -206,12 +203,12 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
 
 
-  G4ThreeVector position(0,0,300*cm);
+  G4ThreeVector position(0,0,0);
   xorig_=0;
   yorig_=0;
 
 
-  G4ThreeVector direction(0.2*G4INCL::Random::shoot(),0.2*G4INCL::Random::shoot(),G4INCL::Random::shoot());
+  G4ThreeVector direction(0.2*G4INCL::Random::shoot(),0.2*G4INCL::Random::shoot(),1);
 
 
   fParticleGun->SetParticleMomentumDirection(direction);

@@ -62,7 +62,7 @@
 #include "sensorContainer.h"
 
 #include <cstdlib>
-#include "Math/Vector3D.h"
+//#include "Math/Vector3D.h"
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -109,10 +109,10 @@ void  B4DetectorConstruction::DefineGeometry(geometry geo){
 	if(geo == fullendcap){
 		calorThickness=2200*mm;
 
-        nofEELayers = 1;
-        Ncalowedges=4;
+        nofEELayers = 2;
+        Ncalowedges=120;
         nofHB=1;
-        int etasegments=1;
+        int etasegments=30;
 
         Calo_start_eta=1.5;
         Calo_end_eta=3.0;
@@ -152,8 +152,7 @@ G4double computeTheta(const G4double& eta )
         { return 2. * atan( exp( -eta ) ); }
 
 double etaToR(const G4double& eta, const G4double& z){
-    G4double atoBP = M_PI/2. - computeTheta(eta);
-    return z * tan(atoBP);
+    return z * exp(-eta);
 }
 G4Cons * createCons(
         G4String name,
@@ -227,7 +226,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createCell(
 
 
 
-    G4double maxStep = z_length/200.;
+    G4double maxStep = z_length/2.;
     G4double maxTime = 2.*s;
     G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
     cellLV->SetUserLimits(stepLimit);
@@ -242,10 +241,10 @@ G4VPhysicalVolume* B4DetectorConstruction::createCell(
             layerLV,          // its mother  volume
             false,            // no boolean operation
             0,                // copy number
-            true);//fCheckOverlaps);  // checking overlaps
+            fCheckOverlaps);//fCheckOverlaps);  // checking overlaps
 
-    ROOT::Math::DisplacementVector3D<ROOT::Math::CylindricalEta3D<double> > RhoEtaPhiVector(etaToR(start_eta+eta_width/2. ,start_z+z_length/2.),
-            start_eta+eta_width/2., starting_angle_rad+width_rad/2.);
+   // ROOT::Math::DisplacementVector3D<ROOT::Math::CylindricalEta3D<double> > RhoEtaPhiVector(etaToR(start_eta+eta_width/2. ,start_z+z_length/2.),
+    //        start_eta+eta_width/2., starting_angle_rad+width_rad/2.);
 
     activecells_.push_back(
             sensorContainer(
@@ -253,8 +252,8 @@ G4VPhysicalVolume* B4DetectorConstruction::createCell(
                     start_eta+eta_width/2.,//sensor size   // G4double dimxy
                     z_length,                              // G4double dimz,
                     starting_angle_rad+width_rad/2.,       // G4double area,
-                    RhoEtaPhiVector.x(),                   // G4double posx,
-                    RhoEtaPhiVector.y(),                   // G4double posy,
+                    0,                   // G4double posx,
+                    0,                   // G4double posy,
                     start_z+z_length/2.,                   // G4double posz,
                     layernum,
                     0
@@ -293,7 +292,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(
             defaultMaterial,  // its material
 			"Layer_"+name);         // its name
 
-    G4double maxStep = z_length/200.;
+    G4double maxStep = z_length/2.;
     G4double maxTime = 2.*s;
     G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
     layerLV->SetUserLimits(stepLimit);
@@ -303,6 +302,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(
 	double cell_phiwidth = 2*M_PI/(double)n_cells_phi;
 
 	//create cells
+	int cellno=0;
 	for(int ieta=0; ieta<n_cells_eta; ieta++){
 	    double startEta = Calo_start_eta + cell_etawidth* (double)ieta;
 
@@ -317,15 +317,15 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(
 	                starting_angle_rad,
 	                cell_phiwidth,
 	                layernumber,
-	                (ieta+1)*(iphi+1)+iphi);
-
+	                cellno);
+	        cellno++;
 	    }
 	}
 
 
 	auto layerPV = new G4PVPlacement(
 	            0,                // no rotation
-	            position, // its position
+	            position+G4ThreeVector(0,0,z_length/2.), // its position
 	            layerLV,       // its logical volume
 	            "Layer_"+name,           // its name
 	            caloLV,          // its mother  volume
@@ -357,7 +357,7 @@ void B4DetectorConstruction::createCalo(G4LogicalVolume * worldLV,
      */
 
 
-	G4double lastzpos=0;//;
+	G4double lastzpos=Calo_start_z;//;
 	for(int i=0;i<nofEELayers+nofHB;i++){
 
 	    auto thickness = layerThicknesses.at(i);
@@ -455,7 +455,7 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 			"World");         // its name
 
 
-	G4double maxStep = 1.0*mm;
+	G4double maxStep = worldSizeZ/5.;
 	G4double maxTime = 20.*s;
 	G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
 	worldLV->SetUserLimits(stepLimit);

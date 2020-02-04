@@ -182,33 +182,36 @@ int main(int argc,char** argv)
   enable_physlimits();
   // Initialize visualization
   //
- // auto visManager = new G4VisExecutive;
+   auto visManager = new G4VisExecutive;
   // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
  // G4VisManager* visManager = new G4VisExecutive("Quiet");
  // visManager->Initialize();
   //auto visManager = new G4VisExecutive();
-  //    visManager->Initialize();
+     visManager->Initialize();
 
   // Get the pointer to the User Interface manager
-  auto UImanager = G4UImanager::GetUIpointer();
+  G4UImanager* UImanager = G4UImanager::GetUIpointer();
 
-  // Process macro or start UI session
-  //
-  if ( macro.size() ) {
-    // batch mode
-    G4String command = "/control/execute ";
-    G4Random::setTheSeeds(&rseed);
-    UImanager->ApplyCommand(command+macro);
-  }
-  else  {  
-    // interactive mode : define UI session
-    UImanager->ApplyCommand("/control/execute init_vis.mac");
-    if (ui->IsGUI()) {
-      UImanager->ApplyCommand("/control/execute gui.mac");
-    }
-    ui->SessionStart();
-    delete ui;
-  }
+    if (argc!=1)   // batch mode
+      {
+        G4String command = "/control/execute ";
+        G4String fileName = macro;
+        UImanager->ApplyCommand(command+fileName);
+      }
+    else
+      {  // interactive mode : define UI session
+
+        G4UIExecutive* ui = new G4UIExecutive(argc, argv);
+
+        UImanager->ApplyCommand("/control/execute init_vis.mac");
+
+        if (ui->IsGUI())
+          UImanager->ApplyCommand("/control/execute gui.mac");
+        ui->SessionStart();
+        delete ui;
+
+      }
+
 
   // Job termination
   // Free the store: user actions, physics_list and detector_description are

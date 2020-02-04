@@ -86,11 +86,8 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 
 	if(idx>=activesensors->size())return;//not active volume
 
-	G4cout << activesensors->at(idx).getVol()->GetName() << G4endl;
 
 	auto energy=step->GetTotalEnergyDeposit();
-	if(energy>0)
-	    G4cout << "hit " << energy << G4endl;
 	if(idx<rechit_energy_.size()){
 	    rechit_energy_.at(idx)+=energy/1000.; //GeV
 	    totalen_+=energy/1000.; //GeV
