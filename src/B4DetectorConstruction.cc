@@ -41,6 +41,7 @@
 #include "G4GlobalMagFieldMessenger.hh"
 #include "G4AutoDelete.hh"
 #include "G4UserLimits.hh"
+#include "G4PVDivision.hh"
 
 #include "G4GeometryManager.hh"
 #include "G4PhysicalVolumeStore.hh"
@@ -109,10 +110,10 @@ void  B4DetectorConstruction::DefineGeometry(geometry geo){
 	if(geo == fullendcap){
 		calorThickness=2200*mm;
 
-        nofEELayers = 2;
-        Ncalowedges=120;
-        nofHB=1;
-        int etasegments=30;
+        nofEELayers = 5;
+        Ncalowedges=3;//120;
+        nofHB=5;
+        int etasegments=3;
 
         Calo_start_eta=1.5;
         Calo_end_eta=3.0;
@@ -209,7 +210,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createCellWheel(
 	        start_z,
 	        z_length,
 	        0,
-	        2*M_PI/(double)nphi);
+	        2.*M_PI/(double)nphi);
 
 
 	auto cellLV  = new G4LogicalVolume(
@@ -219,18 +220,22 @@ G4VPhysicalVolume* B4DetectorConstruction::createCellWheel(
 
 
 
-    G4double maxStep = z_length/2.;
+    G4double maxStep = z_length/200.;
     G4double maxTime = 2.*s;
     G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
     cellLV->SetUserLimits(stepLimit);
 
 
+  //  G4VPhysicalVolume* activeMaterial
+   //     = new G4PVReplica("Cell_rep_"+name, cellLV,
+    //            layerLV, kPhi, nphi, 2.*M_PI/(double)nphi-1e-7);
+
     G4VPhysicalVolume* activeMaterial
-        = new G4PVReplica("Cell_rep_"+name, cellLV,
-                layerLV, kPhi, nphi, 2.*M_PI/(double)nphi);
+            = new G4PVDivision("Cell_rep_"+name, cellLV,layerLV, kPhi, nphi,0.);
 
 
     G4int maxcopies = activeMaterial->GetMultiplicity();
+    //activeMaterial->GetReplicationData()
     //activeMaterial->GetCopyNo()
    // auto activeMaterial
    // = new G4PVPlacement(
@@ -246,9 +251,9 @@ G4VPhysicalVolume* B4DetectorConstruction::createCellWheel(
    // ROOT::Math::DisplacementVector3D<ROOT::Math::CylindricalEta3D<double> > RhoEtaPhiVector(etaToR(start_eta+eta_width/2. ,start_z+z_length/2.),
     //        start_eta+eta_width/2., starting_angle_rad+width_rad/2.);
 
-    double width_rad = 2*M_PI/(double)nphi;
+    double width_rad = 2.*M_PI/(double)nphi*rad;
     for(G4int i =0;i<maxcopies;i++){
-        double phi=width_rad/2. + 2*M_PI/(double)nphi*(double)i;
+        double phi= width_rad*(double)i; //offset doesn't really matter
 
         double x = cos(phi)*etaToR(start_eta+eta_width/2. ,start_z+z_length/2.);
         double y = sin(phi)*etaToR(start_eta+eta_width/2. ,start_z+z_length/2.);
@@ -257,7 +262,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createCellWheel(
                 sensorContainer(
                         activeMaterial,
                         start_eta+eta_width/2.,//sensor size   // G4double dimxy
-                        z_length,                              // G4double dimz,
+                        phi,                              // G4double dimz,
                         0,       // G4double area,
                         x,                   // G4double posx,
                         y,                   // G4double posy,
@@ -310,14 +315,14 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(
                 0,                // copy number
                 fCheckOverlaps);  // checking overlaps
 
-    G4double maxStep = z_length/2.;
+    G4double maxStep = z_length/200.;
     G4double maxTime = 2.*s;
     G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
     layerLV->SetUserLimits(stepLimit);
 
 
 	double cell_etawidth = (end_eta-start_eta) / (double)n_cells_eta;
-	double cell_phiwidth = 2*M_PI/(double)n_cells_phi;
+	double cell_phiwidth = 2*M_PI/(double)n_cells_phi *rad;
 
 	//create cells
 	int cellno=0;
@@ -484,7 +489,7 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 			"World");         // its name
 
 
-	G4double maxStep = worldSizeZ/5.;
+	G4double maxStep = worldSizeZ/100.;
 	G4double maxTime = 20.*s;
 	G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
 	worldLV->SetUserLimits(stepLimit);

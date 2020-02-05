@@ -15,15 +15,15 @@ class sensorContainer{
 public:
 
 	sensorContainer(G4VPhysicalVolume * vol,
-	G4double dimxy,
-	G4double dimz,
-	G4double area,
+	G4double eta,
+	G4double phi,
+	G4double null,
 	G4double posx,
 	G4double posy,
 	G4double posz,
 	int layer, G4int copyno):
-		vol_(vol),dimxy_(dimxy),dimz_(dimz),area_(area),
-		posx_(posx),posy_(posy),posz_(posz-dimz/2.),energyscalefactor_(1),
+		vol_(vol),eta_(eta),phi_(phi),area_(null),
+		posx_(posx),posy_(posy),posz_(posz),energyscalefactor_(1),
 		layer_(layer),copyno_(copyno)
 	{
 		global_detid_=global_detid_counter_++;
@@ -35,12 +35,12 @@ public:
 		return area_;
 	}
 
-	const G4double& getDimxy() const {
-		return dimxy_;
+	const G4double& getEta() const {
+		return eta_;
 	}
 
-	const G4double& getDimz() const {
-		return dimz_;
+	const G4double& getPhi() const {
+		return phi_;
 	}
 
 	const G4VPhysicalVolume* getVol() const {
@@ -85,8 +85,8 @@ private:
 		}
 
 	G4VPhysicalVolume * vol_;
-	G4double dimxy_;
-	G4double dimz_;
+	G4double eta_;
+	G4double phi_;
 	G4double area_;
 
 	G4double posx_;

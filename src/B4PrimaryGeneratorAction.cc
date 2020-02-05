@@ -142,6 +142,19 @@ G4String B4PrimaryGeneratorAction::setParticleID(enum particles p){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+
+void generatePosition(G4double dRmin,G4double dRmax, G4double&x , G4double&y){
+
+    G4double dRmin2=dRmin*dRmin;
+    G4double dRmax2=dRmax*dRmax;
+    G4double dR2=dRmax2+1;
+    while(dR2 > dRmax2 || dR2<dRmin2){
+        x = dRmin + (dRmax2-dRmin)*G4INCL::Random::shoot();
+        y = dRmin + (dRmax2-dRmin)*G4INCL::Random::shoot();
+        dR2 = x*x + y*y;
+    }
+}
+
 void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
   // This function is called at the begining of event
@@ -174,19 +187,19 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   // Set gun position
 
 
-  double energy_max=200;
-  double energy_min=1;
+  double energy_max=40;
+  double energy_min=29;
   //energy_=15;
 
   //iterate
-  if(particleid_==pioncharged)
-      setParticleID(elec);
-  else if(particleid_==elec)
-      setParticleID(gamma);
-  else if(particleid_==gamma)
-      setParticleID(pioncharged);
+  //if(particleid_==pioncharged)
+  //    G4cout << setParticleID(elec) <<G4endl;
+  //else if(particleid_==elec)
+  //    G4cout << setParticleID(gamma) <<G4endl;
+  //else if(particleid_==gamma)
+  //    G4cout << setParticleID(pioncharged) <<G4endl;
 
-  //setParticleID(elec);
+  setParticleID(gamma);
   //positron
 
 
@@ -201,14 +214,12 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
       energy_=(energy_max)*rand+energy_min;
   }
 
+  generatePosition(11*cm,40*cm,xorig_,yorig_);
 
 
-  G4ThreeVector position(0,0,0);
-  xorig_=0;
-  yorig_=0;
+  G4ThreeVector position(161.311,-271.054,0);//xorig_,yorig_,0);
 
-
-  G4ThreeVector direction(0.2*G4INCL::Random::shoot(),0.2*G4INCL::Random::shoot(),1);
+  G4ThreeVector direction(0,0,1);//0.2*G4INCL::Random::shoot(),0.2*G4INCL::Random::shoot(),0);
 
 
   fParticleGun->SetParticleMomentumDirection(direction);
@@ -217,7 +228,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   fParticleGun->GeneratePrimaryVertex(anEvent);
 
 
-  G4cout << "Energy: " << energy_ << ", position: "<< position<<  G4endl;
+  G4cout << "Energy: " << energy_ << ", position: "<< position <<" direction "<<direction<<  G4endl;
 }
 
 

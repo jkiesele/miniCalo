@@ -75,14 +75,17 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 	G4TouchableHistory* theTouchable =
 	(G4TouchableHistory*)(preStepPoint->GetTouchable());
 	G4int copyNo = theTouchable->GetVolume()->GetCopyNo();
-//	G4int motherCopyNo
+	//G4int motherCopyNo
 //	= theTouchable->GetVolume(1)->GetCopyNo();
+
+
+	//theTouchable->GetVolume()->Ge
 
 	size_t idx=activesensors->size();
 	for(size_t i=0;i<activesensors->size();i++){
 		if(volume == activesensors->at(i).getVol()){
 		    if(copyNo == activesensors->at(i).getCopyNo()){
-
+		    //    G4cout << copyNo << " "<<G4endl;
 		        idx=i;
 		        break;
 
@@ -131,8 +134,8 @@ void B4aEventAction::BeginOfEventAction(const G4Event* /*event*/)
   rechit_y_.resize(activesensors->size(),0);
   rechit_z_.resize(activesensors->size(),0);
   rechit_layer_.resize(activesensors->size(),0);
-  rechit_varea_.resize(activesensors->size(),0);
-  rechit_vz_.resize(activesensors->size(),0);
+  rechit_phi_.resize(activesensors->size(),0);
+  rechit_eta_.resize(activesensors->size(),0);
   rechit_vxy_.resize(activesensors->size(),0);
   rechit_detid_.resize(activesensors->size(),0);
   for(size_t i=0;i<activesensors->size();i++){
@@ -140,9 +143,9 @@ void B4aEventAction::BeginOfEventAction(const G4Event* /*event*/)
       rechit_y_.at     (i)=activesensors->at(i).getPosy();//phi
       rechit_z_.at     (i)=activesensors->at(i).getPosz();//z
       rechit_layer_.at (i)=activesensors->at(i).getLayer();
-      rechit_varea_.at (i)=activesensors->at(i).getArea();//0
-      rechit_vz_.at    (i)=activesensors->at(i).getDimz();//lengthz
-      rechit_vxy_.at   (i)=activesensors->at(i).getDimxy();//0
+      rechit_phi_.at (i)=activesensors->at(i).getPhi();//0
+      rechit_eta_.at    (i)=activesensors->at(i).getEta();//lengthz
+      rechit_vxy_.at   (i)=activesensors->at(i).getArea();//0
       rechit_detid_.at (i)=activesensors->at(i).getGlobalDetID();
   }
 

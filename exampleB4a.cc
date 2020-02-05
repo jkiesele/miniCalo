@@ -117,7 +117,7 @@ int main(int argc,char** argv)
     PrintUsage();
     return 1;
   }
-  
+  long rseed=0;
   G4String macro;
   G4String session;
   G4String outfile="out";
@@ -133,14 +133,15 @@ int main(int argc,char** argv)
     }
 #endif
     else if (G4String(argv[i]) == "-f" ) {
-    	outfile = argv[i+1];
+    	outfile += argv[i+1];
+    	rseed = atoi(argv[i+1]);
     }
     else {
       PrintUsage();
       return 1;
     }
   }  
-  long rseed=0;
+
   // Detect interactive mode (if no macro provided) and define UI session
   //
   G4UIExecutive* ui = 0;
@@ -151,6 +152,8 @@ int main(int argc,char** argv)
 
   // Choose the Random engine
   //
+    auto ren = new CLHEP::RanecuEngine();
+    ren->setSeed(rseed);
   G4Random::setTheEngine(new CLHEP::RanecuEngine);
   
   // Construct the default run manager
