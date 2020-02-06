@@ -39,6 +39,7 @@
 #include "Randomize.hh"
 #include <iomanip>
 #include "G4INCLRandom.hh"
+#include "B4PrimaryGeneratorAction.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -53,8 +54,6 @@ B4aEventAction::B4aEventAction()
 {
 	//create vector ntuple here
 //	auto analysisManager = G4AnalysisManager::Instance();
-
-
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -168,21 +167,22 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
   //
 
     G4cout << "nsteps_ "<<nsteps_ <<G4endl;
-
+//clear();return;
   // get analysis manager
   auto analysisManager = G4AnalysisManager::Instance();
 
   
   // fill ntuple
   int i=0;
-  int ispart[B4PrimaryGeneratorAction::particles_size];
-  for( ;i<B4PrimaryGeneratorAction::particles_size;i++){
-	  ispart[i]=B4PrimaryGeneratorAction::globalgen->isParticle(i);
+  int ispart[navail_parts];
+  for( ;i<navail_parts ;i++){
+      //G4cout << i  << G4endl;
+	  ispart[i]=generator_->isParticle(i);
 	  analysisManager->FillNtupleIColumn(i,ispart[i]);
   }
-  analysisManager->FillNtupleDColumn(i,B4PrimaryGeneratorAction::globalgen->getEnergy());
-  analysisManager->FillNtupleDColumn(i+1,B4PrimaryGeneratorAction::globalgen->getX());
-  analysisManager->FillNtupleDColumn(i+2,B4PrimaryGeneratorAction::globalgen->getY());
+  analysisManager->FillNtupleDColumn(i,generator_->getEnergy());
+  analysisManager->FillNtupleDColumn(i+1,generator_->getX());
+  analysisManager->FillNtupleDColumn(i+2,generator_->getY());
   analysisManager->FillNtupleDColumn(i+3,0); //maybe this could be displacement?
   analysisManager->FillNtupleDColumn(i+4,totalen_);
 

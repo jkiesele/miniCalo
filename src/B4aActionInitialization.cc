@@ -34,6 +34,7 @@
 #include "B4aEventAction.hh"
 #include "B4aSteppingAction.hh"
 #include "B4DetectorConstruction.hh"
+#include "B4JetGeneratorAction.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -53,6 +54,7 @@ B4aActionInitialization::~B4aActionInitialization()
 void B4aActionInitialization::BuildForMaster() const
 {
 	auto gen=new B4PrimaryGeneratorAction;
+	//auto gen=new B4JetGeneratorAction;
   auto ev=new B4aEventAction;
   SetUserAction(new B4RunAction(gen,ev,""));
 }
@@ -62,7 +64,8 @@ void B4aActionInitialization::BuildForMaster() const
 void B4aActionInitialization::Build() const
 {
 	auto gen=new B4PrimaryGeneratorAction;
-  SetUserAction(new B4PrimaryGeneratorAction);
+	//auto gen=new B4JetGeneratorAction;
+  SetUserAction(gen);
   auto eventAction = new B4aEventAction;
   eventAction->setGenerator(gen);
   eventAction->setDetector(fDetConstruction);

@@ -34,6 +34,7 @@
 #include "G4UserRunAction.hh"
 #include "globals.hh"
 #include "G4String.hh"
+#include "B4PartGeneratorBase.hh"
 
 class G4Run;
 class B4PrimaryGeneratorAction;
@@ -59,10 +60,10 @@ class B4aEventAction;
 class B4RunAction : public G4UserRunAction
 {
   public:
-    B4RunAction(B4PrimaryGeneratorAction * gen, B4aEventAction* e, G4String fn);
+    B4RunAction(B4PartGeneratorBase * gen, B4aEventAction* e, G4String fn);
     virtual ~B4RunAction();
 
-    void linkGenerator(B4PrimaryGeneratorAction* g){
+    void linkGenerator(B4PartGeneratorBase* g){
     	generator_=g;
     }
     void linkEventAction(B4aEventAction* e){
@@ -76,7 +77,7 @@ class B4RunAction : public G4UserRunAction
     virtual void BeginOfRunAction(const G4Run*);
     virtual void   EndOfRunAction(const G4Run*);
   private:
-    B4PrimaryGeneratorAction * generator_;
+    B4PartGeneratorBase * generator_;
     B4aEventAction* eventact_;
     G4String fname_;
 };

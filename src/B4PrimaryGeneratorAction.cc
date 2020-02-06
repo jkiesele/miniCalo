@@ -46,12 +46,18 @@
 #include<ctime>
 #include<sys/types.h>
 
+template<class T>
+static G4String createString(const T& i){
+    std::stringstream ss;
+    ss << i;
+    std::string number=ss.str();
+    return number;
+}
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
- B4PrimaryGeneratorAction * B4PrimaryGeneratorAction::globalgen=0;
 
 B4PrimaryGeneratorAction::B4PrimaryGeneratorAction()
- : G4VUserPrimaryGeneratorAction(),
+ : B4PartGeneratorBase(),
    fParticleGun(nullptr)
 {
   G4int nofParticles = 1;
@@ -69,7 +75,6 @@ B4PrimaryGeneratorAction::B4PrimaryGeneratorAction()
 
   G4INCL::Random::setGenerator( new G4INCL::Geant4RandomGenerator());
 
-  globalgen=this;
 
   xorig_=0;
   yorig_=0;
@@ -83,13 +88,42 @@ B4PrimaryGeneratorAction::~B4PrimaryGeneratorAction()
 {
   delete fParticleGun;
 }
-std::vector<G4String> B4PrimaryGeneratorAction::generateAvailableParticles(){
+std::vector<G4String> B4PrimaryGeneratorAction::generateAvailableParticles()const{
 	std::vector<G4String> out;
-	auto oldid=particleid_;
 	for(int i=0;i<particles_size;i++)
-		out.push_back(setParticleID((B4PrimaryGeneratorAction::particles)i));
-	setParticleID(oldid);
+		out.push_back(getParticleName((B4PrimaryGeneratorAction::particles)i));
+
 	return out;
+}
+
+
+G4String B4PrimaryGeneratorAction::getParticleName(enum particles p)const{
+    if(p==elec){
+        return "isElectron";
+    }
+    if(p==positron){
+        return "isPositron";
+    }
+    if(p==muon){
+        return "isMuon";
+    }
+    if(p==pioncharged){
+        return "isPionCharged";
+    }
+    if(p==pionneutral){
+        return "isPionNeutral";
+    }
+    if(p==klong){
+        return "isK0Long";
+    }
+    if(p==kshort){
+        return "isK0Short";
+    }
+    if(p==gamma){
+        return "isGamma";
+    }
+
+    return "isInvalid"+createString((int)p);
 }
 
 G4String B4PrimaryGeneratorAction::setParticleID(enum particles p){
@@ -99,45 +133,38 @@ G4String B4PrimaryGeneratorAction::setParticleID(enum particles p){
 	if(p==elec){
 		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("e-");
 		fParticleGun->SetParticleDefinition(particleDefinition);
-		return "isElectron";
 	}
 	if(p==positron){
 	    particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("e+");
 	    fParticleGun->SetParticleDefinition(particleDefinition);
-	    return "isPositron";
 	}
 	if(p==muon){
 		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("mu-");
 		fParticleGun->SetParticleDefinition(particleDefinition);
-		return "isMuon";
 	}
 	if(p==pioncharged){
 		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("pi+");
 		fParticleGun->SetParticleDefinition(particleDefinition);
-		return "isPionCharged";
 	}
 	if(p==pionneutral){
 		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("pi0");
 		fParticleGun->SetParticleDefinition(particleDefinition);
-		return "isPionNeutral";
 	}
 	if(p==klong){
 		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("kaon0L");
 		fParticleGun->SetParticleDefinition(particleDefinition);
-		return "isK0Long";
 	}
 	if(p==kshort){
 		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("kaon0S");
 		fParticleGun->SetParticleDefinition(particleDefinition);
-		return "isK0Short";
 	}
 	if(p==gamma){
 		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("gamma");
 		fParticleGun->SetParticleDefinition(particleDefinition);
-		return "isGamma";
 	}
 
-	return "isInvalid";
+	return getParticleName(p);
+	return "isInvalid"+createString((int)p);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -31,7 +31,8 @@
 #ifndef B4JetGeneratorAction_h
 #define B4JetGeneratorAction_h 1
 
-#include "G4VUserPrimaryGeneratorAction.hh"
+#include "B4PrimaryGeneratorAction.hh"
+#include "B4PartGeneratorBase.hh"
 #include "globals.hh"
 #include <vector>
 
@@ -56,7 +57,7 @@ class TTree;
 
 
 
-class B4JetGeneratorAction : public G4VUserPrimaryGeneratorAction
+class B4JetGeneratorAction : public B4PartGeneratorBase
 {
 public:
   B4JetGeneratorAction();
@@ -70,13 +71,29 @@ public:
   G4double getY()const{return yorig_;}
   G4double getR()const{return std::sqrt(yorig_*yorig_+xorig_*xorig_);}
 
-  static B4JetGeneratorAction * globalgen;
+
+  bool isJetGenerator(){return true;}
 
   enum EventType {
     kQQ,
     kGG,
     nEventTypes
   };
+
+  std::vector<G4String> generateAvailableParticles()const{return {"isQuark","isGluon"};}
+
+  particles getParticle() const{
+      if(eventType_==kQQ)
+          return quark;
+      else
+          return gluon;
+  }
+
+  int isParticle(int i)const{
+      if(i && eventType_==kQQ)
+          return 1;
+      return 0;
+  }
 
   EventType eventType() const { return eventType_; }
   static G4String eventTypeName(unsigned t);

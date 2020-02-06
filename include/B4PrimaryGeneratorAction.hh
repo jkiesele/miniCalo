@@ -34,6 +34,7 @@
 #include "G4VUserPrimaryGeneratorAction.hh"
 #include "globals.hh"
 #include <vector>
+#include "B4PartGeneratorBase.hh"
 
 class G4ParticleGun;
 class G4Event;
@@ -47,7 +48,7 @@ class G4Event;
 
 
 
-class B4PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
+class B4PrimaryGeneratorAction : public B4PartGeneratorBase
 {
 public:
   B4PrimaryGeneratorAction();    
@@ -60,21 +61,12 @@ public:
 
   G4ParticleGun* getGun(){return fParticleGun;}
 
-  G4double getEnergy()const{return energy_;}
 
-  G4double getX()const{return xorig_;}
-  G4double getY()const{return yorig_;}
-  G4double getR()const{return std::sqrt(yorig_*yorig_+xorig_*xorig_);}
+  virtual bool isJetGenerator(){return false;}
 
-  static B4PrimaryGeneratorAction * globalgen;
 
-  enum particles{
-	  elec=0,muon,pioncharged,pionneutral,klong,kshort,gamma,
-	  positron,
-	  particles_size //leave this one
-  };
 
-  std::vector<G4String> generateAvailableParticles();
+  std::vector<G4String> generateAvailableParticles()const;
 
   particles getParticle()const{return particleid_;}
 
@@ -82,13 +74,13 @@ public:
 	  return i==particleid_;
   }
 
+  G4String getParticleName(enum particles )const;
+
 private:
   G4ParticleGun*  fParticleGun; // G4 particle gun
 
   G4String setParticleID(enum particles );
 
-  G4double energy_;
-  G4double xorig_,yorig_;
   particles particleid_;
 
 };

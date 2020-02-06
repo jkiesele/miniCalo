@@ -40,7 +40,7 @@
 #include "B4aEventAction.hh"
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-B4RunAction::B4RunAction(B4PrimaryGeneratorAction *gen, B4aEventAction* ev, G4String fname)
+B4RunAction::B4RunAction(B4PartGeneratorBase *gen, B4aEventAction* ev, G4String fname)
  : G4UserRunAction()
 { 
 	fname_=fname;
@@ -69,11 +69,14 @@ B4RunAction::B4RunAction(B4PrimaryGeneratorAction *gen, B4aEventAction* ev, G4St
   //
   analysisManager->CreateNtuple("B4", "Edep and TrackL");
   generator_=gen;
-  G4cout << "creating particle entries" << G4endl;
-  auto parts=generator_->generateAvailableParticles();
-  for(const auto& p:parts){
-	  analysisManager->CreateNtupleIColumn(p);
-  }
+  //if(! generator_->isJetGenerator()){
+      G4cout << "creating particle entries" << G4endl;
+      auto parts=generator_->generateAvailableParticles();
+      for(const auto& p:parts){
+          G4cout << p << G4endl;
+          analysisManager->CreateNtupleIColumn(p);
+      }
+  //}
   analysisManager->CreateNtupleDColumn("true_energy");
   analysisManager->CreateNtupleDColumn("true_x");
   analysisManager->CreateNtupleDColumn("true_y");

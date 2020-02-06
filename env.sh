@@ -1,4 +1,4 @@
-#export PATH=/cvmfs/sft.cern.ch/lcg/releases/LCG_96/Python/2.7.16/x86_64-centos7-gcc8-opt/bin/:$PATH
+export PATH=/cvmfs/sft.cern.ch/lcg/releases/LCG_96/Python/2.7.16/x86_64-centos7-gcc8-opt/bin/:$PATH
 
 source /cvmfs/sft.cern.ch/lcg/views/LCG_latest/x86_64-centos7-gcc9-opt/setup.sh
 

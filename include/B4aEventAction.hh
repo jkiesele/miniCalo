@@ -33,12 +33,13 @@
 
 #include "G4UserEventAction.hh"
 #include "globals.hh"
-#include "B4PrimaryGeneratorAction.hh"
+#include "B4PartGeneratorBase.hh"
 #include "G4StepPoint.hh"
 #include "sensorContainer.h"
 #include "B4DetectorConstruction.hh"
 #include "G4Step.hh"
 #include "B4RunAction.hh"
+#include "B4PrimaryGeneratorAction.hh"
 /// Event action class
 ///
 /// It defines data members to hold the energy deposit and track lengths
@@ -79,8 +80,9 @@ class B4aEventAction : public G4UserEventAction
     }
 
 
-    void setGenerator(B4PrimaryGeneratorAction * generator){
+    void setGenerator(B4PartGeneratorBase  * generator){
     	generator_=generator;
+    	navail_parts = generator_->generateAvailableParticles().size();
     }
     void setDetector(B4DetectorConstruction * detector){
     	detector_=detector;
@@ -105,10 +107,11 @@ class B4aEventAction : public G4UserEventAction
     G4double  fTrackLGap;
 
 
-    B4PrimaryGeneratorAction * generator_;
+    B4PartGeneratorBase * generator_;
     B4DetectorConstruction * detector_;
 
     size_t nsteps_;
+    size_t navail_parts;
 
 };
 

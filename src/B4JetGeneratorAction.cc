@@ -53,14 +53,13 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-B4JetGeneratorAction * B4JetGeneratorAction::globalgen=0;
 
 bool WriteTruthTree = false;
 
 B4JetGeneratorAction::B4JetGeneratorAction()
- : G4VUserPrimaryGeneratorAction(),
-   pyqq_("/cvmfs/cms.cern.ch/slc6_amd64_gcc700/external/pythia8/230-omkpbe4/share/Pythia8/xmldoc"),
-   pygg_("/cvmfs/cms.cern.ch/slc6_amd64_gcc700/external/pythia8/230-omkpbe4/share/Pythia8/xmldoc"),
+ :// B4PrimaryGeneratorAction(),
+   pyqq_("/cvmfs/sft.cern.ch/lcg/releases/LCG_latest/MCGenerators/pythia8/244/x86_64-centos7-gcc9-opt/share/Pythia"),
+   pygg_("/cvmfs/sft.cern.ch/lcg/releases/LCG_latest/MCGenerators/pythia8/244/x86_64-centos7-gcc9-opt/share/Pythia"),
    jetDef_(new fastjet::JetDefinition(fastjet::antikt_algorithm, 0.4)),
    fjinputs_()
 {
@@ -83,7 +82,6 @@ B4JetGeneratorAction::B4JetGeneratorAction()
 
   fjinputs_.reserve(4096);
 
-  globalgen=this;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -128,7 +126,8 @@ void B4JetGeneratorAction::GeneratePrimaries(G4Event* anEvent)
     firstEvent_ = false;
   }
 
-  double const etaTarget = 3.6;
+  double const etaTargetMin = 1.5;
+  double const etaTargetMax = 3.0;
   double const eMin = 300.;
   double const eMax = 400.;
 
@@ -136,7 +135,7 @@ void B4JetGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   double const vtxY = -30.*cm;
   double const vtxZ = -500.*cm;
 
-  G4ThreeVector vertex_position(0., vtxY, vtxZ);
+  G4ThreeVector vertex_position(40.*cm,40.*cm , 0);
   G4double vertex_time(0.);
 
   // make a dummy primary proton
@@ -178,7 +177,7 @@ void B4JetGeneratorAction::GeneratePrimaries(G4Event* anEvent)
     fastjet::PseudoJet* jet(nullptr);
 
     for (auto& j : jets) {
-      if (j.e() > eMin && j.e() < eMax && std::abs(std::abs(j.eta()) - etaTarget) < 0.01) {
+      if (j.e() > eMin && j.e() < eMax && j.eta()<etaTargetMax && j.eta()>etaTargetMin) {
         jet = &j;
         break;
       }

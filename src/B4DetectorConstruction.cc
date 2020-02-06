@@ -223,7 +223,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createCellWheel(
     G4double maxStep = z_length/200.;
     G4double maxTime = 2.*s;
     G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
-    cellLV->SetUserLimits(stepLimit);
+ //   cellLV->SetUserLimits(stepLimit);
 
 
   //  G4VPhysicalVolume* activeMaterial
@@ -318,7 +318,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(
     G4double maxStep = z_length/200.;
     G4double maxTime = 2.*s;
     G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
-    layerLV->SetUserLimits(stepLimit);
+//    layerLV->SetUserLimits(stepLimit);
 
 
 	double cell_etawidth = (end_eta-start_eta) / (double)n_cells_eta;
@@ -492,7 +492,7 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 	G4double maxStep = worldSizeZ/100.;
 	G4double maxTime = 20.*s;
 	G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
-	worldLV->SetUserLimits(stepLimit);
+//	worldLV->SetUserLimits(stepLimit);
 
 
 	auto worldPV
@@ -522,10 +522,12 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 
 	worldLV->SetVisAttributes (G4VisAttributes::GetInvisible());
 
-	auto simpleBoxVisAtt= new G4VisAttributes(G4Colour(1.0,.0,.0));
-	simpleBoxVisAtt->SetVisibility(true);
+	double g=0;
 	for(auto& v: activecells_){
+	    auto simpleBoxVisAtt= new G4VisAttributes(G4Colour(1.0,g,.0));
+	    simpleBoxVisAtt->SetVisibility(true);
 		v.getVol()->GetLogicalVolume()->SetVisAttributes(simpleBoxVisAtt);
+		g+= 1./(double)activecells_.size();
 	}
 	//
 	// Always return the physical World

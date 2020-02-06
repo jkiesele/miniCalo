@@ -185,12 +185,12 @@ int main(int argc,char** argv)
   enable_physlimits();
   // Initialize visualization
   //
-   auto visManager = new G4VisExecutive;
+//   auto visManager = new G4VisExecutive;
   // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
  // G4VisManager* visManager = new G4VisExecutive("Quiet");
  // visManager->Initialize();
   //auto visManager = new G4VisExecutive();
-     visManager->Initialize();
+  //   visManager->Initialize();
 
   // Get the pointer to the User Interface manager
   G4UImanager* UImanager = G4UImanager::GetUIpointer();
