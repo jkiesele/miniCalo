@@ -24,6 +24,8 @@ endif()
 #
 include(${Geant4_USE_FILE})
 include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories($ENV{PYTHIA8_HOME}/include)
+include_directories($ENV{FASTJET_HOME}/include)
 
 #----------------------------------------------------------------------------
 # Locate sources and headers for this project
@@ -36,7 +38,7 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 # Add the executable, and link it to the Geant4 libraries
 #
 add_executable(exampleB4a exampleB4a.cc ${sources} ${headers})
-target_link_libraries(exampleB4a ${Geant4_LIBRARIES})
+target_link_libraries(exampleB4a ${Geant4_LIBRARIES} $ENV{PYTHIA8_HOME}/lib/libpythia8.so $ENV{FASTJET_HOME}/lib/libfastjet.so)
 
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we

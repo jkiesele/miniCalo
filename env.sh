@@ -1,4 +1,4 @@
-export PATH=/cvmfs/sft.cern.ch/lcg/releases/LCG_96/Python/2.7.16/x86_64-centos7-gcc8-opt/bin/:$PATH
+#export PATH=/cvmfs/sft.cern.ch/lcg/releases/LCG_96/Python/2.7.16/x86_64-centos7-gcc8-opt/bin/:$PATH
 
 source /cvmfs/sft.cern.ch/lcg/views/LCG_latest/x86_64-centos7-gcc9-opt/setup.sh
 
@@ -9,6 +9,11 @@ eval "`lcgenv -p LCG_latest x86_64-centos7-gcc9-opt CMake`"
 eval "`lcgenv -p LCG_latest x86_64-centos7-gcc9-opt cmaketools`"
 eval "`lcgenv -p LCG_latest x86_64-centos7-gcc9-opt Geant4`"
 eval "`lcgenv -p LCG_latest x86_64-centos7-gcc9-opt Qt5`"
+eval "`lcgenv -p LCG_latest x86_64-centos7-gcc9-opt fastjet`"
+eval "`lcgenv -p LCG_latest x86_64-centos7-gcc9-opt pythia8 244`"
+
+
+#export LD_LIBRARY_PATH=$PYTHIA8_HOME/lib:$LD_LIBRARY_PATH
 
 export G4DATAINSTALL=/cvmfs/sft.cern.ch/lcg/releases/LCG_93/Geant4/10.04/x86_64-slc6-gcc7-opt/share/Geant4-10.4.0
 export G4LEVELGAMMADATA=$G4DATAINSTALL/data/PhotonEvaporation5.2
