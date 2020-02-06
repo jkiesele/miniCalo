@@ -223,7 +223,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createCellWheel(
     G4double maxStep = z_length/200.;
     G4double maxTime = 2.*s;
     G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
- //   cellLV->SetUserLimits(stepLimit);
+    cellLV->SetUserLimits(stepLimit);
 
 
   //  G4VPhysicalVolume* activeMaterial
@@ -318,7 +318,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(
     G4double maxStep = z_length/200.;
     G4double maxTime = 2.*s;
     G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
-//    layerLV->SetUserLimits(stepLimit);
+    layerLV->SetUserLimits(stepLimit);
 
 
 	double cell_etawidth = (end_eta-start_eta) / (double)n_cells_eta;
@@ -340,6 +340,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(
 	            ringSvol,           // its solid
 	                defaultMaterial,  // its material
 	                "RingLV_"+createString(ieta) +"_"+name);         // its name
+	    RingLV->SetUserLimits(stepLimit);
 	    auto RingPV = new G4PVPlacement(
 	                    0,                // no rotation
 	                    G4ThreeVector(0,0,0), // its position
@@ -492,7 +493,7 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 	G4double maxStep = worldSizeZ/100.;
 	G4double maxTime = 20.*s;
 	G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
-//	worldLV->SetUserLimits(stepLimit);
+	worldLV->SetUserLimits(stepLimit);
 
 
 	auto worldPV
@@ -543,7 +544,7 @@ void B4DetectorConstruction::ConstructSDandField()
 	// Create global magnetic field messenger.
 	// Uniform magnetic field is then created automatically if
 	// the field value is not zero.
-	G4ThreeVector fieldValue;//(100,0,0);
+	G4ThreeVector fieldValue(0,0,1);
 	fMagFieldMessenger = new G4GlobalMagFieldMessenger(fieldValue);
 	fMagFieldMessenger->SetVerboseLevel(2);
 
