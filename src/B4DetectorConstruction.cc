@@ -226,12 +226,12 @@ G4VPhysicalVolume* B4DetectorConstruction::createCellWheel(
     cellLV->SetUserLimits(stepLimit);
 
 
-  //  G4VPhysicalVolume* activeMaterial
-   //     = new G4PVReplica("Cell_rep_"+name, cellLV,
-    //            layerLV, kPhi, nphi, 2.*M_PI/(double)nphi-1e-7);
-
     G4VPhysicalVolume* activeMaterial
-            = new G4PVDivision("Cell_rep_"+name, cellLV,layerLV, kPhi, nphi,0.);
+        = new G4PVReplica("Cell_rep_"+name, cellLV,
+                layerLV, kPhi, nphi, 2.*M_PI/(double)nphi-1e-7);
+
+    //G4VPhysicalVolume* activeMaterial
+      //      = new G4PVDivision("Cell_rep_"+name, cellLV,layerLV, kPhi, nphi,0.);
 
 
     G4int maxcopies = activeMaterial->GetMultiplicity();

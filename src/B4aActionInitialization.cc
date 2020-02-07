@@ -36,6 +36,8 @@
 #include "B4DetectorConstruction.hh"
 #include "B4JetGeneratorAction.hh"
 
+#define USEPYTHIA
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 B4aActionInitialization::B4aActionInitialization
@@ -53,8 +55,11 @@ B4aActionInitialization::~B4aActionInitialization()
 
 void B4aActionInitialization::BuildForMaster() const
 {
-	auto gen=new B4PrimaryGeneratorAction;
-	//auto gen=new B4JetGeneratorAction;
+#ifdef USEPYTHIA
+    auto gen=new B4JetGeneratorAction;
+#else
+    auto gen=new B4PrimaryGeneratorAction;
+#endif
   auto ev=new B4aEventAction;
   SetUserAction(new B4RunAction(gen,ev,""));
 }
@@ -63,8 +68,12 @@ void B4aActionInitialization::BuildForMaster() const
 
 void B4aActionInitialization::Build() const
 {
-	auto gen=new B4PrimaryGeneratorAction;
-	//auto gen=new B4JetGeneratorAction;
+
+#ifdef USEPYTHIA
+	auto gen=new B4JetGeneratorAction;
+#else
+    auto gen=new B4PrimaryGeneratorAction;
+#endif
   SetUserAction(gen);
   auto eventAction = new B4aEventAction;
   eventAction->setGenerator(gen);
