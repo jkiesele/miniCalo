@@ -36,7 +36,7 @@
 #include "B4DetectorConstruction.hh"
 #include "B4JetGeneratorAction.hh"
 
-#define USEPYTHIA
+//#define USEPYTHIA
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
