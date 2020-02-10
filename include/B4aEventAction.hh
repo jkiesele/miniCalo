@@ -31,6 +31,8 @@
 #ifndef B4aEventAction_h
 #define B4aEventAction_h 1
 
+#include "defines.h"
+
 #include "G4UserEventAction.hh"
 #include "globals.hh"
 #include "B4PartGeneratorBase.hh"

@@ -31,6 +31,8 @@
 #ifndef B4JetGeneratorAction_h
 #define B4JetGeneratorAction_h 1
 
+#include "defines.h"
+
 #ifndef NOPYTHIA
 
 #include "B4PrimaryGeneratorAction.hh"

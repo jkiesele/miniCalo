@@ -31,6 +31,8 @@
 #ifndef B4RunAction_h
 #define B4RunAction_h 1
 
+#include "defines.h"
+
 #include "G4UserRunAction.hh"
 #include "globals.hh"
 #include "G4String.hh"

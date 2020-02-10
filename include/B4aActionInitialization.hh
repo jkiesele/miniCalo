@@ -31,6 +31,7 @@
 #ifndef B4aActionInitialization_h
 #define B4aActionInitialization_h 1
 
+#include "defines.h"
 #include "G4VUserActionInitialization.hh"
 #include "G4String.hh"
 

@@ -31,6 +31,8 @@
 #ifndef B4DetectorConstruction_h
 #define B4DetectorConstruction_h 1
 
+#include "defines.h"
+
 #include "G4VUserDetectorConstruction.hh"
 #include "globals.hh"
 

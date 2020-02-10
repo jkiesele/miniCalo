@@ -207,6 +207,8 @@ G4VPhysicalVolume* B4DetectorConstruction::createCellWheel(
 
     G4double active_z_length=z_length;
     G4double abs_z_length=0;
+    G4double midz = z_length/2.;
+
     if(abs_fraction>0){
         active_z_length *= 1.-abs_fraction;
         abs_z_length = z_length-active_z_length;
@@ -216,13 +218,39 @@ G4VPhysicalVolume* B4DetectorConstruction::createCellWheel(
 
     G4String name = createString(layernum)+"_"+createString(cellnum);
 
+    G4LogicalVolume* activewheelLV=layerLV;
+    G4PVPlacement * activewheelPV=0;
+    if(abs_fraction>0){
+        auto activewheelS = createCons("Activewheel_"+name,
+                start_eta,
+                eta_width,
+                start_z+abs_z_length,
+                active_z_length,
+                0,
+                2.*M_PI);
+        activewheelLV = new G4LogicalVolume(
+                activewheelS,           // its solid
+                active_m,  // its material
+                "Activewheel_LV_"+name);         // its name
+
+        activewheelPV = new G4PVPlacement(
+                0,                // no rotation
+                G4ThreeVector(0,0,(abs_z_length-midz)+active_z_length/2.), // its position
+                activewheelLV,       // its logical volume
+                "Activewheel_PV_"+name,           // its name
+                layerLV,          // its mother  volume
+                false,            // no boolean operation
+                0,                // copy number
+                fCheckOverlaps);  // checking overlaps
+
+    }
+
 	auto cellS   = createCons("Cell_"+name,
 	        start_eta,
 	        eta_width,
 	        start_z+abs_z_length,
 	        active_z_length,
 	        0,
-
 	        2.*M_PI/(double)nphi);
 
 	auto cellLV  = new G4LogicalVolume(
@@ -243,31 +271,44 @@ G4VPhysicalVolume* B4DetectorConstruction::createCellWheel(
     G4VPhysicalVolume* activeMaterial
             = new G4PVDivision("Cell_rep_"+name, cellLV,layerLV, kPhi, nphi,0.);
 #else
-    G4VPhysicalVolume* activeMaterial
-        = new G4PVReplica("Cell_rep_"+name, cellLV,
-                layerLV, kPhi, nphi, 2.*M_PI/(double)nphi-1e-7);
+    G4VPhysicalVolume* activeMaterial=0;
+    if(activewheelPV)
+        activeMaterial = new G4PVReplica("Cell_rep_"+name, cellLV,
+                activewheelPV, kPhi, nphi, 2.*M_PI/(double)nphi-1e-7);
+    else
+        activeMaterial = new G4PVReplica("Cell_rep_"+name, cellLV,
+                activewheelLV, kPhi, nphi, 2.*M_PI/(double)nphi-1e-7);
 #endif
 
     if(abs_fraction>0 && abs_m){
-        auto absS   = createCons("Abs_"+name,
+        auto absWheelS = createCons("Abswheel_"+name,
                 start_eta,
                 eta_width,
                 start_z,
                 abs_z_length,
                 0,
+                2.*M_PI);
 
-                2.*M_PI/(double)nphi);
-
-        auto absLV  = new G4LogicalVolume(
-                absS,           // its solid
+        auto  abswheelLV = new G4LogicalVolume(
+                absWheelS,           // its solid
                 abs_m,  // its material
-                "Abs_LV_"+name);         // its name
+                "Abswheel_LV_"+name);         // its name
 
-        G4VPhysicalVolume* absMaterial
-        = new G4PVReplica("Abs_rep_"+name, absLV,
-                layerLV, kPhi, nphi, 2.*M_PI/(double)nphi-1e-7);
+        auto abswheelPV = new G4PVPlacement(
+                0,                // no rotation
+                G4ThreeVector(0,0,-(midz-abs_z_length/2.)), // its position
+                abswheelLV,       // its logical volume
+                "Aabswheel_PV_"+name,           // its name
+                layerLV,          // its mother  volume
+                false,            // no boolean operation
+                0,                // copy number
+                fCheckOverlaps);  // checking overlaps
 
 
+       // auto simpleBoxVisAtt= new G4VisAttributes(G4Colour(.1,.1,.1));
+       // simpleBoxVisAtt->SetVisibility(true);
+       // simpleBoxVisAtt->SetForceSolid(true);
+       // abswheelLV->SetVisAttributes(simpleBoxVisAtt);
     }
 
     G4int maxcopies = activeMaterial->GetMultiplicity();
@@ -557,8 +598,9 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 
 	double g=0;
 	for(auto& v: activecells_){
-	    auto simpleBoxVisAtt= new G4VisAttributes(G4Colour(1.0,g,.0));
+	    auto simpleBoxVisAtt= new G4VisAttributes(G4Colour(.5,g,.0));
 	    simpleBoxVisAtt->SetVisibility(true);
+	    simpleBoxVisAtt->SetForceSolid(true);
 		v.getVol()->GetLogicalVolume()->SetVisAttributes(simpleBoxVisAtt);
 		g+= 1./(double)activecells_.size();
 	}
@@ -576,7 +618,7 @@ void B4DetectorConstruction::ConstructSDandField()
 	// Create global magnetic field messenger.
 	// Uniform magnetic field is then created automatically if
 	// the field value is not zero.
-	G4ThreeVector fieldValue(0,0,0);//1.);
+	G4ThreeVector fieldValue(0,0,1.);
 	fMagFieldMessenger = new G4GlobalMagFieldMessenger(fieldValue);
 	fMagFieldMessenger->SetVerboseLevel(2);
 

@@ -31,6 +31,8 @@
 #ifndef B4PrimaryGeneratorAction_h
 #define B4PrimaryGeneratorAction_h 1
 
+#include "defines.h"
+
 #include "G4VUserPrimaryGeneratorAction.hh"
 #include "globals.hh"
 #include <vector>

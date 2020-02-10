@@ -31,6 +31,8 @@
 #ifndef B4aSteppingAction_h
 #define B4aSteppingAction_h 1
 
+#include "defines.h"
+
 #include "G4UserSteppingAction.hh"
 
 class B4DetectorConstruction;

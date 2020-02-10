@@ -31,6 +31,8 @@
 #include "B4DetectorConstruction.hh"
 #include "B4aActionInitialization.hh"
 
+#include "defines.h"
+
 #ifdef G4MULTITHREADED
 #undef G4MULTITHREADED
 #endif
@@ -185,13 +187,14 @@ int main(int argc,char** argv)
   enable_physlimits();
   // Initialize visualization
   //
-//   auto visManager = new G4VisExecutive;
+#ifdef USEVIS
+   auto visManager = new G4VisExecutive;
   // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
  // G4VisManager* visManager = new G4VisExecutive("Quiet");
  // visManager->Initialize();
   //auto visManager = new G4VisExecutive();
-  //   visManager->Initialize();
-
+     visManager->Initialize();
+#endif
   // Get the pointer to the User Interface manager
   G4UImanager* UImanager = G4UImanager::GetUIpointer();
 
