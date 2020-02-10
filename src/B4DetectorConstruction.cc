@@ -65,6 +65,7 @@
 #include <cstdlib>
 //#include "Math/Vector3D.h"
 
+//#define USEDIVISION
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -85,9 +86,11 @@ static G4String createString(const T& i){
 B4DetectorConstruction::B4DetectorConstruction()
 : G4VUserDetectorConstruction(),
   fCheckOverlaps(false),
-  defaultMaterial(0),
-  absorberMaterial(0),
-  gapMaterial(0)
+  m_vacuum(0),
+  m_pb(0),
+  m_pbtungsten(0),
+  m_silicon(0),
+  m_cu(0)
 
 {
 
@@ -110,20 +113,20 @@ void  B4DetectorConstruction::DefineGeometry(geometry geo){
 	if(geo == fullendcap){
 		calorThickness=2200*mm;
 
-        nofEELayers = 5;
-        Ncalowedges=3;//120;
-        nofHB=5;
-        int etasegments=3;
+        nofEELayers = 14;
+        Ncalowedges=120;
+        nofHB=0;
+        int etasegments=30;
 
         Calo_start_eta=1.5;
         Calo_end_eta=3.0;
-        Calo_start_z=200*cm;
+        Calo_start_z=300*cm;
 
 		for(int i=0;i<nofEELayers+nofHB;i++){
 		    if(i<nofEELayers)
-		        layerThicknesses.push_back(26*cm / (float)nofEELayers);//CMS like about 30 X0
+		        layerThicknesses.push_back(34*cm / (float)nofEELayers);//CMS like about 30 X0
 		    else
-		        layerThicknesses.push_back((calorThickness - 26*cm) / (float)nofHB);
+		        layerThicknesses.push_back((calorThickness - 34*cm) / (float)nofHB);
 
 		    layerGranularity.push_back(etasegments);
 		}
@@ -195,10 +198,19 @@ G4VPhysicalVolume* B4DetectorConstruction::createCellWheel(
         G4double z_length,
         G4int nphi,
         G4int layernum,
-        G4int cellnum){
+        G4int cellnum,
+        G4Material* active_m,
+        G4Material* abs_m,
+        G4double abs_fraction){
 
 
 
+    G4double active_z_length=z_length;
+    G4double abs_z_length=0;
+    if(abs_fraction>0){
+        active_z_length *= 1.-abs_fraction;
+        abs_z_length = z_length-active_z_length;
+    }
 
     //create the volume
 
@@ -207,16 +219,17 @@ G4VPhysicalVolume* B4DetectorConstruction::createCellWheel(
 	auto cellS   = createCons("Cell_"+name,
 	        start_eta,
 	        eta_width,
-	        start_z,
-	        z_length,
+	        start_z+abs_z_length,
+	        active_z_length,
 	        0,
-	        2.*M_PI/(double)nphi);
 
+	        2.*M_PI/(double)nphi);
 
 	auto cellLV  = new G4LogicalVolume(
 	        cellS,           // its solid
-			gapMaterial,  // its material
+	        active_m,  // its material
 			"Cell_LV_"+name);         // its name
+
 
 
 
@@ -226,30 +239,40 @@ G4VPhysicalVolume* B4DetectorConstruction::createCellWheel(
     cellLV->SetUserLimits(stepLimit);
 
 
+#ifdef USEDIVISION
+    G4VPhysicalVolume* activeMaterial
+            = new G4PVDivision("Cell_rep_"+name, cellLV,layerLV, kPhi, nphi,0.);
+#else
     G4VPhysicalVolume* activeMaterial
         = new G4PVReplica("Cell_rep_"+name, cellLV,
                 layerLV, kPhi, nphi, 2.*M_PI/(double)nphi-1e-7);
+#endif
 
-    //G4VPhysicalVolume* activeMaterial
-      //      = new G4PVDivision("Cell_rep_"+name, cellLV,layerLV, kPhi, nphi,0.);
+    if(abs_fraction>0 && abs_m){
+        auto absS   = createCons("Abs_"+name,
+                start_eta,
+                eta_width,
+                start_z,
+                abs_z_length,
+                0,
 
+                2.*M_PI/(double)nphi);
+
+        auto absLV  = new G4LogicalVolume(
+                absS,           // its solid
+                abs_m,  // its material
+                "Abs_LV_"+name);         // its name
+
+        G4VPhysicalVolume* absMaterial
+        = new G4PVReplica("Abs_rep_"+name, absLV,
+                layerLV, kPhi, nphi, 2.*M_PI/(double)nphi-1e-7);
+
+
+    }
 
     G4int maxcopies = activeMaterial->GetMultiplicity();
-    //activeMaterial->GetReplicationData()
-    //activeMaterial->GetCopyNo()
-   // auto activeMaterial
-   // = new G4PVPlacement(
-   //         0,                // no rotation
-   //         G4ThreeVector(0., 0., 0.), // its position, relative to layerLV
-   //         cellLV,            // its logical volume
-   //         "Cell_x_"+name,            // its name
-   //         layerLV,          // its mother  volume
-   //         false,            // no boolean operation
-   //         0,                // copy number
-   //         fCheckOverlaps);//fCheckOverlaps);  // checking overlaps
-   //
-   // ROOT::Math::DisplacementVector3D<ROOT::Math::CylindricalEta3D<double> > RhoEtaPhiVector(etaToR(start_eta+eta_width/2. ,start_z+z_length/2.),
-    //        start_eta+eta_width/2., starting_angle_rad+width_rad/2.);
+
+    //only consider active material here
 
     double width_rad = 2.*M_PI/(double)nphi*rad;
     for(G4int i =0;i<maxcopies;i++){
@@ -290,6 +313,9 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(
 
     //create the volume
 
+    //override:
+    z_length = 10.382*mm + 0.300*mm ;//absorber plus silicon, this makes 1.85 X0 per layer
+
     auto layerS   = createCons("Layer_"+name,
             start_eta,
             end_eta-start_eta,
@@ -301,7 +327,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(
 
     auto layerLV  = new G4LogicalVolume(
             layerS,           // its solid
-            defaultMaterial,  // its material
+            m_vacuum,  // its material
 			"Layer_"+name);         // its name
 
 
@@ -338,7 +364,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(
 	            2*M_PI);
 	    auto RingLV  = new G4LogicalVolume(
 	            ringSvol,           // its solid
-	                defaultMaterial,  // its material
+	                m_vacuum,  // its material
 	                "RingLV_"+createString(ieta) +"_"+name);         // its name
 	    RingLV->SetUserLimits(stepLimit);
 	    auto RingPV = new G4PVPlacement(
@@ -361,11 +387,15 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(
 	                z_length,
 	                n_cells_phi,
 	                layernumber,
-	                cellno);
+	                cellno,
+	                m_silicon,
+	                m_cu,
+	                0.9719153717 //absorber fraction
+	                );
+
 	        cellno++;
 	  //  }
 	}
-
 
 
 
@@ -423,6 +453,7 @@ void B4DetectorConstruction::DefineMaterials()
 	// Lead material defined using NIST Manager
 	auto nistManager = G4NistManager::Instance();
 	nistManager->FindOrBuildMaterial("G4_Pb");
+    nistManager->FindOrBuildMaterial("G4_Cu");
 	nistManager->FindOrBuildMaterial("G4_PbWO4");
     nistManager->FindOrBuildMaterial("G4_Si");
 
@@ -444,12 +475,13 @@ void B4DetectorConstruction::DefineMaterials()
 
 
 	// Get materials
-	defaultMaterial = G4Material::GetMaterial("Galactic");
-	absorberMaterial = G4Material::GetMaterial("G4_Pb");
-	gapMaterial = G4Material::GetMaterial("G4_PbWO4");
-	trackerMaterial = G4Material::GetMaterial("G4_Si");
+	m_vacuum = G4Material::GetMaterial("Galactic");
+	m_pb = G4Material::GetMaterial("G4_Pb");
+	m_pbtungsten = G4Material::GetMaterial("G4_PbWO4");
+	m_silicon = G4Material::GetMaterial("G4_Si");
+	m_cu = G4Material::GetMaterial("G4_Cu");
 
-	if ( ! defaultMaterial || ! absorberMaterial || ! gapMaterial || !trackerMaterial ) {
+	if ( ! m_vacuum || ! m_pb || ! m_pbtungsten || !m_silicon ) {
 		G4ExceptionDescription msg;
 		msg << "Cannot retrieve materials already defined.";
 		G4Exception("B4DetectorConstruction::DefineVolumes()",
@@ -486,7 +518,7 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 	auto worldLV
 	= new G4LogicalVolume(
 			worldS,           // its solid
-			defaultMaterial,  // its material
+			m_vacuum,  // its material
 			"World");         // its name
 
 
@@ -544,7 +576,7 @@ void B4DetectorConstruction::ConstructSDandField()
 	// Create global magnetic field messenger.
 	// Uniform magnetic field is then created automatically if
 	// the field value is not zero.
-	G4ThreeVector fieldValue(0,0,0.);
+	G4ThreeVector fieldValue(0,0,0);//1.);
 	fMagFieldMessenger = new G4GlobalMagFieldMessenger(fieldValue);
 	fMagFieldMessenger->SetVerboseLevel(2);
 

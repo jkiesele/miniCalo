@@ -55,8 +55,13 @@ B4aActionInitialization::~B4aActionInitialization()
 
 void B4aActionInitialization::BuildForMaster() const
 {
+
+#ifndef NOPYTHIA
 #ifdef USEPYTHIA
     auto gen=new B4JetGeneratorAction;
+#else
+    auto gen=new B4PrimaryGeneratorAction;
+#endif
 #else
     auto gen=new B4PrimaryGeneratorAction;
 #endif
@@ -69,8 +74,12 @@ void B4aActionInitialization::BuildForMaster() const
 void B4aActionInitialization::Build() const
 {
 
+#ifndef NOPYTHIA
 #ifdef USEPYTHIA
-	auto gen=new B4JetGeneratorAction;
+    auto gen=new B4JetGeneratorAction;
+#else
+    auto gen=new B4PrimaryGeneratorAction;
+#endif
 #else
     auto gen=new B4PrimaryGeneratorAction;
 #endif

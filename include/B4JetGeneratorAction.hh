@@ -31,6 +31,8 @@
 #ifndef B4JetGeneratorAction_h
 #define B4JetGeneratorAction_h 1
 
+#ifndef NOPYTHIA
+
 #include "B4PrimaryGeneratorAction.hh"
 #include "B4PartGeneratorBase.hh"
 #include "globals.hh"
@@ -124,5 +126,5 @@ private:
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
+#endif
 #endif

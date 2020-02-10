@@ -99,7 +99,10 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
             G4double z_length,
             G4int nphi,
             G4int layernum,
-            G4int cellnum);
+            G4int cellnum,
+            G4Material* active_m,
+            G4Material* abs_m=0,
+            G4double abs_fraction=0);
 
     G4VPhysicalVolume* createLayer(
             G4LogicalVolume * caloLV,
@@ -131,7 +134,7 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
     std::vector<G4int> layerGranularity;
     std::vector<G4int> layerSplitGranularity;
     G4double calorSizeXY;
-    G4Material * defaultMaterial, *absorberMaterial, *gapMaterial, *trackerMaterial;
+    G4Material * m_vacuum, *m_pb, *m_pbtungsten, *m_silicon, *m_cu;
     G4int nofEELayers,nofHB, noTrackLayers;
     G4double calorThickness;
 

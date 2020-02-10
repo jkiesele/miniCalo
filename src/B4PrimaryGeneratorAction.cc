@@ -78,7 +78,7 @@ B4PrimaryGeneratorAction::B4PrimaryGeneratorAction()
 
   xorig_=0;
   yorig_=0;
-  setParticleID(gamma);
+  setParticleID(elec);
 
 }
 
@@ -181,6 +181,30 @@ void generatePosition(G4double dRmin,G4double dRmax, G4double&x , G4double&y){
         dR2 = x*x + y*y;
     }
 }
+double gen_etaToR(const G4double& eta, const G4double& z){
+    return z * exp(-eta);
+}
+
+//just make sure it hits the first calo layer
+void generateDirection(G4double etamin,G4double etamax, const G4ThreeVector& position, G4double&x_dir , G4double&y_dir){
+    G4double eta=0;
+    G4double calo_z = 320*cm;
+    G4double Rmin= gen_etaToR(etamax,calo_z);
+    G4double Rmax= gen_etaToR(etamin,calo_z);
+
+
+
+    G4double R = 0;
+    while(R > Rmax || R<Rmin){
+        x_dir= 1. - 2.*G4INCL::Random::shoot();
+        y_dir= 1. - 2.*G4INCL::Random::shoot();
+        //propagate to surface:
+        G4double xprop = x_dir*calo_z + position.x();
+        G4double yprop = y_dir*calo_z + position.y();
+
+        R = sqrt(xprop*xprop + yprop*yprop);
+    }
+}
 
 void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
@@ -214,20 +238,21 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   // Set gun position
 
 
-  double energy_max=40;
-  double energy_min=29;
+  double energy_max=140;
+  double energy_min=10;
   //energy_=15;
 
   //iterate
-  //if(particleid_==pioncharged)
-  //    G4cout << setParticleID(elec) <<G4endl;
-  //else if(particleid_==elec)
-  //    G4cout << setParticleID(gamma) <<G4endl;
-  //else if(particleid_==gamma)
-  //    G4cout << setParticleID(pioncharged) <<G4endl;
+  if(particleid_==pioncharged)
+      G4cout << setParticleID(elec) <<G4endl;
+  else if(particleid_==elec)
+      G4cout << setParticleID(gamma) <<G4endl;
+  else if(particleid_==gamma)
+      G4cout << setParticleID(pioncharged) <<G4endl;
 
-  setParticleID(gamma);
+//  setParticleID(gamma);
   //positron
+
 
 
 
@@ -241,12 +266,18 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
       energy_=(energy_max)*rand+energy_min;
   }
 
-  generatePosition(11*cm,40*cm,xorig_,yorig_);
+  generatePosition(0.*cm,100*cm,xorig_,yorig_);
+
+  G4ThreeVector position(xorig_,yorig_,0);//xorig_,yorig_,0);
+  G4double x_dir,y_dir;
+
+  generateDirection(1.5,3.0,position,x_dir,y_dir);
 
 
-  G4ThreeVector position(161.311,-271.054,0);//xorig_,yorig_,0);
+  //get eta
 
-  G4ThreeVector direction(0,0,1);//0.2*G4INCL::Random::shoot(),0.2*G4INCL::Random::shoot(),0);
+
+  G4ThreeVector direction(x_dir,y_dir,1);//0.2*G4INCL::Random::shoot(),0.2*G4INCL::Random::shoot(),0);
 
 
   fParticleGun->SetParticleMomentumDirection(direction);
