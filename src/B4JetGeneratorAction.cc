@@ -58,40 +58,50 @@
 
 bool WriteTruthTree = false;
 
-B4JetGeneratorAction::B4JetGeneratorAction()
- :// B4PrimaryGeneratorAction(),
-   pyqq_("/cvmfs/sft.cern.ch/lcg/releases/LCG_latest/MCGenerators/pythia8/244/x86_64-centos7-gcc9-opt/share/Pythia"),
-   pygg_("/cvmfs/sft.cern.ch/lcg/releases/LCG_latest/MCGenerators/pythia8/244/x86_64-centos7-gcc9-opt/share/Pythia"),
-   jetDef_(new fastjet::JetDefinition(fastjet::antikt_algorithm, 0.4)),
-   fjinputs_()
+B4JetGeneratorAction::B4JetGeneratorAction(particles p) :
+// B4PrimaryGeneratorAction(),
+  pythia_("/cvmfs/sft.cern.ch/lcg/releases/LCG_latest/MCGenerators/pythia8/244/x86_64-centos7-gcc9-opt/share/Pythia"),
+  particle_(p),
+  jetDef_(new fastjet::JetDefinition(fastjet::antikt_algorithm, 0.4)),
+  fjinputs_()
 {
   G4INCL::Random::setGenerator(new G4INCL::Ranecu());
 
-  for (auto* py : {&pygg_, &pyqq_}) {
-    py->readString("Beams:eCM = 14000.");
-    py->readString("Init:showChangedParticleData = off");
-    py->readString("Init:showChangedSettings = on");
-    py->readString("Next:numberShowLHA = 0");
-    py->readString("Next:numberShowInfo = 0");
-    py->readString("Next:numberShowProcess = 0");
-    py->readString("Next:numberShowEvent = 0");
-    py->readString("PhaseSpace:pTHatMin = 10.");
+  pythia_.readString("Beams:eCM = 14000.");
+  pythia_.readString("Init:showChangedParticleData = off");
+  pythia_.readString("Init:showChangedSettings = on");
+  pythia_.readString("Next:numberShowLHA = 0");
+  pythia_.readString("Next:numberShowInfo = 0");
+  pythia_.readString("Next:numberShowProcess = 0");
+  pythia_.readString("Next:numberShowEvent = 0");
+  pythia_.readString("PhaseSpace:pTHatMin = 10.");
+  switch (particle_) {
+  case minbias:
+    pythia_.readString("HardQCD:gg2gg = on");
+    break;
+  case displacedjet:
+    pythia_.readString("NewGaugeBoson:ffbar2gmZZprime = on");
+    pythia_.readString("Zprime:gmZmode = 3"); // only pure Z'
+    pythia_.readString("Zprime:ve = 0.");
+    pythia_.readString("Zprime:ae = 0.");
+    pythia_.readString("Zprime:vnue = 0.");
+    pythia_.readString("Zprime:anue = 0.");
+    pythia_.readString("32:tau0 = 100.");
+    pythia_.readString("32:oneChannel = 1 1. 100 1 -1");
+    break;
+  default:
+    break;
   }
-  pygg_.readString("HardQCD:gg2gg = on");
-  pyqq_.readString("WeakBosonExchange:ff2ff(t:gmZ) = on");
-  pygg_.init();
-  pyqq_.init();
+  pythia_.init();
 
   fjinputs_.reserve(4096);
-
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 B4JetGeneratorAction::~B4JetGeneratorAction()
 {
-  pygg_.stat();
-  pyqq_.stat();
+  pythia_.stat();
 
   delete jetDef_;
 
@@ -123,8 +133,7 @@ void B4JetGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   }
 
   if (firstEvent_) {
-    pyqq_.rndm.init(G4INCL::Random::getSeeds()[0]);
-    pygg_.rndm.init(G4INCL::Random::getSeeds()[1]);
+    pythia_.rndm.init(G4INCL::Random::getSeeds()[0]);
     firstEvent_ = false;
   }
 
@@ -134,137 +143,173 @@ void B4JetGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   double const eMax = 4000.;
 
   // jets from this position at eta ~ 3.6 will hit the center of the detector
- xorig_=0;
- yorig_=0;
+  xorig_=0;
+  yorig_=0;
 
   G4ThreeVector vertex_position(xorig_,yorig_,0);
   G4double vertex_time(0.);
 
-  // make a dummy primary proton
-  G4PrimaryParticle* primaryParticle = new G4PrimaryParticle(2212);
+  // // make a dummy primary proton
+  // G4PrimaryParticle* primaryParticle = new G4PrimaryParticle(2212);
 
-  Pythia8::Pythia* pythia(&pygg_);//G4INCL::Random::shoot() > 0.5 ? &pyqq_ : &pygg_);
-  if (pythia == &pyqq_) {
-    eventType_ = kQQ;
-    jetType_ = 0;
-  }
-  else {
-    eventType_ = kGG;
-    jetType_ = 1;
-  }
-
-  unsigned iTry(0);
+  G4double zsign = 1.;
+  std::vector<int> primaries;
+  primaries.reserve(1024 * 16);
+ 
   while (true) {
-    if (!pythia->next()) {
-      if (++iTry < 10)
-        continue;
-      pythia->stat();
+    // loop until an event passing a gen filter is generated
+
+    unsigned iTry(0);
+    while (true) {
+      // loop until pythia generates a consistent event (should succeed)
+      if (!pythia_.next()) {
+        if (++iTry < 10)
+          continue;
+        pythia_.stat();
+      }
       break;
     }
 
-    fjinputs_.clear();
+    if (iTry == 10) {
+      // failed event generation - make a dummy vertex (or just crash?)
+      G4cerr << "EVENT GENERATION FAILED!!!!" << G4endl;
 
-    // Find number of all final charged particles and fill histogram.
-    for (int i(0); i < pythia->event.size(); ++i) {
-      auto& part(pythia->event[i]);
-      if (part.isFinal()) {
-        fjinputs_.emplace_back(part.px(), part.py(), part.pz(), part.e());
-        fjinputs_.back().set_user_index(i);
-      }
+      G4PrimaryVertex* vertex = new G4PrimaryVertex(vertex_position, vertex_time);
+      // let there be light
+      G4PrimaryParticle* primaryParticle = new G4PrimaryParticle(22);
+      vertex->SetPrimary(primaryParticle);
+
+      anEvent->AddPrimaryVertex(vertex);
+
+      return;
     }
 
-    fastjet::ClusterSequence seq(fjinputs_, *jetDef_);
-    auto jets(fastjet::sorted_by_pt(seq.inclusive_jets(15.)));
+    if (particle_ == minbias) {
+      primaries.clear();
+      fjinputs_.clear();
 
-    fastjet::PseudoJet* jet(nullptr);
+      // cluster ak4 jets from final state particles
+      for (int i{0}; i < pythia_.event.size(); ++i) {
+        auto& part(pythia_.event[i]);
 
-    for (auto& j : jets) {
-      if (j.e() > eMin && j.e() < eMax && fabs(j.eta())<etaTargetMax && fabs(j.eta())>etaTargetMin) {
-        jet = &j;
-        break;
-      }
-    }
+        if (part.isFinal()) {
+          fjinputs_.emplace_back(part.px(), part.py(), part.pz(), part.e());
+          fjinputs_.back().set_user_index(i);
 
-    if (jet == nullptr)
-      continue;
-
-    energy_ = jet->e()*GeV;
-
-    auto constituents(seq.constituents(*jet));
-
-    // bring all particles around +z, +y axis
-    if (jet->pz() < 0.) {
-      for (auto& pj : constituents)
-        pj.reset_momentum(pj.px(), pj.py(), -pj.pz(), pj.E());
-
-      jet->reset_momentum(jet->px(), jet->py(), -jet->pz(), jet->E());
-    }
-
-
-    auto* partDefinition(G4ParticleTable::GetParticleTable()->FindParticle(2212));
-    primaryParticle->SetMass(jet->m()*GeV);
-    primaryParticle->SetMomentum(jet->px()*GeV, jet->py()*GeV, jet->pz()*GeV);
-    primaryParticle->SetCharge(partDefinition->GetPDGCharge());
-
-    if (WriteTruthTree) {
-      jetE_ = jet->e();
-      jetEta_ = jet->eta();
-      nPart_ = 0;
-    }
-
-    //
-    // Write not just the jet but ALL particles
-    //
-    //  for (auto& pj : constituents) {
-    //   int pdgId(pythia->event[pj.user_index()].id());
-    for (int i(0); i < pythia->event.size(); ++i) {
-        auto& pj(pythia->event[i]);
-        int pdgId= pythia->event[i].id();
-        partDefinition = G4ParticleTable::GetParticleTable()->FindParticle(pdgId);
-        if (partDefinition == nullptr)
-            continue; //throw std::runtime_error(std::string("Unknown particle ") + std::to_string(pdgId));
-
-        G4PrimaryParticle* particle = new G4PrimaryParticle(pdgId);
-        particle->SetMass(pj.m()*GeV);
-        particle->SetMomentum(pj.px()*GeV, pj.py()*GeV, pj.pz()*GeV);
-        particle->SetCharge(partDefinition->GetPDGCharge());
-
-        primaryParticle->SetDaughter(particle);
-
-        if (WriteTruthTree) {
-            partPid_[nPart_] = pj.id();
-            partE_[nPart_] = pj.e();
-            partEta_[nPart_] = pj.eta();
-            partPhi_[nPart_] = pj.phi();
-            ++nPart_;
+          primaries.push_back(i);
         }
-    }
+      }
 
-    if (WriteTruthTree)
-      truthTree_->Fill();
+      fastjet::ClusterSequence seq(fjinputs_, *jetDef_);
+      auto jets(fastjet::sorted_by_pt(seq.inclusive_jets(15.)));
+
+      fastjet::PseudoJet* jet(nullptr);
+
+      for (auto& j : jets) {
+        if (j.e() > eMin && j.e() < eMax && fabs(j.eta())<etaTargetMax && fabs(j.eta())>etaTargetMin) {
+          jet = &j;
+          break;
+        }
+      }
+      if (jet == nullptr)
+        continue;
+
+      energy_ = jet->e()*GeV;
+
+      if (jet->pz() < 0.)
+        zsign = -1.;
+    }
+    else if (particle_ == displacedjet) {
+      // ak4 doesn't make sense for displaced jets - simply check if one of the immediate daughters (down quarks) of the Z' points to the detector
+
+      int ipart{0};
+      for (; ipart < pythia_.event.size(); ++ipart) {
+        auto& part(pythia_.event[ipart]);
+        auto& mother(pythia_.event[part.mother1()]); // mother1 is minimum 0 (not -1) so there won't be segfaults
+        if (mother.id() != 32)
+          continue;
+
+        // I'm lazy so I'm not going to implement an actual filter - just checking that it's "roughly in the detector direction"
+        if (part.e() > eMin && part.e() < eMax && std::abs(part.eta()) < etaTargetMax + 0.2 && std::abs(part.eta()) > etaTargetMin - 0.2) {
+          if (part.pz() > 0.) {
+            vertex_position = G4ThreeVector(mother.xProd(), mother.yProd(), mother.zProd());
+          }
+          else {
+            zsign = -1.;
+            vertex_position = G4ThreeVector(mother.xProd(), mother.yProd(), -mother.zProd());
+          }
+          break;
+        }
+      }
+
+      if (ipart == pythia_.event.size())
+        continue;
+
+      primaries.clear();
+
+      ipart = 0;
+      for (; ipart < pythia_.event.size(); ++ipart) {
+        auto& part(pythia_.event[ipart]);
+
+        if (!part.isFinal())
+          continue;
+
+        auto* mother(&pythia_.event[part.mother1()]);
+        while (mother->id() != 32 && mother->mother1() != 0)
+          mother = &pythia_.event[mother->mother1()];
+
+        if (mother->id() == 32)
+          primaries.push_back(ipart);
+      }
+    }
 
     break;
   }
 
+  // auto* partDefinition(G4ParticleTable::GetParticleTable()->FindParticle(2212));
+  // primaryParticle->SetMass(jet->m()*GeV);
+  // primaryParticle->SetMomentum(jet->px()*GeV, jet->py()*GeV, jet->pz()*GeV);
+  // primaryParticle->SetCharge(partDefinition->GetPDGCharge());
+
+  // if (WriteTruthTree) {
+  //   jetE_ = jet->e();
+  //   jetEta_ = jet->eta();
+  //   nPart_ = 0;
+  // }
+
   // create G4PrimaryVertex object
   G4PrimaryVertex* vertex = new G4PrimaryVertex(vertex_position, vertex_time);
-  vertex->SetPrimary(primaryParticle);
+
+  for (int ipart : primaries) {
+    auto& pj(pythia_.event[ipart]);
+
+    int pdgId = pj.id();
+    auto* partDefinition = G4ParticleTable::GetParticleTable()->FindParticle(pdgId);
+    if (partDefinition == nullptr)
+      continue; //throw std::runtime_error(std::string("Unknown particle ") + std::to_string(pdgId));
+
+    G4PrimaryParticle* particle = new G4PrimaryParticle(pdgId);
+    particle->SetMass(pj.m()*GeV);
+    particle->SetMomentum(pj.px()*GeV, pj.py()*GeV, pj.pz()*GeV*zsign);
+    particle->SetCharge(partDefinition->GetPDGCharge());
+
+    vertex->SetPrimary(particle);
+
+    //      primaryParticle->SetDaughter(particle);
+
+    if (WriteTruthTree) {
+      partPid_[nPart_] = pdgId;
+      partE_[nPart_] = pj.e();
+      partEta_[nPart_] = pj.eta();
+      partPhi_[nPart_] = pj.phi();
+      ++nPart_;
+    }
+  }
+
+  if (WriteTruthTree)
+    truthTree_->Fill();
 
   anEvent->AddPrimaryVertex(vertex);
-}
-
-/*static*/
-G4String
-B4JetGeneratorAction::eventTypeName(unsigned t)
-{
-  switch (t) {
-  case kQQ:
-    return "QQ";
-  case kGG:
-    return "GG";
-  default:
-    throw std::runtime_error("Invalid event type");
-  };
 }
 
 #endif

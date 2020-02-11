@@ -21,7 +21,8 @@ public:
     enum particles{
         elec=0,muon,pioncharged,pionneutral,klong,kshort,gamma,
         positron,
-        quark,gluon,
+        minbias,
+        displacedjet,
         particles_size //leave this one
     };
 

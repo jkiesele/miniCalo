@@ -64,7 +64,7 @@ class TTree;
 class B4JetGeneratorAction : public B4PartGeneratorBase
 {
 public:
-  B4JetGeneratorAction();
+  B4JetGeneratorAction(particles p);
   virtual ~B4JetGeneratorAction();
 
   virtual void GeneratePrimaries(G4Event* event);
@@ -75,40 +75,27 @@ public:
   G4double getY()const{return yorig_;}
   G4double getR()const{return std::sqrt(yorig_*yorig_+xorig_*xorig_);}
 
-
   bool isJetGenerator(){return true;}
 
-  enum EventType {
-    kQQ,
-    kGG,
-    nEventTypes
-  };
-
-  std::vector<G4String> generateAvailableParticles()const{return {"isQuark","isGluon"};}
+  std::vector<G4String> generateAvailableParticles()const{return {"isMinbias","isDisplacedJet"};}
 
   particles getParticle() const{
-      if(eventType_==kQQ)
-          return quark;
-      else
-          return gluon;
+    return particle_;
   }
 
   int isParticle(int i)const{
-      if(i && eventType_==kQQ)
-          return 1;
+    if (i == int(particle_))
+      return 1;
+    else
       return 0;
   }
-
-  EventType eventType() const { return eventType_; }
-  static G4String eventTypeName(unsigned t);
 
 private:
   G4double energy_;
   G4double xorig_,yorig_;
 
-  Pythia8::Pythia pyqq_;
-  Pythia8::Pythia pygg_;
-  EventType eventType_;
+  Pythia8::Pythia pythia_;
+  particles particle_;
   fastjet::JetDefinition* jetDef_;
   std::vector<fastjet::PseudoJet> fjinputs_;
 

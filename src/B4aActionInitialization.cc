@@ -36,7 +36,7 @@
 #include "B4DetectorConstruction.hh"
 #include "B4JetGeneratorAction.hh"
 
-//#define USEPYTHIA
+#define USEPYTHIA B4PartGeneratorBase::displacedjet
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -58,7 +58,7 @@ void B4aActionInitialization::BuildForMaster() const
 
 #ifndef NOPYTHIA
 #ifdef USEPYTHIA
-    auto gen=new B4JetGeneratorAction;
+  auto gen=new B4JetGeneratorAction(USEPYTHIA);
 #else
     auto gen=new B4PrimaryGeneratorAction;
 #endif
@@ -76,7 +76,7 @@ void B4aActionInitialization::Build() const
 
 #ifndef NOPYTHIA
 #ifdef USEPYTHIA
-    auto gen=new B4JetGeneratorAction;
+  auto gen=new B4JetGeneratorAction(USEPYTHIA);
 #else
     auto gen=new B4PrimaryGeneratorAction;
 #endif
