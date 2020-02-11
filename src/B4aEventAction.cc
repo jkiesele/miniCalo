@@ -161,14 +161,17 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
 
     G4cout << "nsteps_ "<<nsteps_ <<G4endl;
     bool isgamma = B4PrimaryGeneratorAction::globalgen->isParticle(B4PrimaryGeneratorAction::gamma);
+    double truex = B4PrimaryGeneratorAction::globalgen->getX();
+    double truey = B4PrimaryGeneratorAction::globalgen->getY();
+    double min_distance2  = 1e6;
     double trackmom = getTrackMomentum(B4PrimaryGeneratorAction::globalgen->getEnergy(),isgamma);
     if(trackmom>0){
         int ti_he=-1;
-        double highest_e=0;
         for(size_t ti=0;ti<rechit_layer_.size();ti++){
             if(rechit_layer_.at (ti)<-0.1 && rechit_energy_.at (ti)>0){
-                if(highest_e<rechit_energy_.at (ti)){
-                    highest_e=rechit_energy_.at (ti);
+                double distance2 = (rechit_x_.at (ti)-truex)*(rechit_x_.at (ti)-truex) + (rechit_y_.at (ti)-truey)*(rechit_y_.at (ti)-truey);
+                if(min_distance2 > distance2){
+                    min_distance2=distance2;
                     ti_he=ti;
                 }
             }

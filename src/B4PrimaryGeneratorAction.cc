@@ -205,7 +205,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
  }
 
   //energy_=20;
- double minmaxx=30/2.;
+ double minmaxx=28/2.;
 
   //G4cout << "shooting particle at " ;
   double xpos=550;

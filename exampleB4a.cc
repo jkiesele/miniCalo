@@ -63,6 +63,8 @@
 #include "G4ParticleDefinition.hh"
 #include "G4ProcessManager.hh"
 
+#include "defines.h"
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 namespace {
@@ -120,6 +122,7 @@ int main(int argc,char** argv)
   G4String macro;
   G4String session;
   G4String outfile="out";
+  long rseed=0;
 #ifdef G4MULTITHREADED
   G4int nThreads = 0;
 #endif
@@ -133,20 +136,23 @@ int main(int argc,char** argv)
 #endif
     else if (G4String(argv[i]) == "-f" ) {
     	outfile = argv[i+1];
+    	rseed = atoi(argv[i+1]);
     }
     else {
       PrintUsage();
       return 1;
     }
   }  
-  long rseed=0;
+
   // Detect interactive mode (if no macro provided) and define UI session
   //
 
 
   // Choose the Random engine
   //
-  G4Random::setTheEngine(new CLHEP::RanecuEngine);
+  auto randomengine=new CLHEP::RanecuEngine;
+  randomengine->setSeed(rseed);
+  G4Random::setTheEngine(randomengine);
   
   // Construct the default run manager
   //
@@ -177,11 +183,12 @@ int main(int argc,char** argv)
   enable_physlimits();
   // Initialize visualization
   //
+#ifdef USEVIS
   auto visManager = new G4VisExecutive;
   // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
   // G4VisManager* visManager = new G4VisExecutive("Quiet");
   visManager->Initialize();
-
+#endif
   // Get the pointer to the User Interface manager
   auto UImanager = G4UImanager::GetUIpointer();
 
