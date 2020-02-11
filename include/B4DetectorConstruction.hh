@@ -106,7 +106,7 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
     		G4double absfraction,G4ThreeVector position,
     		G4String name, int number, G4double calibration, G4int    nsmallsensorsrow=-1,
     		G4Material* material=0,
-            G4double sizexy=0);
+            G4double sizexy=0, bool istracker=false);
   
     void createCalo(G4LogicalVolume * caloLV,G4ThreeVector position,G4String name);
     // data members

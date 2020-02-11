@@ -205,16 +205,17 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
  }
 
   //energy_=20;
+ double minmaxx=30/2.;
 
   //G4cout << "shooting particle at " ;
-  double xpos=50;
-  while(fabs(xpos)>7.5){
-      xpos=15*G4INCL::Random::shoot() - 7.5;
+  double xpos=550;
+  while(fabs(xpos)>minmaxx){
+      xpos=2.*minmaxx*G4INCL::Random::shoot() - minmaxx;
       //G4cout << xpos <<  G4endl;
   }
-  double ypos=50;
-  while(fabs(ypos)>=7.5){
-      ypos=15*G4INCL::Random::shoot() -7.5;
+  double ypos=550;
+  while(fabs(ypos)>minmaxx){
+      ypos=2.*minmaxx*G4INCL::Random::shoot() - minmaxx;
   }
 
   G4ThreeVector position(xpos*cm, ypos*cm, zposition);

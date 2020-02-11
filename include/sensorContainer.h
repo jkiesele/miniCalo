@@ -20,10 +20,10 @@ public:
 	G4double posx,
 	G4double posy,
 	G4double posz,
-	int layer, G4VPhysicalVolume * absvol=0):
+	int layer, G4VPhysicalVolume * absvol=0, bool istracker=false):
 		vol_(vol),dimxy_(dimxy),dimz_(dimz),area_(area),
 		posx_(posx),posy_(posy),posz_(posz-dimz/2.),energyscalefactor_(1),
-		layer_(layer),absvol_(absvol)
+		layer_(layer),absvol_(absvol),istracker_(istracker)
 	{
 		global_detid_=global_detid_counter_++;
 	}
@@ -78,6 +78,8 @@ public:
 		return global_detid_;
 	}
 
+	bool isTracker()const{return istracker_;}
+
 private:
 	sensorContainer():vol_(0),dimxy_(0),dimz_(0),area_(0),
 		posx_(0),posy_(0),posz_(0),energyscalefactor_(1),absvol_(0){
@@ -100,8 +102,10 @@ private:
 	int global_detid_;
 
 	G4VPhysicalVolume *  absvol_;
+	bool istracker_;
 
 	static int global_detid_counter_;
+
 
 };
 

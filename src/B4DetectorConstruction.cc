@@ -344,7 +344,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createSandwich(G4LogicalVolume* layer
 	auto activeMaterial
 	= new G4PVPlacement(
 	        rot,                // no rotation
-			G4ThreeVector(0., 0., gapdz/2), // its position
+			G4ThreeVector(0., 0., 0), // its position
 			gapLV,            // its logical volume
 			"Gap_"+name,            // its name
 			sandwichLV,          // its mother  volume
@@ -375,7 +375,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 		G4int granularity, G4double absfraction,G4ThreeVector position,
 		G4String name, int layernumber, G4double calibration, G4int    nsmallsensorsrow,
 		G4Material* material,
-		G4double sizexy){
+		G4double sizexy, bool istracker){
 
     if(!sizexy)
         sizexy=calorSizeXY;
@@ -443,7 +443,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 			G4LogicalVolume* layerlogV,
 			B4DetectorConstruction* drec,
 			G4ThreeVector patentpos,
-			G4double absfractio, int laynum, G4double calib, G4Material* sw_material) {
+			G4double absfractio, int laynum, G4double calib, G4Material* sw_material, bool istrk) {
 		for(int xi=0;xi<gran;xi++){
 			G4double posx=startcorner.x()+sensorsize/2+sensorsize*(G4double)xi;
 			for(int yi=0;yi<gran;yi++){
@@ -464,7 +464,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 						sensorsize,Thickness,sensorsize*sensorsize,
 						patentpos.x()+posx,
 						patentpos.y()+posy,
-						patentpos.z(),laynum,absorber);
+						patentpos.z(),laynum,absorber,istrk);
 				G4cout << "created sensor with ID "<< sensordesc.getGlobalDetID() <<" sizexy "<< sensorsize <<"mm at "<< sandwichposition << G4endl;
 				sensordesc.setEnergyscalefactor(calib);
 				acells->push_back(sensordesc);
@@ -483,7 +483,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 
 	placeSensors(lowerleftcorner, true,largesensordxy,thickness,
 	        granularity,G4ThreeVector(0,0,0),name,&activecells_,layerLV,this,
-	        position,absfraction,layernumber,calibration,material);
+	        position,absfraction,layernumber,calibration,material,istracker);
 
 	G4cout << "layer position="<<position <<G4endl;
 
@@ -548,7 +548,7 @@ void B4DetectorConstruction::createCalo(G4LogicalVolume * caloLV,G4ThreeVector p
 	            absfraction,
 	            createatposition,
 	            name+"tracker"+createString(i),-100+i,1,splitgranularity,
-	            trackerMaterial, layersizexy);//calibration);
+	            trackerMaterial, layersizexy,true);//calibration);
 	    G4cout << "created tracker "<<  i<<" at "<< createatposition << G4endl;
 	    lastzpos+=5*cm;
 
@@ -662,9 +662,31 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 	//
 	worldLV->SetVisAttributes (G4VisAttributes::GetInvisible());
 
-	auto simpleBoxVisAtt= new G4VisAttributes(G4Colour(1.0,.0,.0));
-	simpleBoxVisAtt->SetVisibility(true);
+	G4double tgreen=0;
+	G4double tred=1;
+    G4double cgreen=0;
+    G4double cred=1;
+	float ncalo=0,ntracker=0;
 	for(auto& v: activecells_){
+	    if(v.isTracker()) ntracker++;
+	    else ncalo++;}
+
+	for(auto& v: activecells_){
+	    auto col = G4Colour(1,1,0);
+	    if(v.isTracker()){
+	        col = G4Colour(tred, tgreen,0);
+	        tred-= 1./ntracker;
+	        tgreen += 1./ntracker;
+	    }
+	    else{
+	        col = G4Colour(cred, cgreen,0);
+	        cred-= 1./ncalo;
+	        cgreen += 1./ncalo;
+	    }
+
+	    auto simpleBoxVisAtt= new G4VisAttributes(col);
+	    simpleBoxVisAtt->SetVisibility(true);
+        simpleBoxVisAtt->SetForceSolid(true);
 		v.getVol()->GetLogicalVolume()->SetVisAttributes(simpleBoxVisAtt);
 	}
 	//
@@ -681,7 +703,7 @@ void B4DetectorConstruction::ConstructSDandField()
 	// Create global magnetic field messenger.
 	// Uniform magnetic field is then created automatically if
 	// the field value is not zero.
-	G4ThreeVector fieldValue(100,0,0);
+	G4ThreeVector fieldValue(0,0,0);
 	fMagFieldMessenger = new G4GlobalMagFieldMessenger(fieldValue);
 	fMagFieldMessenger->SetVerboseLevel(2);
 
