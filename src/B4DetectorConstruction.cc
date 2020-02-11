@@ -532,12 +532,12 @@ void B4DetectorConstruction::createCalo(G4LogicalVolume * caloLV,G4ThreeVector p
 
 	for(int i=0;i<noTrackLayers;i++){
 
-	    int granularity=32;
+	    int granularity=2*32;
 	    int splitgranularity = -1;
 	    G4double absfraction=0;
 	    G4double thickness=0.3*mm;
 	    G4double calibration=1;
-	    G4double layersizexy=calorSizeXY * (1. - (lastzpos)/originpoint);
+	    G4double layersizexy=calorSizeXY;// * (1. - (lastzpos)/originpoint);
 	    G4cout << "layersizexy " << layersizexy << G4endl;
 
 	    G4ThreeVector createatposition=G4ThreeVector(0,0,lastzpos+thickness)+position;
