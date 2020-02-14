@@ -54,6 +54,9 @@ set(EXAMPLEB4A_SCRIPTS
   run1.mac
   run2.mac
   vis.mac
+  batchrun.mac
+  condorSubmit
+  batchscript.sh
   )
 
 foreach(_script ${EXAMPLEB4A_SCRIPTS})
