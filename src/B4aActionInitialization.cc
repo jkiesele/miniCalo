@@ -35,8 +35,7 @@
 #include "B4aSteppingAction.hh"
 #include "B4DetectorConstruction.hh"
 #include "B4JetGeneratorAction.hh"
-
-#define USEPYTHIA B4PartGeneratorBase::displacedjet
+#include "defines.h"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 

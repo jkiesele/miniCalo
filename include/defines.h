@@ -12,5 +12,6 @@
 
 //#define USEVIS
 
+#define USEPYTHIA B4PartGeneratorBase::minbias
 
 #endif /* MINICALO_INCLUDE_DEFINES_H_ */

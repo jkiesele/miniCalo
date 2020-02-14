@@ -77,7 +77,9 @@ B4JetGeneratorAction::B4JetGeneratorAction(particles p) :
   pythia_.readString("PhaseSpace:pTHatMin = 10.");
   switch (particle_) {
   case minbias:
-    pythia_.readString("HardQCD:gg2gg = on");
+    pythia_.readString("SoftQCD:nonDiffractive = on");
+    pythia_.readString("SoftQCD:singleDiffractive = on");
+    pythia_.readString("SoftQCD:doubleDiffractive = on");
     break;
   case displacedjet:
     pythia_.readString("NewGaugeBoson:ffbar2gmZZprime = on");
@@ -193,6 +195,7 @@ void B4JetGeneratorAction::GeneratePrimaries(G4Event* anEvent)
         auto& part(pythia_.event[i]);
 
         if (part.isFinal()) {
+          if(part.eta()>3. || part.eta() < 1.5)continue;
           fjinputs_.emplace_back(part.px(), part.py(), part.pz(), part.e());
           fjinputs_.back().set_user_index(i);
 

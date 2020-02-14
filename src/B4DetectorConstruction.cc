@@ -261,8 +261,8 @@ G4VPhysicalVolume* B4DetectorConstruction::createCellWheel(
 
 
 
-    G4double maxStep = z_length/200.;
-    G4double maxTime = 2.*s;
+    G4double maxStep = z_length/5.;
+    G4double maxTime = 10.*ms;
     G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
     cellLV->SetUserLimits(stepLimit);
 
@@ -305,6 +305,10 @@ G4VPhysicalVolume* B4DetectorConstruction::createCellWheel(
                 fCheckOverlaps);  // checking overlaps
 
 
+        G4double maxStep = z_length/5.;
+        G4double maxTime = 10.*ms;
+        G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
+        abswheelLV->SetUserLimits(stepLimit);
        // auto simpleBoxVisAtt= new G4VisAttributes(G4Colour(.1,.1,.1));
        // simpleBoxVisAtt->SetVisibility(true);
        // simpleBoxVisAtt->SetForceSolid(true);
@@ -382,8 +386,8 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(
                 0,                // copy number
                 fCheckOverlaps);  // checking overlaps
 
-    G4double maxStep = z_length/200.;
-    G4double maxTime = 2.*s;
+    G4double maxStep = z_length/5.;
+    G4double maxTime = 10.*ms;
     G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
     layerLV->SetUserLimits(stepLimit);
 
@@ -497,6 +501,7 @@ void B4DetectorConstruction::DefineMaterials()
     nistManager->FindOrBuildMaterial("G4_Cu");
 	nistManager->FindOrBuildMaterial("G4_PbWO4");
     nistManager->FindOrBuildMaterial("G4_Si");
+   // nistManager->FindOrBuildMaterial("G4_Air");
 
 	//nistManager->ListMaterials("all");
 
@@ -516,7 +521,7 @@ void B4DetectorConstruction::DefineMaterials()
 
 
 	// Get materials
-	m_vacuum = G4Material::GetMaterial("Galactic");
+	m_vacuum = G4Material::GetMaterial("Galactic"); // "Galactic"
 	m_pb = G4Material::GetMaterial("G4_Pb");
 	m_pbtungsten = G4Material::GetMaterial("G4_PbWO4");
 	m_silicon = G4Material::GetMaterial("G4_Si");
@@ -563,8 +568,8 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 			"World");         // its name
 
 
-	G4double maxStep = worldSizeZ/100.;
-	G4double maxTime = 20.*s;
+	G4double maxStep = worldSizeZ/10.;
+	G4double maxTime = 200.*ms;
 	G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
 	worldLV->SetUserLimits(stepLimit);
 
