@@ -74,7 +74,7 @@ B4JetGeneratorAction::B4JetGeneratorAction(particles p) :
   pythia_.readString("Next:numberShowInfo = 0");
   pythia_.readString("Next:numberShowProcess = 0");
   pythia_.readString("Next:numberShowEvent = 0");
-  pythia_.readString("PhaseSpace:pTHatMin = 10.");
+
   switch (particle_) {
   case minbias:
     pythia_.readString("SoftQCD:nonDiffractive = on");
@@ -195,32 +195,15 @@ void B4JetGeneratorAction::GeneratePrimaries(G4Event* anEvent)
         auto& part(pythia_.event[i]);
 
         if (part.isFinal()) {
-          if(part.eta()>3. || part.eta() < 1.5)continue;
+          if(part.eta()>3.2 || part.eta() < 1.3)continue;
           fjinputs_.emplace_back(part.px(), part.py(), part.pz(), part.e());
           fjinputs_.back().set_user_index(i);
 
           primaries.push_back(i);
         }
       }
+      energy_ = 0;
 
-      fastjet::ClusterSequence seq(fjinputs_, *jetDef_);
-      auto jets(fastjet::sorted_by_pt(seq.inclusive_jets(15.)));
-
-      fastjet::PseudoJet* jet(nullptr);
-
-      for (auto& j : jets) {
-        if (j.e() > eMin && j.e() < eMax && fabs(j.eta())<etaTargetMax && fabs(j.eta())>etaTargetMin) {
-          jet = &j;
-          break;
-        }
-      }
-      if (jet == nullptr)
-        continue;
-
-      energy_ = jet->e()*GeV;
-
-      if (jet->pz() < 0.)
-        zsign = -1.;
     }
     else if (particle_ == displacedjet) {
       // ak4 doesn't make sense for displaced jets - simply check if one of the immediate daughters (down quarks) of the Z' points to the detector

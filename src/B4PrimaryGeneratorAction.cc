@@ -188,7 +188,7 @@ double gen_etaToR(const G4double& eta, const G4double& z){
 //just make sure it hits the first calo layer
 void generateDirection(G4double etamin,G4double etamax, const G4ThreeVector& position, G4double&x_dir , G4double&y_dir, G4double zpos){
     G4double eta=0;
-    G4double calo_z = 320*cm-zpos;
+    G4double calo_z = 6*cm+320*cm-zpos;//should hit at least 3 layers
     G4double Rmin= gen_etaToR(etamax,calo_z);
     G4double Rmax= gen_etaToR(etamin,calo_z);
 
@@ -250,11 +250,11 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
  // else if(particleid_==gamma)
   //    G4cout << setParticleID(pioncharged) <<G4endl;
 
-//  setParticleID(gamma);
+  setParticleID(gamma);
   //positron
 
 
-
+// good metrics are: angle w.r.t. projective and energy
 
 
 
@@ -266,7 +266,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
       energy_=(energy_max)*rand+energy_min;
   }
 
-  generatePosition(0.*cm,100*cm,xorig_,yorig_);
+  generatePosition(15.*cm,66*cm,xorig_,yorig_);
 
   G4ThreeVector position(xorig_,yorig_,200*cm);//xorig_,yorig_,0);
   G4double x_dir,y_dir;

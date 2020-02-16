@@ -57,6 +57,7 @@ set(EXAMPLEB4A_SCRIPTS
   batchrun.mac
   condorSubmit
   batchscript.sh
+  env.sh
   )
 
 foreach(_script ${EXAMPLEB4A_SCRIPTS})
