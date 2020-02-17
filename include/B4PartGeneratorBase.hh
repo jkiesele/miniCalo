@@ -39,11 +39,15 @@ public:
     G4double getY()const{return yorig_;}
     G4double getR()const{return std::sqrt(yorig_*yorig_+xorig_*xorig_);}
 
+    G4double getDiffProjTheta()const{return diff_proj_theta_;}
+    G4double getDiffProjPhi()const{return diff_proj_phi_;}
+
 
 protected:
 
     G4double energy_;
     G4double xorig_,yorig_;
+    G4double diff_proj_theta_, diff_proj_phi_;
 };
 
 

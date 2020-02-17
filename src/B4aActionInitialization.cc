@@ -54,7 +54,6 @@ B4aActionInitialization::~B4aActionInitialization()
 
 void B4aActionInitialization::BuildForMaster() const
 {
-
 #ifndef NOPYTHIA
 #ifdef USEPYTHIA
   auto gen=new B4JetGeneratorAction(USEPYTHIA);

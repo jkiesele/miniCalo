@@ -183,8 +183,10 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
   analysisManager->FillNtupleDColumn(i,generator_->getEnergy());
   analysisManager->FillNtupleDColumn(i+1,generator_->getX());
   analysisManager->FillNtupleDColumn(i+2,generator_->getY());
-  analysisManager->FillNtupleDColumn(i+3,0); //maybe this could be displacement?
-  analysisManager->FillNtupleDColumn(i+4,totalen_);
+  analysisManager->FillNtupleDColumn(i+3,generator_->getR());
+  analysisManager->FillNtupleDColumn(i+4,generator_->getDiffProjTheta()); //maybe this could be displacement?
+  analysisManager->FillNtupleDColumn(i+5,generator_->getDiffProjPhi()); //maybe this could be displacement?
+  analysisManager->FillNtupleDColumn(i+6,totalen_);
 
 
   //filling deposits and volume info for all volumes automatically..

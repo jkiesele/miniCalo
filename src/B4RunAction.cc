@@ -80,7 +80,9 @@ B4RunAction::B4RunAction(B4PartGeneratorBase *gen, B4aEventAction* ev, G4String 
   analysisManager->CreateNtupleDColumn("true_energy");
   analysisManager->CreateNtupleDColumn("true_x");
   analysisManager->CreateNtupleDColumn("true_y");
-  analysisManager->CreateNtupleDColumn("track_momentum");
+  analysisManager->CreateNtupleDColumn("true_r");
+  analysisManager->CreateNtupleDColumn("true_diff_theta");
+  analysisManager->CreateNtupleDColumn("true_diff_phi");
   analysisManager->CreateNtupleDColumn("total_dep_energy");
 
 //if(false){

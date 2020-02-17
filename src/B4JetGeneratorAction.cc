@@ -75,12 +75,45 @@ B4JetGeneratorAction::B4JetGeneratorAction(particles p) :
   pythia_.readString("Next:numberShowProcess = 0");
   pythia_.readString("Next:numberShowEvent = 0");
 
+  pythia_.readString("Tune:pp 14");
+  pythia_.readString("Tune:ee 7");
+  pythia_.readString("MultipartonInteractions:ecmPow=0.03344");
+  pythia_.readString("MultipartonInteractions:bProfile=2");
+  pythia_.readString("MultipartonInteractions:pT0Ref=1.41");
+  pythia_.readString("MultipartonInteractions:coreRadius=0.7634");
+  pythia_.readString("MultipartonInteractions:coreFraction=0.63");
+  pythia_.readString("ColourReconnection:range=5.176");
+  pythia_.readString("SigmaTotal:zeroAXB=off");
+  pythia_.readString("SpaceShower:alphaSorder=2");
+  pythia_.readString("SpaceShower:alphaSvalue=0.118");
+  pythia_.readString("SigmaProcess:alphaSvalue=0.118");
+  pythia_.readString("SigmaProcess:alphaSorder=2");
+  pythia_.readString("MultipartonInteractions:alphaSvalue=0.118");
+  pythia_.readString("MultipartonInteractions:alphaSorder=2");
+  pythia_.readString("TimeShower:alphaSorder=2");
+  pythia_.readString("TimeShower:alphaSvalue=0.118");
+  pythia_.readString("SigmaTotal:mode = 0");
+  pythia_.readString("SigmaTotal:sigmaEl = 21.89");
+  pythia_.readString("SigmaTotal:sigmaTot = 100.309");
+  //pythia_.readString("PDF:pSet=LHAPDF6:NNPDF31_nnlo_as_0118");
+
   switch (particle_) {
   case minbias:
-    pythia_.readString("SoftQCD:nonDiffractive = on");
-    pythia_.readString("SoftQCD:singleDiffractive = on");
-    pythia_.readString("SoftQCD:doubleDiffractive = on");
-    break;
+  //  pythia_.readString("SoftQCD:nonDiffractive = on");
+  //  pythia_.readString("SoftQCD:singleDiffractive = on");
+  //  pythia_.readString("SoftQCD:doubleDiffractive = on");
+    pythia_.readString("SoftQCD:inelastic = on");
+
+    pythia_.readString("Tune:preferLHAPDF = 2");
+    pythia_.readString("Main:timesAllowErrors = 10000");
+    pythia_.readString("Check:epTolErr = 0.01");
+    pythia_.readString("Beams:setProductionScalesFromLHEF = off");
+    pythia_.readString("SLHA:keepSM = on");
+    pythia_.readString("SLHA:minMassSM = 1000.");
+    pythia_.readString("ParticleDecays:limitTau0 = on");
+    pythia_.readString("ParticleDecays:tau0Max = 10");
+    pythia_.readString("ParticleDecays:allowPhotonRadiation = on");
+        break;
   case displacedjet:
     pythia_.readString("NewGaugeBoson:ffbar2gmZZprime = on");
     pythia_.readString("Zprime:gmZmode = 3"); // only pure Z'
@@ -195,7 +228,7 @@ void B4JetGeneratorAction::GeneratePrimaries(G4Event* anEvent)
         auto& part(pythia_.event[i]);
 
         if (part.isFinal()) {
-          if(part.eta()>3.2 || part.eta() < 1.3)continue;
+          //if(part.eta()>3.2 || part.eta() < 1.3)continue;
           fjinputs_.emplace_back(part.px(), part.py(), part.pz(), part.e());
           fjinputs_.back().set_user_index(i);
 
