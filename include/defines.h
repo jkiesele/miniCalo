@@ -12,7 +12,7 @@
 
 //#define USEVIS
 
-//#define USEPYTHIA B4PartGeneratorBase::minbias
+#define USEPYTHIA B4PartGeneratorBase::minbias
 
 #ifdef USEPYTHIA
 #define ONLY_ENERGY_OUTPUT

@@ -42,8 +42,7 @@
 #else
 #include "G4RunManager.hh"
 #endif
-
-
+#include<string>
 
 #include "G4UImanager.hh"
 #include "G4UIcommand.hh"
@@ -70,7 +69,7 @@
 namespace {
   void PrintUsage() {
     G4cerr << " Usage: " << G4endl;
-    G4cerr << " exampleB4a [-m macro ] [-u UIsession] [-t nThreads]" << G4endl;
+    G4cerr << " exampleB4a [-m macro ] [-f filenumber=seed] [-o seedoffset (to be added to filenumber)]" << G4endl;
     G4cerr << "   note: -t option is available only for multi-threaded mode."
            << G4endl;
   }
@@ -135,14 +134,18 @@ int main(int argc,char** argv)
     }
 #endif
     else if (G4String(argv[i]) == "-f" ) {
-    	outfile += argv[i+1];
-    	rseed = atoi(argv[i+1]);
+
+    	rseed += atoi(argv[i+1]);
     }
+    else if (G4String(argv[i]) == "-o" ) {
+        rseed += atoi(argv[i+1]);
+        }
     else {
       PrintUsage();
       return 1;
     }
   }  
+  outfile += std::to_string(rseed);
 
   // Detect interactive mode (if no macro provided) and define UI session
   //
