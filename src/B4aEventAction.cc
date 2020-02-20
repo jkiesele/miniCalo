@@ -127,8 +127,8 @@ void B4aEventAction::BeginOfEventAction(const G4Event* /*event*/)
 
   const auto& activesensors=detector_->getActiveSensors();
 
-  rechit_absorber_energy_ = std::vector<double>(activesensors->size(),0);//reset
-  rechit_energy_ = std::vector<double>(activesensors->size(),0);//reset
+  rechit_absorber_energy_ = std::vector<float>(activesensors->size(),0);//reset
+  rechit_energy_ = std::vector<float>(activesensors->size(),0);//reset
   rechit_x_.resize(activesensors->size(),0);
   rechit_y_.resize(activesensors->size(),0);
   rechit_z_.resize(activesensors->size(),0);
@@ -171,26 +171,27 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
   // get analysis manager
   auto analysisManager = G4AnalysisManager::Instance();
 
-  
+#ifndef ONLY_ENERGY_OUTPUT
   // fill ntuple
   int i=0;
   int ispart[navail_parts];
-  for( ;i<navail_parts ;i++){
-      //G4cout << i  << G4endl;
-	  ispart[i]=generator_->isParticle(i);
-	  analysisManager->FillNtupleIColumn(i,ispart[i]);
-  }
+ // for( ;i<navail_parts ;i++){
+ //     //G4cout << i  << G4endl;
+//	  ispart[i]=generator_->isParticle(i);
+//	  analysisManager->FillNtupleIColumn(i,ispart[i]);
+ // }
   analysisManager->FillNtupleDColumn(i,generator_->getEnergy());
   analysisManager->FillNtupleDColumn(i+1,generator_->getX());
   analysisManager->FillNtupleDColumn(i+2,generator_->getY());
   analysisManager->FillNtupleDColumn(i+3,generator_->getR());
-  analysisManager->FillNtupleDColumn(i+4,generator_->getDiffProjTheta()); //maybe this could be displacement?
-  analysisManager->FillNtupleDColumn(i+5,generator_->getDiffProjPhi()); //maybe this could be displacement?
-  analysisManager->FillNtupleDColumn(i+6,totalen_);
+  analysisManager->FillNtupleDColumn(i+4,generator_->getDirX()); //maybe this could be displacement?
+  analysisManager->FillNtupleDColumn(i+5,generator_->getDirY()); //maybe this could be displacement?
+  analysisManager->FillNtupleDColumn(i+6,generator_->getDirZ());
+  analysisManager->FillNtupleDColumn(i+7,generator_->getHowParallel());
 
 
   //filling deposits and volume info for all volumes automatically..
-
+#endif
 
   analysisManager->AddNtupleRow();  
 

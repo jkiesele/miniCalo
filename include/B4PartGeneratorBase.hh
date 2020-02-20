@@ -39,14 +39,22 @@ public:
     G4double getY()const{return yorig_;}
     G4double getR()const{return std::sqrt(yorig_*yorig_+xorig_*xorig_);}
 
+
+    G4double getDirX()const{return dirx_;}
+    G4double getDirY()const{return diry_;}
+    G4double getDirZ()const{return dirz_;}
+
     G4double getDiffProjTheta()const{return diff_proj_theta_;}
     G4double getDiffProjPhi()const{return diff_proj_phi_;}
 
+    G4double getHowParallel()const{return howparallel_;}
 
 protected:
 
     G4double energy_;
     G4double xorig_,yorig_;
+    G4double dirx_,diry_,dirz_;
+    G4double howparallel_;
     G4double diff_proj_theta_, diff_proj_phi_;
 };
 

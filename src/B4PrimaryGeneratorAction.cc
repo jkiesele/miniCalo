@@ -78,7 +78,7 @@ B4PrimaryGeneratorAction::B4PrimaryGeneratorAction()
 
   xorig_=0;
   yorig_=0;
-  setParticleID(elec);
+  setParticleID(gamma);
 
 }
 
@@ -172,13 +172,13 @@ G4String B4PrimaryGeneratorAction::setParticleID(enum particles p){
 
 void generatePosition(G4double dRmin,G4double dRmax, G4double&x , G4double&y){
 
-    G4double dRmin2=dRmin*dRmin;
-    G4double dRmax2=dRmax*dRmax;
-    G4double dR2=dRmax2+1;
-    while(dR2 > dRmax2 || dR2<dRmin2){
-        x = dRmin + (dRmax2-dRmin)*G4INCL::Random::shoot();
-        y = dRmin + (dRmax2-dRmin)*G4INCL::Random::shoot();
-        dR2 = x*x + y*y;
+    while(true){
+        x = dRmax - 2*dRmax*G4INCL::Random::shoot();
+        y = dRmax - 2*dRmax*G4INCL::Random::shoot();
+        G4ThreeVector dir(x,y,0);
+        G4double dr = dir.r();
+        if(dr > dRmin && dr <= dRmax)
+            break;
     }
 }
 double gen_etaToR(const G4double& eta, const G4double& z){
@@ -186,21 +186,18 @@ double gen_etaToR(const G4double& eta, const G4double& z){
 }
 
 //just make sure it hits the first calo layer
-void generateDirection(G4double etamin,G4double etamax, const G4ThreeVector& position, G4double&x_dir , G4double&y_dir, G4double& z_dir){
-    G4double eta=0;
-    G4double calo_z = 6*cm+320*cm;//should hit at least 3 layers
-    G4double Rmin= gen_etaToR(etamax,calo_z);
-    G4double Rmax= gen_etaToR(etamin,calo_z);
+G4ThreeVector generateDirection(G4double etamin,G4double etamax, const G4ThreeVector& position){
+
+    G4double calo_z = 30*cm+300*cm;//should hit all layers
 
     G4ThreeVector initialdir = position.unit();
 
     G4double dz = calo_z-position.z();
 
-    G4double R = 100000*cm;
-    while(R > Rmax || R <= Rmin){
-        x_dir= 1.-2.*G4INCL::Random::shoot();
-        y_dir= 1.-2.*G4INCL::Random::shoot();
-        z_dir= 0.1;
+    while(true){
+        G4double x_dir= 1.-2.*G4INCL::Random::shoot();
+        G4double y_dir= 1.-2.*G4INCL::Random::shoot();
+        G4double z_dir= G4INCL::Random::shoot()+0.01;
 
         G4ThreeVector dir(x_dir,y_dir,z_dir);
         dir=dir.unit();
@@ -208,7 +205,9 @@ void generateDirection(G4double etamin,G4double etamax, const G4ThreeVector& pos
 
         G4ThreeVector newpos = position + dir;
 
-        R = newpos.rho();
+        G4double eta = newpos.eta();
+        if(eta < etamax && eta > etamin)
+            return dir.unit();
     }
 }
 
@@ -244,8 +243,8 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   // Set gun position
 
 
-  double energy_max=200;
-  double energy_min=30;
+  double energy_max=150;
+  double energy_min=20;
   //energy_=15;
 
   //iterate
@@ -272,20 +271,26 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
       energy_=(energy_max-energy_min)*rand+energy_min;
   }
 
-  generatePosition(15.*cm,66*cm,xorig_,yorig_);
 
-  G4ThreeVector position(xorig_,yorig_,310*cm);//xorig_,yorig_,0);
+  G4cout << "get position " << G4endl;
+  generatePosition(20.*cm,60*cm,xorig_,yorig_);//15.*cm,66*cm,xorig_,yorig_);
+
+  G4ThreeVector position(xorig_,yorig_,299*cm);//xorig_,yorig_,0);
   G4double x_dir,y_dir,z_dir;
 
-  generateDirection(1.5,3.0,position,x_dir,y_dir,z_dir);
 
-  G4ThreeVector direction(x_dir,y_dir,z_dir);
-  direction=direction.unit();
+  G4ThreeVector direction = generateDirection(1.55,2.95,position);
+
+  dirx_ = direction.x();
+  diry_ = direction.y();
+  dirz_ = direction.z();
 
   G4cout << "projective direction " << position.unit() << G4endl;
 
-  diff_proj_phi_=position.deltaPhi(direction);
-  diff_proj_theta_=position.theta(direction);
+  diff_proj_phi_=direction.deltaPhi(position);
+  diff_proj_theta_=direction.theta(position);
+
+  howparallel_ = direction.howParallel(position.unit());
 
   G4cout << "Dphi,DTheta " <<  diff_proj_phi_ << ", " << diff_proj_theta_ << G4endl;
 
@@ -302,7 +307,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   fParticleGun->GeneratePrimaryVertex(anEvent);
 
 
-  G4cout << "Energy: " << energy_ << ", position: "<< position <<" direction "<<direction<<  G4endl;
+  G4cout << "Energy: " << energy_ << ", position: "<< position <<" direction "<<direction<< " field "<<1*tesla <<  G4endl;
 }
 
 

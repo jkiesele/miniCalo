@@ -69,33 +69,36 @@ B4RunAction::B4RunAction(B4PartGeneratorBase *gen, B4aEventAction* ev, G4String 
   //
   analysisManager->CreateNtuple("B4", "Edep and TrackL");
   generator_=gen;
-  //if(! generator_->isJetGenerator()){
-      G4cout << "creating particle entries" << G4endl;
-      auto parts=generator_->generateAvailableParticles();
-      for(const auto& p:parts){
-          G4cout << p << G4endl;
-          analysisManager->CreateNtupleIColumn(p);
-      }
-  //}
+#ifndef ONLY_ENERGY_OUTPUT
+//  //if(! generator_->isJetGenerator()){
+//      G4cout << "creating particle entries" << G4endl;
+//      auto parts=generator_->generateAvailableParticles();
+//      for(const auto& p:parts){
+//          G4cout << p << G4endl;
+//          analysisManager->CreateNtupleIColumn(p);
+//      }
+//  //}
   analysisManager->CreateNtupleDColumn("true_energy");
   analysisManager->CreateNtupleDColumn("true_x");
   analysisManager->CreateNtupleDColumn("true_y");
   analysisManager->CreateNtupleDColumn("true_r");
-  analysisManager->CreateNtupleDColumn("true_diff_theta");
-  analysisManager->CreateNtupleDColumn("true_diff_phi");
-  analysisManager->CreateNtupleDColumn("total_dep_energy");
+  analysisManager->CreateNtupleDColumn("true_dir_x");
+  analysisManager->CreateNtupleDColumn("true_dir_y");
+  analysisManager->CreateNtupleDColumn("true_dir_z");
+  analysisManager->CreateNtupleDColumn("true_howparallel");
 
-//if(false){
-  analysisManager->CreateNtupleDColumn("rechit_energy",eventact_->rechit_energy_);
- // analysisManager->CreateNtupleDColumn("rechit_absorber_energy",eventact_->rechit_absorber_energy_);
-  analysisManager->CreateNtupleDColumn("rechit_x",eventact_->rechit_x_);
-  analysisManager->CreateNtupleDColumn("rechit_y",eventact_->rechit_y_);
-  analysisManager->CreateNtupleDColumn("rechit_z",eventact_->rechit_z_);
-  analysisManager->CreateNtupleDColumn("rechit_layer",eventact_->rechit_layer_);
-  analysisManager->CreateNtupleDColumn("rechit_phi",eventact_->rechit_phi_);
-  analysisManager->CreateNtupleDColumn("rechit_eta",eventact_->rechit_eta_);
-  analysisManager->CreateNtupleDColumn("rechit_vxy",eventact_->rechit_vxy_);
+
+  analysisManager->CreateNtupleFColumn("rechit_x",eventact_->rechit_x_);
+  analysisManager->CreateNtupleFColumn("rechit_y",eventact_->rechit_y_);
+  analysisManager->CreateNtupleFColumn("rechit_z",eventact_->rechit_z_);
+  analysisManager->CreateNtupleFColumn("rechit_layer",eventact_->rechit_layer_);
+  analysisManager->CreateNtupleFColumn("rechit_phi",eventact_->rechit_phi_);
+  analysisManager->CreateNtupleFColumn("rechit_eta",eventact_->rechit_eta_);
   analysisManager->CreateNtupleIColumn("rechit_detid",eventact_->rechit_detid_);
+#endif
+//if(false){
+  analysisManager->CreateNtupleFColumn("rechit_energy",eventact_->rechit_energy_);
+ // analysisManager->CreateNtupleDColumn("rechit_absorber_energy",eventact_->rechit_absorber_energy_);
 //}
   analysisManager->FinishNtuple();
 

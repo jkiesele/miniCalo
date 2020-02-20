@@ -93,14 +93,14 @@ class B4aEventAction : public G4UserEventAction
   private:
     G4double  fEnergyAbs;
     G4double totalen_;
-    std::vector<G4double>  rechit_energy_,rechit_absorber_energy_;
-    std::vector<G4double>  rechit_x_;
-    std::vector<G4double>  rechit_y_;
-    std::vector<G4double>  rechit_z_;
-    std::vector<G4double>  rechit_layer_;
-    std::vector<G4double>  rechit_eta_;
-    std::vector<G4double>  rechit_phi_;
-    std::vector<G4double>  rechit_vxy_;
+    std::vector<float>  rechit_energy_,rechit_absorber_energy_;
+    std::vector<float>  rechit_x_;
+    std::vector<float>  rechit_y_;
+    std::vector<float>  rechit_z_;
+    std::vector<float>  rechit_layer_;
+    std::vector<float>  rechit_eta_;
+    std::vector<float>  rechit_phi_;
+    std::vector<float>  rechit_vxy_;
     std::vector<int>       rechit_detid_;
     std::vector<const G4VPhysicalVolume * > allvolumes_;
 
