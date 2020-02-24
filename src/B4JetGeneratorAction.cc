@@ -65,7 +65,11 @@ B4JetGeneratorAction::B4JetGeneratorAction(particles p) :
   jetDef_(new fastjet::JetDefinition(fastjet::antikt_algorithm, 0.4)),
   fjinputs_()
 {
-  G4INCL::Random::setGenerator(new G4INCL::Ranecu());
+
+    G4INCL::Random::setGenerator(new G4INCL::Ranecu());
+
+    for(int i=0;i<seedsoffset_;i++)
+        G4double rand =  G4INCL::Random::shoot();
 
   pythia_.readString("Beams:eCM = 14000.");
   pythia_.readString("Init:showChangedParticleData = off");
@@ -168,7 +172,7 @@ void B4JetGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   }
 
   if (firstEvent_) {
-    pythia_.rndm.init(G4INCL::Random::getSeeds()[0]);
+      pythia_.rndm.init(seedsoffset_);
     firstEvent_ = false;
   }
 
@@ -222,20 +226,24 @@ void B4JetGeneratorAction::GeneratePrimaries(G4Event* anEvent)
     if (particle_ == minbias) {
       primaries.clear();
       fjinputs_.clear();
+      double totalen=0;
 
       // cluster ak4 jets from final state particles
       for (int i{0}; i < pythia_.event.size(); ++i) {
         auto& part(pythia_.event[i]);
 
         if (part.isFinal()) {
-          //if(part.eta()>3.2 || part.eta() < 1.3)continue;
+          //
           fjinputs_.emplace_back(part.px(), part.py(), part.pz(), part.e());
           fjinputs_.back().set_user_index(i);
 
           primaries.push_back(i);
+          if(part.eta()<3. && part.eta() > 1.5)
+              totalen+=part.e();
         }
       }
       energy_ = 0;
+      G4cout << "total calo energy " << totalen << std::endl;
 
     }
     else if (particle_ == displacedjet) {

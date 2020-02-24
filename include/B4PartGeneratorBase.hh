@@ -9,11 +9,14 @@
 #define DISPLACEDCALO_MINICALO_INCLUDE_B4PARTGENERATORBASE_HH_
 
 #include "G4VUserPrimaryGeneratorAction.hh"
-
+#include "G4INCLRandomSeedVector.hh"
 
 class B4PartGeneratorBase : public G4VUserPrimaryGeneratorAction{
 public:
-    B4PartGeneratorBase(): G4VUserPrimaryGeneratorAction(),energy_(0),xorig_(0),yorig_(0){};
+    B4PartGeneratorBase(): G4VUserPrimaryGeneratorAction(),energy_(0),xorig_(0),yorig_(0){
+
+
+    };
     virtual ~B4PartGeneratorBase(){};
 
     virtual bool isJetGenerator()=0;
@@ -47,15 +50,20 @@ public:
     G4double getDiffProjTheta()const{return diff_proj_theta_;}
     G4double getDiffProjPhi()const{return diff_proj_phi_;}
 
-    G4double getHowParallel()const{return howparallel_;}
+    G4double getHowParallel()const{return angle_;}
+
+
+    static int seedsoffset_;
+
 
 protected:
 
     G4double energy_;
     G4double xorig_,yorig_;
     G4double dirx_,diry_,dirz_;
-    G4double howparallel_;
+    G4double angle_;
     G4double diff_proj_theta_, diff_proj_phi_;
+
 };
 
 

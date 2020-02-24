@@ -75,6 +75,8 @@ B4PrimaryGeneratorAction::B4PrimaryGeneratorAction()
 
   G4INCL::Random::setGenerator( new G4INCL::Geant4RandomGenerator());
 
+  for(int i=0;i<seedsoffset_;i++)
+      G4double rand =  G4INCL::Random::shoot();
 
   xorig_=0;
   yorig_=0;
@@ -243,8 +245,8 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   // Set gun position
 
 
-  double energy_max=150;
-  double energy_min=20;
+  double energy_max=200;
+  double energy_min=10;
   //energy_=15;
 
   //iterate
@@ -287,12 +289,13 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
   G4cout << "projective direction " << position.unit() << G4endl;
 
+
   diff_proj_phi_=direction.deltaPhi(position);
   diff_proj_theta_=direction.theta(position);
 
-  howparallel_ = direction.howParallel(position.unit());
+  angle_ = direction.angle(position.unit());
 
-  G4cout << "Dphi,DTheta " <<  diff_proj_phi_ << ", " << diff_proj_theta_ << G4endl;
+  G4cout << "Dphi,DTheta " <<  diff_proj_phi_ << ", " << diff_proj_theta_ << " angle " << angle_ << G4endl;
 
   G4cout << "new direction " << direction << G4endl;
 

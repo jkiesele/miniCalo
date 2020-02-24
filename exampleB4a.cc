@@ -64,6 +64,8 @@
 #include "G4ParticleDefinition.hh"
 #include "G4ProcessManager.hh"
 
+#include "B4PartGeneratorBase.hh"
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 namespace {
@@ -146,7 +148,7 @@ int main(int argc,char** argv)
     }
   }  
   outfile += std::to_string(rseed);
-
+  rseed++;
   // Detect interactive mode (if no macro provided) and define UI session
   //
   G4UIExecutive* ui = 0;
@@ -157,9 +159,9 @@ int main(int argc,char** argv)
 
   // Choose the Random engine
   //
-    auto ren = new CLHEP::RanecuEngine();
-    ren->setSeed(rseed);
-  G4Random::setTheEngine(new CLHEP::RanecuEngine);
+
+    B4PartGeneratorBase::seedsoffset_ = 800*rseed;
+    G4cout << "random seed " << rseed << G4endl;
   
   // Construct the default run manager
   //

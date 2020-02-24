@@ -85,7 +85,7 @@ B4RunAction::B4RunAction(B4PartGeneratorBase *gen, B4aEventAction* ev, G4String 
   analysisManager->CreateNtupleDColumn("true_dir_x");
   analysisManager->CreateNtupleDColumn("true_dir_y");
   analysisManager->CreateNtupleDColumn("true_dir_z");
-  analysisManager->CreateNtupleDColumn("true_howparallel");
+  analysisManager->CreateNtupleDColumn("true_angle");
 
 
   analysisManager->CreateNtupleFColumn("rechit_x",eventact_->rechit_x_);
@@ -94,7 +94,7 @@ B4RunAction::B4RunAction(B4PartGeneratorBase *gen, B4aEventAction* ev, G4String 
   analysisManager->CreateNtupleFColumn("rechit_layer",eventact_->rechit_layer_);
   analysisManager->CreateNtupleFColumn("rechit_phi",eventact_->rechit_phi_);
   analysisManager->CreateNtupleFColumn("rechit_eta",eventact_->rechit_eta_);
-  analysisManager->CreateNtupleIColumn("rechit_detid",eventact_->rechit_detid_);
+ // analysisManager->CreateNtupleIColumn("rechit_detid",eventact_->rechit_detid_);
 #endif
 //if(false){
   analysisManager->CreateNtupleFColumn("rechit_energy",eventact_->rechit_energy_);
@@ -117,7 +117,7 @@ B4RunAction::~B4RunAction()
 void B4RunAction::BeginOfRunAction(const G4Run* /*run*/)
 { 
   //inform the runManager to save random number seed
-  //G4RunManager::GetRunManager()->SetRandomNumberStore(true);
+  //G4RunManager::GetRunManager()->SetRando//mNumberStore(true);
   
   // Get analysis manager
   auto analysisManager = G4AnalysisManager::Instance();
