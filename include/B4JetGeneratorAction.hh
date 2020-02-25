@@ -68,6 +68,7 @@ public:
   virtual ~B4JetGeneratorAction();
 
   virtual void GeneratePrimaries(G4Event* event);
+  void GenerateSingleVertex(G4Event* event);
 
   G4double getEnergy()const{return energy_;}
 
@@ -112,6 +113,9 @@ private:
   float partEta_[NMAX];
   float partPhi_[NMAX];
   //mkbranch
+
+  int nPU_;
+
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

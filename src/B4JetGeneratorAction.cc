@@ -134,6 +134,8 @@ B4JetGeneratorAction::B4JetGeneratorAction(particles p) :
   pythia_.init();
 
   fjinputs_.reserve(4096);
+
+  nPU_=1;//200;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -154,7 +156,16 @@ B4JetGeneratorAction::~B4JetGeneratorAction()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void B4JetGeneratorAction::GeneratePrimaries(G4Event* anEvent)
+
+void B4JetGeneratorAction::GeneratePrimaries(G4Event* anEvent){
+    if (particle_ == minbias) {
+        for(int i=0;i<nPU_;i++){
+            GenerateSingleVertex(anEvent);
+        }
+    }
+}
+
+void B4JetGeneratorAction::GenerateSingleVertex(G4Event* anEvent)
 {
   if (WriteTruthTree && truthTree_ == nullptr) {
     auto* truthFile(TFile::Open("truth.root", "recreate"));
