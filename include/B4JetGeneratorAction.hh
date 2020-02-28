@@ -36,6 +36,7 @@
 #ifndef NOPYTHIA
 
 #include "B4PrimaryGeneratorAction.hh"
+#include "G4PrimaryVertex.hh"
 #include "B4PartGeneratorBase.hh"
 #include "globals.hh"
 #include <vector>
@@ -68,7 +69,7 @@ public:
   virtual ~B4JetGeneratorAction();
 
   virtual void GeneratePrimaries(G4Event* event);
-  void GenerateSingleVertex(G4Event* event);
+  void GenerateSingleVertex(G4PrimaryVertex* vertex);
 
   G4double getEnergy()const{return energy_;}
 

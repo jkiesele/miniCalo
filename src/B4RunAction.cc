@@ -92,10 +92,11 @@ B4RunAction::B4RunAction(B4PartGeneratorBase *gen, B4aEventAction* ev, G4String 
   analysisManager->CreateNtupleFColumn("rechit_y",eventact_->rechit_y_);
   analysisManager->CreateNtupleFColumn("rechit_z",eventact_->rechit_z_);
   analysisManager->CreateNtupleFColumn("rechit_layer",eventact_->rechit_layer_);
+#endif
   analysisManager->CreateNtupleFColumn("rechit_phi",eventact_->rechit_phi_);
   analysisManager->CreateNtupleFColumn("rechit_eta",eventact_->rechit_eta_);
  // analysisManager->CreateNtupleIColumn("rechit_detid",eventact_->rechit_detid_);
-#endif
+
 //if(false){
   analysisManager->CreateNtupleFColumn("rechit_energy",eventact_->rechit_energy_);
  // analysisManager->CreateNtupleDColumn("rechit_absorber_energy",eventact_->rechit_absorber_energy_);

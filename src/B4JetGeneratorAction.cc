@@ -132,6 +132,7 @@ B4JetGeneratorAction::B4JetGeneratorAction(particles p) :
     break;
   }
   pythia_.init();
+  pythia_.rndm.init(seedsoffset_);
 
   fjinputs_.reserve(4096);
 
@@ -158,14 +159,25 @@ B4JetGeneratorAction::~B4JetGeneratorAction()
 
 
 void B4JetGeneratorAction::GeneratePrimaries(G4Event* anEvent){
+    G4ThreeVector vertex_position(xorig_,yorig_,0);
+    G4double vertex_time(0.);
+
+    G4PrimaryVertex* vertex = new G4PrimaryVertex(vertex_position, vertex_time);
+
     if (particle_ == minbias) {
         for(int i=0;i<nPU_;i++){
-            GenerateSingleVertex(anEvent);
+            GenerateSingleVertex(vertex);
         }
     }
+    else
+        GenerateSingleVertex(vertex);
+
+    G4cout << "npart: " << vertex->GetNumberOfParticle() << G4endl;
+    anEvent->AddPrimaryVertex(vertex);
+
 }
 
-void B4JetGeneratorAction::GenerateSingleVertex(G4Event* anEvent)
+void B4JetGeneratorAction::GenerateSingleVertex(G4PrimaryVertex* vertex)
 {
   if (WriteTruthTree && truthTree_ == nullptr) {
     auto* truthFile(TFile::Open("truth.root", "recreate"));
@@ -183,7 +195,6 @@ void B4JetGeneratorAction::GenerateSingleVertex(G4Event* anEvent)
   }
 
   if (firstEvent_) {
-      pythia_.rndm.init(seedsoffset_);
     firstEvent_ = false;
   }
 
@@ -196,8 +207,6 @@ void B4JetGeneratorAction::GenerateSingleVertex(G4Event* anEvent)
   xorig_=0;
   yorig_=0;
 
-  G4ThreeVector vertex_position(xorig_,yorig_,0);
-  G4double vertex_time(0.);
 
   // // make a dummy primary proton
   // G4PrimaryParticle* primaryParticle = new G4PrimaryParticle(2212);
@@ -205,6 +214,9 @@ void B4JetGeneratorAction::GenerateSingleVertex(G4Event* anEvent)
   G4double zsign = 1.;
   std::vector<int> primaries;
   primaries.reserve(1024 * 16);
+
+  G4ThreeVector vertex_position(xorig_,yorig_,0);
+  G4double vertex_time(0.);
  
   while (true) {
     // loop until an event passing a gen filter is generated
@@ -224,12 +236,11 @@ void B4JetGeneratorAction::GenerateSingleVertex(G4Event* anEvent)
       // failed event generation - make a dummy vertex (or just crash?)
       G4cerr << "EVENT GENERATION FAILED!!!!" << G4endl;
 
-      G4PrimaryVertex* vertex = new G4PrimaryVertex(vertex_position, vertex_time);
+      //G4PrimaryVertex* vertex = new G4PrimaryVertex(vertex_position, vertex_time);
       // let there be light
       G4PrimaryParticle* primaryParticle = new G4PrimaryParticle(22);
       vertex->SetPrimary(primaryParticle);
 
-      anEvent->AddPrimaryVertex(vertex);
 
       return;
     }
@@ -244,13 +255,14 @@ void B4JetGeneratorAction::GenerateSingleVertex(G4Event* anEvent)
         auto& part(pythia_.event[i]);
 
         if (part.isFinal()) {
-          //
-          fjinputs_.emplace_back(part.px(), part.py(), part.pz(), part.e());
-          fjinputs_.back().set_user_index(i);
+            if(part.eta()<3.5 && part.eta() > 1.0){
+                //
+                fjinputs_.emplace_back(part.px(), part.py(), part.pz(), part.e());
+                fjinputs_.back().set_user_index(i);
 
-          primaries.push_back(i);
-          if(part.eta()<3. && part.eta() > 1.5)
-              totalen+=part.e();
+                primaries.push_back(i);
+                totalen+=part.e();
+            }
         }
       }
       energy_ = 0;
@@ -284,6 +296,7 @@ void B4JetGeneratorAction::GenerateSingleVertex(G4Event* anEvent)
         continue;
 
       primaries.clear();
+      vertex->SetPosition(vertex_position.x(),vertex_position.y(),vertex_position.z());
 
       ipart = 0;
       for (; ipart < pythia_.event.size(); ++ipart) {
@@ -316,7 +329,6 @@ void B4JetGeneratorAction::GenerateSingleVertex(G4Event* anEvent)
   // }
 
   // create G4PrimaryVertex object
-  G4PrimaryVertex* vertex = new G4PrimaryVertex(vertex_position, vertex_time);
 
   for (int ipart : primaries) {
     auto& pj(pythia_.event[ipart]);
@@ -347,7 +359,6 @@ void B4JetGeneratorAction::GenerateSingleVertex(G4Event* anEvent)
   if (WriteTruthTree)
     truthTree_->Fill();
 
-  anEvent->AddPrimaryVertex(vertex);
 }
 
 #endif
