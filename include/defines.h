@@ -15,7 +15,7 @@
 #define USEPYTHIA B4PartGeneratorBase::minbias
 
 #ifdef USEPYTHIA
-//#define ONLY_ENERGY_OUTPUT
+#define ONLY_ENERGY_OUTPUT
 #endif
 
 //#define FROMBEAMSPOT
