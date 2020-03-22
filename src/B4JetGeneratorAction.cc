@@ -136,7 +136,7 @@ B4JetGeneratorAction::B4JetGeneratorAction(particles p) :
 
   fjinputs_.reserve(4096);
 
-  nPU_=200;
+  nPU_=1;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
