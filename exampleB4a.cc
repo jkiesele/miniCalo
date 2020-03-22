@@ -190,6 +190,10 @@ int main(int argc,char** argv)
   
 
   enable_physlimits();
+
+
+  //SetThresholdWarningEnergy(500*MeV)
+
   // Initialize visualization
   //
 #ifdef USEVIS

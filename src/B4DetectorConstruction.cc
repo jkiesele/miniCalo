@@ -94,6 +94,12 @@ B4DetectorConstruction::B4DetectorConstruction()
 
 {
 
+
+    limit_in_calo_time_max_=500*ns;//this could be more low energy stuff
+    limit_in_calo_energy_max_=500*keV;
+    limit_world_time_max_=500*ns; //either got there or not (30ns should be easily sufficient
+    limit_world_energy_max_=100*eV;
+
 }
 
 G4VPhysicalVolume* B4DetectorConstruction::Construct()
@@ -168,13 +174,14 @@ G4Cons * createCons(
         G4double end_phi){
 
 
-    G4cout << "created Cons "<< name <<"with size (eta, deta, phi,endphi,z,dz): "
-            << start_eta <<", "<< eta_width <<", "
-            << start_phi << ", "<<end_phi<<", "
-            << start_z << ", "<< z_length  << G4endl;
 
-    G4cout << "(pRmin1,pRmax1) " << etaToR(start_eta+eta_width ,start_z) <<", " << etaToR(start_eta ,start_z)<< G4endl;
-    G4cout << "(pRmin2,pRmax2) " << etaToR(start_eta+eta_width ,start_z+z_length) <<", " << etaToR(start_eta ,start_z+z_length)<< G4endl;
+  //  G4cout << "created Cons "<< name <<"with size (eta, deta, phi,endphi,z,dz): "
+  //          << start_eta <<", "<< eta_width <<", "
+  //          << start_phi << ", "<<end_phi<<", "
+  //          << start_z << ", "<< z_length  << G4endl;
+  //
+  //  G4cout << "(pRmin1,pRmax1) " << etaToR(start_eta+eta_width ,start_z) <<", " << etaToR(start_eta ,start_z)<< G4endl;
+  //  G4cout << "(pRmin2,pRmax2) " << etaToR(start_eta+eta_width ,start_z+z_length) <<", " << etaToR(start_eta ,start_z+z_length)<< G4endl;
 
 
     return new G4Cons(
@@ -191,6 +198,7 @@ G4Cons * createCons(
  * creates a single sandwich tile in a layer
  */
 G4VPhysicalVolume* B4DetectorConstruction::createCellWheel(
+        G4ThreeVector position,
         G4LogicalVolume* layerLV,
 		G4double start_eta,
         G4double eta_width,
@@ -212,6 +220,8 @@ G4VPhysicalVolume* B4DetectorConstruction::createCellWheel(
     if(abs_fraction>0){
         active_z_length *= 1.-abs_fraction;
         abs_z_length = z_length-active_z_length;
+        active_z_length-=1e-3*mm; //otherwise tiny geometry problems at the boundaries
+        abs_z_length-=1e-3*mm; //otherwise tiny geometry problems at the boundaries
     }
 
     //create the volume
@@ -235,13 +245,15 @@ G4VPhysicalVolume* B4DetectorConstruction::createCellWheel(
 
         activewheelPV = new G4PVPlacement(
                 0,                // no rotation
-                G4ThreeVector(0,0,(abs_z_length-midz)+active_z_length/2.), // its position
+                position+ G4ThreeVector(0,0,z_length/2.)  + G4ThreeVector(0,0,(abs_z_length-midz)+active_z_length/2.), // its position
                 activewheelLV,       // its logical volume
                 "Activewheel_PV_"+name,           // its name
                 layerLV,          // its mother  volume
                 false,            // no boolean operation
                 0,                // copy number
                 fCheckOverlaps);  // checking overlaps
+
+        G4cout << "placed active wheel at z_start = " << (abs_z_length) << " ends " << (abs_z_length)+active_z_length << G4endl;
 
     }
 
@@ -259,12 +271,8 @@ G4VPhysicalVolume* B4DetectorConstruction::createCellWheel(
 			"Cell_LV_"+name);         // its name
 
 
-
-
-    G4double maxStep = z_length/5.;
-    G4double maxTime = 10.*ms;
-    G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
-    cellLV->SetUserLimits(stepLimit);
+    cellLV->SetUserLimits(new G4UserLimits(active_z_length/10.,DBL_MAX,
+            limit_in_calo_time_max_,limit_in_calo_energy_max_));
 
 
 #ifdef USEDIVISION
@@ -274,10 +282,10 @@ G4VPhysicalVolume* B4DetectorConstruction::createCellWheel(
     G4VPhysicalVolume* activeMaterial=0;
     if(activewheelPV)
         activeMaterial = new G4PVReplica("Cell_rep_"+name, cellLV,
-                activewheelPV, kPhi, nphi, 2.*M_PI/(double)nphi-1e-7);
+                activewheelPV, kPhi, nphi, 2.*M_PI/(double)nphi,0.);
     else
         activeMaterial = new G4PVReplica("Cell_rep_"+name, cellLV,
-                activewheelLV, kPhi, nphi, 2.*M_PI/(double)nphi-1e-7);
+                activewheelLV, kPhi, nphi, 2.*M_PI/(double)nphi,0.);
 #endif
 
     if(abs_fraction>0 && abs_m){
@@ -296,7 +304,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createCellWheel(
 
         auto abswheelPV = new G4PVPlacement(
                 0,                // no rotation
-                G4ThreeVector(0,0,-(midz-abs_z_length/2.)), // its position
+                position+ G4ThreeVector(0,0,z_length/2.)  + G4ThreeVector(0,0,-(midz-abs_z_length/2.)), // its position
                 abswheelLV,       // its logical volume
                 "Aabswheel_PV_"+name,           // its name
                 layerLV,          // its mother  volume
@@ -305,15 +313,17 @@ G4VPhysicalVolume* B4DetectorConstruction::createCellWheel(
                 fCheckOverlaps);  // checking overlaps
 
 
-        G4double maxStep = z_length/5.;
-        G4double maxTime = 10.*ms;
-        G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
-        abswheelLV->SetUserLimits(stepLimit);
+        abswheelLV->SetUserLimits(new G4UserLimits(abs_z_length/10.,DBL_MAX,
+                limit_in_calo_time_max_,limit_in_calo_energy_max_));
        // auto simpleBoxVisAtt= new G4VisAttributes(G4Colour(.1,.1,.1));
        // simpleBoxVisAtt->SetVisibility(true);
        // simpleBoxVisAtt->SetForceSolid(true);
        // abswheelLV->SetVisAttributes(simpleBoxVisAtt);
     }
+
+
+    //check overlaps thoroughly
+    activeMaterial-> CheckOverlaps(1000000, 0., true);
 
     G4int maxcopies = activeMaterial->GetMultiplicity();
 
@@ -361,36 +371,35 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(
     //override:
     z_length = 10.382*mm + 0.300*mm ;//absorber plus silicon, this makes 1.85 X0 per layer
 
-    auto layerS   = createCons("Layer_"+name,
-            start_eta,
-            end_eta-start_eta,
-            start_z,
-            z_length,
-            0,
-            2*M_PI);
+    //auto layerS   = createCons("Layer_"+name,
+    //        start_eta,
+    //        end_eta-start_eta,
+    //        start_z,
+    //        z_length,
+    //        0,
+    //        2*M_PI);
+    //
+    //
+    //auto layerLV  = new G4LogicalVolume(
+    //        layerS,           // its solid
+    //        m_vacuum,  // its material
+	//		"Layer_"+name);         // its name
+    //
+    //
+    //auto layerPV = new G4PVPlacement(
+    //            0,                // no rotation
+    //            position+G4ThreeVector(0,0,z_length/2.), // its position
+    //            layerLV,       // its logical volume
+    //            "Layer_"+name,           // its name
+    //            caloLV,          // its mother  volume
+    //            false,            // no boolean operation
+    //            0,                // copy number
+    //            fCheckOverlaps);  // checking overlaps
+//
+  //  layerLV->SetUserLimits(new G4UserLimits(z_length/10.,DBL_MAX,
+    //        limit_in_calo_time_max_,limit_in_calo_energy_max_));
 
-
-    auto layerLV  = new G4LogicalVolume(
-            layerS,           // its solid
-            m_vacuum,  // its material
-			"Layer_"+name);         // its name
-
-
-    auto layerPV = new G4PVPlacement(
-                0,                // no rotation
-                position+G4ThreeVector(0,0,z_length/2.), // its position
-                layerLV,       // its logical volume
-                "Layer_"+name,           // its name
-                caloLV,          // its mother  volume
-                false,            // no boolean operation
-                0,                // copy number
-                fCheckOverlaps);  // checking overlaps
-
-    G4double maxStep = z_length/5.;
-    G4double maxTime = 10.*ms;
-    G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
-    layerLV->SetUserLimits(stepLimit);
-
+    auto layerLV  = caloLV;
 
 	double cell_etawidth = (end_eta-start_eta) / (double)n_cells_eta;
 	double cell_phiwidth = 2*M_PI/(double)n_cells_phi *rad;
@@ -400,34 +409,39 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(
 	for(int ieta=0; ieta<n_cells_eta; ieta++){
 	    double startEta = Calo_start_eta + cell_etawidth* (double)ieta;
 
-	    auto ringSvol = createCons("Ring_"+createString(ieta) +"_"+name,
-	            startEta,
-	            cell_etawidth,
-	            start_z,
-	            z_length,
-	            0,
-	            2*M_PI);
-	    auto RingLV  = new G4LogicalVolume(
-	            ringSvol,           // its solid
-	                m_vacuum,  // its material
-	                "RingLV_"+createString(ieta) +"_"+name);         // its name
-	    RingLV->SetUserLimits(stepLimit);
-	    auto RingPV = new G4PVPlacement(
-	                    0,                // no rotation
-	                    G4ThreeVector(0,0,0), // its position
-	                    RingLV,       // its logical volume
-	                    "RingPV_"+createString(ieta) +"_"+name,           // its name
-	                    layerLV,          // its mother  volume
-	                    false,            // no boolean operation
-	                    0,                // copy number
-	                    fCheckOverlaps);  // checking overlaps
+	    //auto ringSvol = createCons("Ring_"+createString(ieta) +"_"+name,
+	    //        startEta,
+	    //        cell_etawidth,
+	    //        start_z,
+	    //        z_length,
+	    //        0,
+	    //        2*M_PI);
+	    //auto RingLV  = new G4LogicalVolume(
+	    //        ringSvol,           // its solid
+	    //            m_vacuum,  // its material
+	    //            "RingLV_"+createString(ieta) +"_"+name);         // its name
+        //
+	    //RingLV->SetUserLimits(new G4UserLimits(z_length/10.,DBL_MAX,
+	    //        limit_in_calo_time_max_,limit_in_calo_energy_max_));
+        //
+	    //auto RingPV = new G4PVPlacement(
+	    //                0,                // no rotation
+	    //                position+G4ThreeVector(0,0,z_length/2.), // its position
+	    //                RingLV,       // its logical volume
+	    //                "RingPV_"+createString(ieta) +"_"+name,           // its name
+	    //                layerLV,          // its mother  volume
+	    //                false,            // no boolean operation
+	    //                0,                // copy number
+	    //                fCheckOverlaps);  // checking overlaps
 
 	   // for(int iphi=0;iphi<n_cells_phi;iphi++){
 	     //   double starting_angle_rad = cell_phiwidth * (double)iphi;
 
-	        createCellWheel(RingLV,
+	        createCellWheel(
+	                position,
+	                layerLV,
 	                startEta,
-	                cell_etawidth,
+	                cell_etawidth-1e-3,//FIXME
 	                start_z,
 	                z_length,
 	                n_cells_phi,
@@ -444,9 +458,9 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(
 
 
 
-	G4cout << "layer "<<name<<" position="<<position << " " << layerPV->GetTranslation () <<G4endl;
+	//G4cout << "layer "<<name<<" position="<<position << " " << layerPV->GetTranslation () <<G4endl;
 
-	return layerPV;
+	return 0;
 
 }
 
@@ -550,8 +564,8 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 
 
     //auto calorThickness = nofEELayers * layerThicknessEE + nofHB*layerThicknessHB;
-    G4double worldSizeXY = 2. * m;
-	G4double worldSizeZ  = 8. * m;
+    G4double worldSizeXY = 4. * m;
+	G4double worldSizeZ  = 16. * m;
 
 
 
@@ -568,11 +582,11 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 			m_vacuum,  // its material
 			"World");         // its name
 
-
-	G4double maxStep = worldSizeZ/10.;
-	G4double maxTime = 200.*ms;
-	G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
-	worldLV->SetUserLimits(stepLimit);
+	worldLV->SetUserLimits(new G4UserLimits(
+	        worldSizeZ/10., //max step length
+            worldSizeZ*50., //max track length
+            limit_world_time_max_, //max track time
+            limit_world_energy_max_)); //min track energy
 
 
 	auto worldPV
@@ -633,7 +647,7 @@ void B4DetectorConstruction::ConstructSDandField()
 
 
 	auto* fieldprop = G4TransportationManager::GetTransportationManager()->GetPropagatorInField();
-	fieldprop->SetMaxLoopCount(10) ;
+	fieldprop->SetMaxLoopCount(100) ;//check 100, 10 is bad, less is bad, default is 1000, maybe a bit less works, too
 
 
 }

@@ -255,7 +255,7 @@ void B4JetGeneratorAction::GenerateSingleVertex(G4PrimaryVertex* vertex)
         auto& part(pythia_.event[i]);
 
         if (part.isFinal()) {
-            if(part.eta()<3.5 && part.eta() > 1.0){
+            if(part.eta()<4. && part.eta() > 1.0){
                 //
                 fjinputs_.emplace_back(part.px(), part.py(), part.pz(), part.e());
                 fjinputs_.back().set_user_index(i);

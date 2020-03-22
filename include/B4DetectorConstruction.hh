@@ -94,6 +94,7 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
 
 
     G4VPhysicalVolume* createCellWheel(
+            G4ThreeVector position,
             G4LogicalVolume* layerLV,
             G4double start_eta,
             G4double eta_width,
@@ -140,6 +141,9 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
     G4int nofEELayers,nofHB, noTrackLayers;
     G4double calorThickness;
 
+
+    G4double limit_in_calo_time_max_, limit_in_calo_energy_max_;
+    G4double limit_world_time_max_,limit_world_energy_max_;
 
 
 };

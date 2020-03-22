@@ -84,6 +84,7 @@ private:
   G4String setParticleID(enum particles );
 
   particles particleid_;
+  bool from_beamspot_;
 
 };
 

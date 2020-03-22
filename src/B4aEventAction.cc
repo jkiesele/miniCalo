@@ -166,6 +166,15 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
   // Accumulate statistics
   //
 
+    //check if event is fine
+
+    if(event->IsAborted()){//don't fill information
+        G4cout << "event was aborted, not writing output" << G4endl;
+        clear();
+        return;
+    }
+
+
     G4cout << "nsteps_ "<<nsteps_ <<G4endl;
 //clear();return;
   // get analysis manager

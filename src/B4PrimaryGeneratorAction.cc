@@ -82,6 +82,12 @@ B4PrimaryGeneratorAction::B4PrimaryGeneratorAction()
   yorig_=0;
   setParticleID(gamma);
 
+  from_beamspot_=false;
+
+#ifdef FROMBEAMSPOT
+  from_beamspot_=true;
+#endif
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -277,9 +283,16 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   G4cout << "get position " << G4endl;
   generatePosition(20.*cm,60*cm,xorig_,yorig_);//15.*cm,66*cm,xorig_,yorig_);
 
+
   G4ThreeVector position(xorig_,yorig_,299*cm);//xorig_,yorig_,0);
   G4double x_dir,y_dir,z_dir;
 
+
+  if(from_beamspot_){
+      xorig_=0;
+      yorig_=0;
+      position = G4ThreeVector(xorig_,yorig_,0);
+  }
 
   G4ThreeVector direction = generateDirection(1.55,2.95,position);
 
@@ -295,7 +308,10 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
   angle_ = direction.angle(position.unit());
 
-  G4cout << "Dphi,DTheta " <<  diff_proj_phi_ << ", " << diff_proj_theta_ << " angle " << angle_ << G4endl;
+  G4cout << "Dphi, DTheta " <<  diff_proj_phi_ << ", " << diff_proj_theta_ << " angle " << angle_ << G4endl;
+
+  if(from_beamspot_)
+      G4cout << "Direction eta,phi " << direction.eta() <<", "<<direction.phi() << G4endl;
 
   G4cout << "new direction " << direction << G4endl;
 
