@@ -178,8 +178,9 @@ G4String B4PrimaryGeneratorAction::setParticleID(enum particles p){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 
-void generatePosition(G4double dRmin,G4double dRmax, G4double&x , G4double&y){
+G4ThreeVector generatePosition(G4double dRmin,G4double dRmax, G4double z){
 
+    G4double x , y;
     while(true){
         x = dRmax - 2*dRmax*G4INCL::Random::shoot();
         y = dRmax - 2*dRmax*G4INCL::Random::shoot();
@@ -188,19 +189,30 @@ void generatePosition(G4double dRmin,G4double dRmax, G4double&x , G4double&y){
         if(dr > dRmin && dr <= dRmax)
             break;
     }
+    return G4ThreeVector(x,y,z);
 }
 double gen_etaToR(const G4double& eta, const G4double& z){
     return z * exp(-eta);
 }
 
-//just make sure it hits the first calo layer
-G4ThreeVector generateDirection(G4double etamin,G4double etamax, const G4ThreeVector& position){
+bool particleTraversesFully(G4double etamin,G4double etamax, const G4ThreeVector& position, const G4ThreeVector& direction){
 
     G4double calo_z = 30*cm+300*cm;//should hit all layers
-
-    G4ThreeVector initialdir = position.unit();
-
     G4double dz = calo_z-position.z();
+    G4ThreeVector dir=direction;
+    dir=dir.unit();
+    dir *= dz/dir.z();
+
+    G4ThreeVector newpos = position + dir;
+
+    G4double eta = newpos.eta();
+    if(eta <= etamax && eta >= etamin)
+        return true;
+    return false;
+}
+
+//just make sure it hits the first calo layer
+G4ThreeVector generateDirection(G4double etamin,G4double etamax, const G4ThreeVector& position){
 
     while(true){
         G4double x_dir= 1.-2.*G4INCL::Random::shoot();
@@ -208,15 +220,46 @@ G4ThreeVector generateDirection(G4double etamin,G4double etamax, const G4ThreeVe
         G4double z_dir= G4INCL::Random::shoot()+0.01;
 
         G4ThreeVector dir(x_dir,y_dir,z_dir);
-        dir=dir.unit();
-        dir *= dz/dir.z();
-
-        G4ThreeVector newpos = position + dir;
-
-        G4double eta = newpos.eta();
-        if(eta < etamax && eta > etamin)
+        if(particleTraversesFully(etamin,etamax, position, dir))
             return dir.unit();
     }
+}
+
+//is allowed to change position in x and y
+G4ThreeVector generateDirectionAndPosition(G4double etamin,G4double etamax, G4ThreeVector& position,
+        G4double angle, G4double pos_drmin, G4double pos_drmax, G4double pos_z){
+
+    position = generatePosition(pos_drmin,pos_drmax,pos_z);
+
+    auto rotaxis = position.orthogonal().unit();
+    auto poscp = position;
+
+    G4ThreeVector direction;
+
+    int try_counter=0;
+
+    while(true){
+        G4double rotation = 2.*M_PI*G4INCL::Random::shoot();
+        //G4cout << "rotaxis pre" << rotaxis << G4endl;
+        rotaxis = rotaxis.rotate(position,rotation).unit(); //defines the rotation for direction
+        //G4cout << "rotaxis post" << rotaxis << G4endl;
+
+        poscp = position;
+        direction = poscp.rotate(rotaxis,angle).unit();
+
+        if(particleTraversesFully(etamin,etamax, position, direction))
+            return direction;
+
+        if(try_counter > 20){
+            position = generatePosition(pos_drmin,pos_drmax,pos_z);
+            poscp = position;
+        }
+        if(try_counter > 2000){
+            throw std::runtime_error("no direction with angle found");
+        }
+        try_counter++;
+    }
+
 }
 
 void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
@@ -281,11 +324,17 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
 
   G4cout << "get position " << G4endl;
-  generatePosition(20.*cm,60*cm,xorig_,yorig_);//15.*cm,66*cm,xorig_,yorig_);
 
 
-  G4ThreeVector position(xorig_,yorig_,299*cm);//xorig_,yorig_,0);
-  G4double x_dir,y_dir,z_dir;
+  angle_ = M_PI/3. * G4INCL::Random::shoot0();
+
+  G4ThreeVector position;//15.*cm,66*cm,xorig_,yorig_);
+  G4ThreeVector direction = generateDirectionAndPosition(1.55,2.95,position,angle_,20.*cm,60*cm,299*cm);
+
+  std::cout << "position " << position << ", direction " << direction << ", angle " << angle_ <<  std::endl;
+
+  xorig_=position.x();
+  yorig_=position.y();
 
 
   if(from_beamspot_){
@@ -294,21 +343,21 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
       position = G4ThreeVector(xorig_,yorig_,0);
   }
 
-  G4ThreeVector direction = generateDirection(1.55,2.95,position);
-
   dirx_ = direction.x();
   diry_ = direction.y();
   dirz_ = direction.z();
 
+
   G4cout << "projective direction " << position.unit() << G4endl;
+  G4cout << "particle direction " << direction.unit() << G4endl;
 
 
   diff_proj_phi_=direction.deltaPhi(position);
   diff_proj_theta_=direction.theta(position);
-
+  //same as theta for some reason..
   angle_ = direction.angle(position.unit());
 
-  G4cout << "Dphi, DTheta " <<  diff_proj_phi_ << ", " << diff_proj_theta_ << " angle " << angle_ << G4endl;
+  //G4cout << "Dphi, DTheta " <<  diff_proj_phi_ << ", " << diff_proj_theta_ << " angle " << angle_ << G4endl;
 
   if(from_beamspot_)
       G4cout << "Direction eta,phi " << direction.eta() <<", "<<direction.phi() << G4endl;
