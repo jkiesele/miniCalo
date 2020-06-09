@@ -93,7 +93,7 @@ G4VPhysicalVolume* B4DetectorConstruction::Construct()
 {
 	//DefineGeometry(homogenous_ecal_only);
 	//DefineGeometry(hcal_only_irregular);
-	DefineGeometry(homogenous_muons);
+	DefineGeometry(homogenous_no_tracker);
 	// Define materials
 	DefineMaterials();
 
@@ -231,23 +231,23 @@ void  B4DetectorConstruction::DefineGeometry(geometry geo){
 
 	    layerGranularity.clear();
 	    layerSplitGranularity.clear();
-	    nofEELayers = 50;
+	    nofEELayers = 60;
 	    nofHB=0;
 	    for(int i=0;i<nofEELayers+nofHB;i++){
-	        G4double granularity=32;
+	        G4double granularity=30;
 	        layerGranularity.push_back(granularity);
 	        layerSplitGranularity.push_back(-granularity/2);
 	    }
 
-	    layerThicknessEE=2000*mm / (float)nofEELayers;//26*8.903*mm ;//* calorThickness/2000*mm; //26 radiation lengths like CMS (23.2cm
-	    layerThicknessHB=(calorThickness-nofEELayers*layerThicknessEE)/(float)nofHB;  //the rest 1'768, about 8.7 nuclear int lengths
+	    layerThicknessEE=2500*mm / (float)nofEELayers;//26*8.903*mm ;//* calorThickness/2000*mm; //26 radiation lengths like CMS (23.2cm
+	    layerThicknessHB=0;//(calorThickness-nofEELayers*layerThicknessEE)/(float)nofHB;  //the rest 1'768, about 8.7 nuclear int lengths
 
 	    if(nofHB<1)
 	        calorThickness=layerThicknessEE*(float)nofEELayers;
 	    noTrackLayers = 0;
 
 
-	    calorSizeXY  = 35.2*cm;
+	    calorSizeXY  = 100*cm;
 
 	}
 	else if(geo == homogenous_muons){

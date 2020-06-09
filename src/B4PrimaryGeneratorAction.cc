@@ -179,7 +179,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
 
   G4double zposition = originpoint;
-  double energy_max=500;
+  double energy_max=110;
   double energy_min=1;
   //energy_=15;
 
@@ -189,7 +189,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   else if(particleid_==elec)
       setParticleID(gamma);
 
-  setParticleID(muon);
+  setParticleID(pioncharged);
   //setParticleID(elec);
   //positron
 
@@ -206,15 +206,15 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
  }
 
   //energy_=20;
- double minmaxx=28/2.;
+ double minmaxx=0;
 
   //G4cout << "shooting particle at " ;
-  double xpos=550;
+  double xpos=0;
   while(fabs(xpos)>minmaxx){
       xpos=2.*minmaxx*G4INCL::Random::shoot() - minmaxx;
       //G4cout << xpos <<  G4endl;
   }
-  double ypos=550;
+  double ypos=0;
   while(fabs(ypos)>minmaxx){
       ypos=2.*minmaxx*G4INCL::Random::shoot() - minmaxx;
   }
