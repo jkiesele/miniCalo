@@ -179,7 +179,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
 
   G4double zposition = originpoint;
-  double energy_max=200;
+  double energy_max=500;
   double energy_min=1;
   //energy_=15;
 
@@ -189,6 +189,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   else if(particleid_==elec)
       setParticleID(gamma);
 
+  setParticleID(muon);
   //setParticleID(elec);
   //positron
 

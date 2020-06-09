@@ -195,8 +195,9 @@ int main(int argc,char** argv)
   // Process macro or start UI session
   //
 
-  if (argc>1)   // batch mode
+  if (argc>3)   // batch mode
   {
+      G4cout << "batch" << G4endl;
       G4String command = "/control/execute ";
       G4String fileName = macro;
       UImanager->ApplyCommand(command+fileName);

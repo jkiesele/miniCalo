@@ -93,7 +93,7 @@ G4VPhysicalVolume* B4DetectorConstruction::Construct()
 {
 	//DefineGeometry(homogenous_ecal_only);
 	//DefineGeometry(hcal_only_irregular);
-	DefineGeometry(homogenous_no_tracker);
+	DefineGeometry(homogenous_muons);
 	// Define materials
 	DefineMaterials();
 
@@ -102,6 +102,9 @@ G4VPhysicalVolume* B4DetectorConstruction::Construct()
 }
 
 void  B4DetectorConstruction::DefineGeometry(geometry geo){
+
+
+    calorSizeXY  = 35.2*cm;
 
 	if(geo == standard){
 		calorThickness=2000*mm;
@@ -228,22 +231,47 @@ void  B4DetectorConstruction::DefineGeometry(geometry geo){
 
 	    layerGranularity.clear();
 	    layerSplitGranularity.clear();
-	    nofEELayers = 1;
+	    nofEELayers = 50;
 	    nofHB=0;
 	    for(int i=0;i<nofEELayers+nofHB;i++){
-	        G4double granularity=16;
+	        G4double granularity=32;
 	        layerGranularity.push_back(granularity);
 	        layerSplitGranularity.push_back(-granularity/2);
 	    }
 
-	    layerThicknessEE=26*8.903*mm ;//* calorThickness/2000*mm; //26 radiation lengths like CMS (23.2cm
+	    layerThicknessEE=2000*mm / (float)nofEELayers;//26*8.903*mm ;//* calorThickness/2000*mm; //26 radiation lengths like CMS (23.2cm
 	    layerThicknessHB=(calorThickness-nofEELayers*layerThicknessEE)/(float)nofHB;  //the rest 1'768, about 8.7 nuclear int lengths
 
 	    if(nofHB<1)
 	        calorThickness=layerThicknessEE*(float)nofEELayers;
-	    noTrackLayers = 1;
+	    noTrackLayers = 0;
 
 
+	    calorSizeXY  = 35.2*cm;
+
+	}
+	else if(geo == homogenous_muons){
+	    calorThickness=2000*mm;
+
+	    layerGranularity.clear();
+	    layerSplitGranularity.clear();
+	    nofEELayers = 50;
+	    nofHB=0;
+	    for(int i=0;i<nofEELayers+nofHB;i++){
+	        G4double granularity=32;
+	        layerGranularity.push_back(granularity);
+	        layerSplitGranularity.push_back(-granularity/2);
+	    }
+
+	    layerThicknessEE=2000*mm / (float)nofEELayers;//26*8.903*mm ;//* calorThickness/2000*mm; //26 radiation lengths like CMS (23.2cm
+	    layerThicknessHB=(calorThickness-nofEELayers*layerThicknessEE)/(float)nofHB;  //the rest 1'768, about 8.7 nuclear int lengths
+
+	    if(nofHB<1)
+	        calorThickness=layerThicknessEE*(float)nofEELayers;
+	    noTrackLayers = 0;
+
+
+	    calorSizeXY  = 35.2*cm;
 
 	}
 }
@@ -604,7 +632,6 @@ void B4DetectorConstruction::DefineMaterials()
 G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 {
 	// Geometry parameters
-	calorSizeXY  = 35.2*cm;
 
 
 

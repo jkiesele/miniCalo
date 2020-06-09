@@ -72,6 +72,7 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
 		hcal_only_irregular,
 		ecal_only_irregular,
 		homogenous_no_tracker,
+		homogenous_muons,
     };
     virtual G4VPhysicalVolume* Construct();
     virtual void ConstructSDandField();
