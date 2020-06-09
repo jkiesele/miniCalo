@@ -78,7 +78,7 @@ B4PrimaryGeneratorAction::B4PrimaryGeneratorAction()
   yorig_=0;
   setParticleID(gamma);
 
-  for(int i=0;i<global_seed+1;i++)
+  for(int i=0;i<1000*global_seed+1;i++)//FIXME  needs nevents here
       G4INCL::Random::shoot();
 }
 
@@ -184,15 +184,11 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
 
   G4double zposition = originpoint;
-  double energy_max=500;
-  double energy_min=1;
+  double energy_max=2000;
+  double energy_min=100;
   //energy_=15;
 
   //iterate
-  if(particleid_==gamma)
-      setParticleID(elec);
-  else if(particleid_==elec)
-      setParticleID(gamma);
 
   setParticleID(muon);
   //setParticleID(elec);
@@ -211,7 +207,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
  }
 
   //energy_=20;
- double minmaxx=28/2.;
+ double minmaxx=2.;
 
   //G4cout << "shooting particle at " ;
   double xpos=550;

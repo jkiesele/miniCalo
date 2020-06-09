@@ -263,7 +263,7 @@ void  B4DetectorConstruction::DefineGeometry(geometry geo){
 	        layerSplitGranularity.push_back(-granularity/2);
 	    }
 
-	    layerThicknessEE=2000*mm / (float)nofEELayers;//26*8.903*mm ;//* calorThickness/2000*mm; //26 radiation lengths like CMS (23.2cm
+	    layerThicknessEE=2032*mm / (float)nofEELayers;//10 lambda!  26*8.903*mm ;//* calorThickness/2000*mm; //26 radiation lengths like CMS (23.2cm
 	    layerThicknessHB=(calorThickness-nofEELayers*layerThicknessEE)/(float)nofHB;  //the rest 1'768, about 8.7 nuclear int lengths
 
 	    if(nofHB<1)
@@ -271,7 +271,7 @@ void  B4DetectorConstruction::DefineGeometry(geometry geo){
 	    noTrackLayers = 0;
 
 
-	    calorSizeXY  = 35.2*cm;
+	    calorSizeXY  = 12*cm;
 
 	}
 }
