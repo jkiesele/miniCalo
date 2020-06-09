@@ -48,6 +48,9 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+  int B4PrimaryGeneratorAction::global_seed=0;
+
+
  B4PrimaryGeneratorAction * B4PrimaryGeneratorAction::globalgen=0;
 
 B4PrimaryGeneratorAction::B4PrimaryGeneratorAction()
@@ -75,6 +78,8 @@ B4PrimaryGeneratorAction::B4PrimaryGeneratorAction()
   yorig_=0;
   setParticleID(gamma);
 
+  for(int i=0;i<global_seed+1;i++)
+      G4INCL::Random::shoot();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

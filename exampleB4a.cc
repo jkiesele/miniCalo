@@ -64,6 +64,7 @@
 #include "G4ProcessManager.hh"
 
 #include "defines.h"
+#include "B4PrimaryGeneratorAction.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -153,7 +154,7 @@ int main(int argc,char** argv)
   auto randomengine=new CLHEP::RanecuEngine;
   randomengine->setSeed(rseed);
   G4Random::setTheEngine(randomengine);
-  
+  B4PrimaryGeneratorAction::global_seed=rseed;
   // Construct the default run manager
   //
 #ifdef G4MULTITHREADED
