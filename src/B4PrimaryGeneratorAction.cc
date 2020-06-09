@@ -77,7 +77,7 @@ B4PrimaryGeneratorAction::B4PrimaryGeneratorAction()
   yorig_=0;
   setParticleID(gamma);
 
-  for(int i=0;i<global_seed+1;i++){
+  for(int i=0;i<1000*global_seed+1;i++){
       G4INCL::Random::shoot();
   }
 
