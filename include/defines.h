@@ -11,5 +11,4 @@
 
 //#define USEVIS
 
-
 #endif /* SIMULATION_MINICALO_INCLUDE_DEFINES_H_ */

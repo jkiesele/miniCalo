@@ -82,6 +82,9 @@ public:
 	  return i==particleid_;
   }
 
+
+  static int global_seed;
+
 private:
   G4ParticleGun*  fParticleGun; // G4 particle gun
 

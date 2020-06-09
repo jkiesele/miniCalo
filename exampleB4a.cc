@@ -62,6 +62,7 @@
 #include "G4ParticleTable.hh"
 #include "G4ParticleDefinition.hh"
 #include "G4ProcessManager.hh"
+#include "B4PrimaryGeneratorAction.hh"
 
 #include "defines.h"
 
@@ -153,6 +154,7 @@ int main(int argc,char** argv)
   auto randomengine=new CLHEP::RanecuEngine;
   randomengine->setSeed(rseed);
   G4Random::setTheEngine(randomengine);
+  B4PrimaryGeneratorAction::global_seed=rseed;
   
   // Construct the default run manager
   //
