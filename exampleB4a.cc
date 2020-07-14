@@ -137,7 +137,7 @@ int main(int argc,char** argv)
 #endif
     else if (G4String(argv[i]) == "-f" ) {
     	outfile = argv[i+1];
-    	rseed = atoi(argv[i+1]);
+    	rseed = 1000+atoi(argv[i+1]);
     }
     else {
       PrintUsage();

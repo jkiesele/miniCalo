@@ -210,7 +210,12 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
      energy_=(energy_max)*rand+energy_min;
  }
 
-  //energy_=20;
+ //for test sampel bin the energy
+ bool testsample=true;
+ if(testsample){
+     energy_ = (int)energy_/10 * 10. + 5. ;
+ }
+ //energy_=20;
  double minmaxx=0;
 
   //G4cout << "shooting particle at " ;
