@@ -3,7 +3,8 @@
 number=$1
 
 sourcedir="/afs/cern.ch/work/j/jkiesele/muonCalo/miniCalo/batch"
-eosdir="/eos/cms/store/cmst3/group/dehep/miniCalo/muoncalo/"
+#eosdir="/eos/cms/store/cmst3/group/dehep/miniCalo/muoncalo/"
+eosdir="/eos/home-d/dorigo/Muon_E_loss/sample_4/"
 
 THISDIR=`pwd`
 cd $sourcedir

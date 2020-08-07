@@ -43,8 +43,12 @@
 #include "G4INCLRandom.hh"
 #include <G4INCLGeant4Random.hh>
 #include <G4INCLRandomSeedVector.hh>
+#include "G4INCLRanecu.hh"
 #include<ctime>
 #include<sys/types.h>
+#include "CLHEP/Random/RanecuEngine.h"
+#include <CLHEP/Random/RandomEngine.h>
+#include <CLHEP/Random/Random.h>
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -69,16 +73,28 @@ B4PrimaryGeneratorAction::B4PrimaryGeneratorAction()
   fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
   fParticleGun->SetParticleEnergy(100.*GeV);
 
+  CLHEP::RanecuEngine * theNewEngine = new CLHEP::RanecuEngine();
+  CLHEP::HepRandom::setTheEngine(theNewEngine);
+  //
+  //CLHEP::HepRandom::setTheSeed(global_seed);
+  auto g =  new G4INCL::Ranecu();
 
-  G4INCL::Random::setGenerator( new G4INCL::Geant4RandomGenerator());
+  G4INCL::Random::SeedVector seeds;
+  seeds.push_back(global_seed+1);
+  seeds.push_back(-global_seed-1);
+  g->setSeeds(seeds);
+  G4INCL::Random::setGenerator(g);
 
+  CLHEP::HepRandom::setTheSeed(global_seed);// G4INCL::Random::setTheSeed(global_seed);
+  //
   globalgen=this;
 
   xorig_=0;
   yorig_=0;
   setParticleID(gamma);
 
-  for(int i=0;i<1000*global_seed+1;i++)//FIXME  needs nevents here
+  int offset = 100*G4INCL::Random::shoot();
+  for(int i=0;i<offset*(global_seed+1);i++)
       G4INCL::Random::shoot();
 }
 
@@ -184,7 +200,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
 
   G4double zposition = originpoint;
-  double energy_max=2000;
+  double energy_max=4000;
   double energy_min=100;
   //energy_=15;
 
@@ -199,12 +215,14 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
 
   //particleid_=pioncharged;
-
+//for(int i=0;i<1200;i++){
  energy_=10001;
  while(energy_>energy_max){//somehow sometimes the random gen shoots >1??
      G4double rand =  G4INCL::Random::shoot();
      energy_=(energy_max)*rand+energy_min;
  }
+ //std::cout <<", " << energy_ << std::endl;
+//}
 
   //energy_=20;
  double minmaxx=2.;

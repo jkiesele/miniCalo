@@ -509,7 +509,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 
 
 
-	placeSensors(lowerleftcorner, true,largesensordxy,thickness,
+	placeSensors(lowerleftcorner, true,largesensordxy-0.01*mm,thickness-0.5*mm,
 	        granularity,G4ThreeVector(0,0,0),name,&activecells_,layerLV,this,
 	        position,absfraction,layernumber,calibration,material,istracker);
 

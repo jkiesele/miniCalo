@@ -5,7 +5,7 @@ output                = $(ProcId).out
 error                 = $(ProcId).err
 getenv = True
 #use_x509userproxy = True
-+MaxRuntime = 16400
++MaxRuntime = 60400
 RequestCpus = 1
 max_retries = 1
-queue 1500
+queue 3000
