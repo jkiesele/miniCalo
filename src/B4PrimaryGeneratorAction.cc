@@ -197,7 +197,7 @@ double gen_etaToR(const G4double& eta, const G4double& z){
 
 bool particleTraversesFully(G4double etamin,G4double etamax, const G4ThreeVector& position, const G4ThreeVector& direction){
 
-    G4double calo_z = 30*cm+300*cm;//should hit all layers
+    G4double calo_z = 30*cm+320*cm;//should hit all layers
     G4double dz = calo_z-position.z();
     G4ThreeVector dir=direction;
     dir=dir.unit();
@@ -290,12 +290,11 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
     G4Exception("B4PrimaryGeneratorAction::GeneratePrimaries()",
       "MyCode0002", JustWarning, msg);
   } 
-  G4cout << "shooting.. " <<G4endl;
   // Set gun position
 
 
-  double energy_max=200;
-  double energy_min=10;
+  double energy_max=100;
+  double energy_min=1;
   //energy_=15;
 
   //iterate
@@ -306,8 +305,12 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
  // else if(particleid_==gamma)
   //    G4cout << setParticleID(pioncharged) <<G4endl;
 
-  setParticleID(gamma);
+  if(particleid_+1 < positron)
+      setParticleID((particles)(particleid_+1));
+  else
+      setParticleID(elec);
   //positron
+  G4cout << "shooting "<< getParticleName(particleid_) <<G4endl;
 
 
 // good metrics are: angle w.r.t. projective and energy
@@ -326,10 +329,10 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   G4cout << "get position " << G4endl;
 
 
-  angle_ = M_PI/3. * G4INCL::Random::shoot0();
+  angle_ = M_PI/60. * G4INCL::Random::shoot0(); //almost pointing, 3 degrees difference allowed
 
   G4ThreeVector position;//15.*cm,66*cm,xorig_,yorig_);
-  G4ThreeVector direction = generateDirectionAndPosition(1.55,2.95,position,angle_,20.*cm,60*cm,299*cm);
+  G4ThreeVector direction = generateDirectionAndPosition(1.55,2.95,position,angle_,20.*cm,60*cm,329*cm);
 
   std::cout << "position " << position << ", direction " << direction << ", angle " << angle_ <<  std::endl;
 
@@ -375,7 +378,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   fParticleGun->GeneratePrimaryVertex(anEvent);
 
 
-  G4cout << "Energy: " << energy_ << ", position: "<< position <<" direction "<<direction<< " field "<<1*tesla <<  G4endl;
+  G4cout << "Energy: " << energy_ << ", position: "<< position <<" direction "<<direction<<   G4endl;
 }
 
 

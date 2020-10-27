@@ -132,7 +132,7 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
     G4double Calo_start_eta;
     G4double Calo_end_eta;
     G4double Calo_start_z;
-    std::vector<G4double> layerThicknesses;
+    std::vector<G4double> layerThicknesses,layerAbsorberFractions;
     G4int Ncalowedges;
     std::vector<G4int> layerGranularity;
     std::vector<G4int> layerSplitGranularity;

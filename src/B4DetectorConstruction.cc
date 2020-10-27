@@ -85,7 +85,7 @@ static G4String createString(const T& i){
 
 B4DetectorConstruction::B4DetectorConstruction()
 : G4VUserDetectorConstruction(),
-  fCheckOverlaps(false),
+  fCheckOverlaps(true),
   m_vacuum(0),
   m_pb(0),
   m_pbtungsten(0),
@@ -116,23 +116,30 @@ G4VPhysicalVolume* B4DetectorConstruction::Construct()
 
 void  B4DetectorConstruction::DefineGeometry(geometry geo){
 
+    layerAbsorberFractions.clear();
+    layerThicknesses.clear();
+    layerGranularity.clear();
 	if(geo == fullendcap){
 		calorThickness=2200*mm;
 
         nofEELayers = 14;
-        Ncalowedges=120;
-        nofHB=0;
-        int etasegments=30;
+        Ncalowedges=96;
+        nofHB=18;
+        int etasegments=24;
 
         Calo_start_eta=1.5;
         Calo_end_eta=3.0;
-        Calo_start_z=300*cm;
+        Calo_start_z=320*cm;
 
-		for(int i=0;i<nofEELayers+nofHB;i++){
-		    if(i<nofEELayers)
-		        layerThicknesses.push_back(34*cm / (float)nofEELayers);//CMS like about 30 X0
-		    else
-		        layerThicknesses.push_back((calorThickness - 34*cm) / (float)nofHB);
+        for(int i=0;i<nofEELayers+nofHB;i++){
+            if(i<nofEELayers){
+                layerThicknesses.push_back(10.382*mm + 0.300*mm);////absorber plus silicon, this makes 1.85 X0 per layer
+                layerAbsorberFractions.push_back(0.9719153717);
+            }
+            else{//copper absorber: 15.32 cm == 1 l_0 , ECal part already has about 1. Add 9 more// 1/2 per layer
+                layerThicknesses.push_back(15.32*cm / 2. + 0.300*mm);
+                layerAbsorberFractions.push_back(0.9960988296);
+            }
 
 		    layerGranularity.push_back(etasegments);
 		}
@@ -253,7 +260,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createCellWheel(
                 0,                // copy number
                 fCheckOverlaps);  // checking overlaps
 
-        G4cout << "placed active wheel at z_start = " << (abs_z_length) << " ends " << (abs_z_length)+active_z_length << G4endl;
+        G4cout << "placed active wheel at z_start = " << start_z << " ends " <<  start_z+(abs_z_length) << G4endl;
 
     }
 
@@ -369,7 +376,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(
     //create the volume
 
     //override:
-    z_length = 10.382*mm + 0.300*mm ;//absorber plus silicon, this makes 1.85 X0 per layer
+    //z_length = 10.382*mm + 0.300*mm ;//absorber plus silicon, this makes 1.85 X0 per layer
 
     //auto layerS   = createCons("Layer_"+name,
     //        start_eta,
@@ -499,7 +506,7 @@ void B4DetectorConstruction::createCalo(G4LogicalVolume * worldLV,
 		        G4ThreeVector(0,0,lastzpos),
 		        "Layer_"+createString(i),  i);
 
-		lastzpos+=thickness;
+		lastzpos+=thickness+1.*mm; //1mm offset
 	}
 
 
@@ -638,7 +645,7 @@ void B4DetectorConstruction::ConstructSDandField()
 	// Create global magnetic field messenger.
 	// Uniform magnetic field is then created automatically if
 	// the field value is not zero.
-	G4ThreeVector fieldValue(0,0,1.*tesla);
+	G4ThreeVector fieldValue(0,0,0);// no need for field here 1.*tesla);
 	fMagFieldMessenger = new G4GlobalMagFieldMessenger(fieldValue);
 	fMagFieldMessenger->SetVerboseLevel(2);
 
