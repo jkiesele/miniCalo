@@ -3,7 +3,7 @@
 number=$1
 
 sourcedir="/afs/cern.ch/user/j/jkiesele/work/HGCal/DisplacedCalo/build/" #end with "/"
-eosdir="/eos/home-j/jalimena/DisplacedCalo/" #end with "/"
+eosdir="/eos/home-j/jkiesele/DeepNtuples/HGCalToys/" #end with "/"
 
 THISDIR=`pwd`
 cd $sourcedir
