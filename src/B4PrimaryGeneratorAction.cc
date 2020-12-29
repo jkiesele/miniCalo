@@ -132,6 +132,11 @@ G4String B4PrimaryGeneratorAction::setParticleID(enum particles p){
 		fParticleGun->SetParticleDefinition(particleDefinition);
 		return "isMuon";
 	}
+    if(p==antimuon){
+        particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("mu+");
+        fParticleGun->SetParticleDefinition(particleDefinition);
+        return "isAntiMuon";
+    }
 	if(p==pioncharged){
 		particleDefinition  = G4ParticleTable::GetParticleTable()->FindParticle("pi+");
 		fParticleGun->SetParticleDefinition(particleDefinition);
@@ -196,7 +201,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
   //generate a few of them
   int noTrackLayers =1;
-  float originpoint = ((float)noTrackLayers)*(-5*cm)-0.5*cm;
+  float originpoint = ((float)noTrackLayers)*(-5*cm)-0.01*cm;
 
 
   G4double zposition = originpoint;
@@ -206,7 +211,10 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
   //iterate
 
-  setParticleID(muon);
+  if(particleid_==muon)
+      setParticleID(antimuon);
+  else
+      setParticleID(muon);
   //setParticleID(elec);
   //positron
 
@@ -216,7 +224,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
   //particleid_=pioncharged;
 //for(int i=0;i<1200;i++){
- energy_=10001;
+ energy_=1e9;
  while(energy_>energy_max){//somehow sometimes the random gen shoots >1??
      G4double rand =  G4INCL::Random::shoot();
      energy_=(energy_max)*rand+energy_min;
@@ -225,7 +233,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 //}
 
   //energy_=20;
- double minmaxx=2.;
+ double minmaxx=0.2;
 
   //G4cout << "shooting particle at " ;
   double xpos=550;
@@ -242,6 +250,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   xorig_=xpos*cm;
   yorig_=ypos*cm;
 
+  //energy_=100;
 
   G4ThreeVector direction(0.,0.,1.);
 

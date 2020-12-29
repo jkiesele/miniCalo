@@ -83,8 +83,10 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
 
     const std::vector<sensorContainer>* getActiveSensors()const;
 
+    void setIsCalo(bool iscalo){iscalo_=iscalo;}
      
   private:
+    bool iscalo_;
     // methods
     //
     void DefineMaterials();

@@ -80,6 +80,7 @@ static G4String createString(const T& i){
 
 B4DetectorConstruction::B4DetectorConstruction()
 : G4VUserDetectorConstruction(),
+  iscalo_(true),
   fCheckOverlaps(false),
   defaultMaterial(0),
   absorberMaterial(0),
@@ -270,8 +271,8 @@ void  B4DetectorConstruction::DefineGeometry(geometry geo){
 	        calorThickness=layerThicknessEE*(float)nofEELayers;
 	    noTrackLayers = 0;
 
-
-	    calorSizeXY  = 12*cm;
+	    //1.2cm for full coverage at 100 GeV at 1T->4 times that
+	    calorSizeXY  = 12.*cm; //3.75*cm;
 
 	}
 }
@@ -509,7 +510,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 
 
 
-	placeSensors(lowerleftcorner, true,largesensordxy-0.01*mm,thickness-0.5*mm,
+	placeSensors(lowerleftcorner, true,largesensordxy-0.001*mm,thickness*0.99,
 	        granularity,G4ThreeVector(0,0,0),name,&activecells_,layerLV,this,
 	        position,absfraction,layernumber,calibration,material,istracker);
 
@@ -543,12 +544,18 @@ void B4DetectorConstruction::createCalo(G4LogicalVolume * caloLV,G4ThreeVector p
 			calibration=calibrationHB;
 		}
 		G4ThreeVector createatposition=G4ThreeVector(0,0,lastzpos+thickness)+position;
+        auto layerthickness = thickness;
+		auto material=gapMaterial;
+		if(! iscalo_){
+		    material = trackerMaterial;
+		    layerthickness = 0.3*mm;
+		}
 		createLayer(
-				caloLV,thickness,
+				caloLV,layerthickness,
 				granularity,
 				absfraction,
 				createatposition,
-				name+"layer"+createString(i),i,1,splitgranularity);//calibration);
+				name+"layer"+createString(i),i,1,splitgranularity,material);//calibration);
 		G4cout << "created layer "<<  i<<" at "<< createatposition << G4endl;
 		lastzpos+=thickness;
 	}
@@ -730,7 +737,7 @@ void B4DetectorConstruction::ConstructSDandField()
 	// Create global magnetic field messenger.
 	// Uniform magnetic field is then created automatically if
 	// the field value is not zero.
-	G4ThreeVector fieldValue(0,0,0);
+	G4ThreeVector fieldValue(0,2.*tesla,0);
 	fMagFieldMessenger = new G4GlobalMagFieldMessenger(fieldValue);
 	fMagFieldMessenger->SetVerboseLevel(2);
 
