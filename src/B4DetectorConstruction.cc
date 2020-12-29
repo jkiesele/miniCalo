@@ -313,6 +313,12 @@ G4VPhysicalVolume* B4DetectorConstruction::createSandwich(G4LogicalVolume* layer
 			defaultMaterial,  // its material
 			"Sandwich_"+name);         // its name
 
+
+    G4double maxStep = dz/5.;
+    G4double maxTime = 0.1*s;
+    G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime, 0.1*MeV);
+    sandwichLV->SetUserLimits(stepLimit);
+
 	G4RotationMatrix * rot =0;
 	if(rotation){
 	    //rotation part:
@@ -364,10 +370,10 @@ G4VPhysicalVolume* B4DetectorConstruction::createSandwich(G4LogicalVolume* layer
 			"Gap_"+name);           // its name
 
 
-    G4double maxStep = dz/20.;
-    G4double maxTime = 2.*s;
-    G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
-    gapLV->SetUserLimits(stepLimit);
+	maxStep = dz/5.;
+	maxTime = 0.1*s;
+	stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime, 0.1*MeV);
+	gapLV->SetUserLimits(stepLimit);
 
 
 	auto activeMaterial
@@ -422,9 +428,9 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
     //if(layernumber<0){
 
     //needs to be put into any LV
-        G4double maxStep = thickness/20.;
-        G4double maxTime = 2.*s;
-        G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
+        G4double maxStep = thickness/5.;
+        G4double maxTime = .1*s;
+        G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime,0.1*MeV);
         layerLV->SetUserLimits(stepLimit);
 
     //}
@@ -665,9 +671,9 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 			"World");         // its name
 
 
-	G4double maxStep = 1.0*mm;
-	G4double maxTime = 20.*s;
-	G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime);
+	G4double maxStep = 1.0*cm;
+	G4double maxTime = 0.1*s;
+	G4UserLimits* stepLimit = new G4UserLimits(maxStep,DBL_MAX,maxTime, 0.1*MeV);
 	worldLV->SetUserLimits(stepLimit);
 
 

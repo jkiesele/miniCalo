@@ -118,6 +118,8 @@ void B4aEventAction::BeginOfEventAction(const G4Event* /*event*/)
   //
   //
 
+  G4cout << "begin event " <<G4endl;
+
   const auto& activesensors=detector_->getActiveSensors();
 
   rechit_absorber_energy_ = std::vector<double>(activesensors->size(),0);//reset

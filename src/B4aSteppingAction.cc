@@ -62,9 +62,9 @@ void B4aSteppingAction::UserSteppingAction(const G4Step* step)
 	//step->GetPreStepPoint()->GetTouchableHandle()->Get
 
 	// energy deposit
+	//  G4cout << "step" <<G4endl;
 
 	fEventAction->accumulateVolumeInfo(volume, step);
-
 
 
 }

@@ -223,17 +223,17 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
 
   //particleid_=pioncharged;
-//for(int i=0;i<1200;i++){
- energy_=1e9;
- while(energy_>energy_max){//somehow sometimes the random gen shoots >1??
-     G4double rand =  G4INCL::Random::shoot();
-     energy_=(energy_max)*rand+energy_min;
- }
- //std::cout <<", " << energy_ << std::endl;
-//}
+  //for(int i=0;i<1200;i++){
+  energy_=1e9;
+  while(energy_>energy_max){//somehow sometimes the random gen shoots >1??
+      G4double rand =  G4INCL::Random::shoot();
+      energy_=(energy_max-energy_min)*rand+energy_min;
+  }
+  //std::cout <<", " << energy_ << std::endl;
+  //}
 
   //energy_=20;
- double minmaxx=0.2;
+  double minmaxx=0.2;
 
   //G4cout << "shooting particle at " ;
   double xpos=550;
