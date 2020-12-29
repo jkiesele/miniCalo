@@ -272,7 +272,7 @@ void  B4DetectorConstruction::DefineGeometry(geometry geo){
 	    noTrackLayers = 0;
 
 	    //1.2cm for full coverage at 100 GeV at 1T->4 times that
-	    calorSizeXY  = 12.*cm; //3.75*cm;
+	    calorSizeXY  = 9.6*cm; //3 mm x 3 mm
 
 	}
 }

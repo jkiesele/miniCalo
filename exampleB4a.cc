@@ -169,7 +169,7 @@ int main(int argc,char** argv)
   // Set mandatory initialization classes
   //
   auto detConstruction = new B4DetectorConstruction();
-  detConstruction->setIsCalo(true);
+  detConstruction->setIsCalo(false);
   runManager->SetUserInitialization(detConstruction);
 
 
