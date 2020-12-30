@@ -206,7 +206,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
   G4double zposition = originpoint;
   double energy_max=4000;
-  double energy_min=100;
+  double energy_min=50;
   //energy_=15;
 
   //iterate
