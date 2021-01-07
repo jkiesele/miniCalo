@@ -652,7 +652,7 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 
 
     //auto calorThickness = nofEELayers * layerThicknessEE + nofHB*layerThicknessHB;
-	auto worldSizeXY = 1.2 * calorSizeXY;
+	auto worldSizeXY = 1. * calorSizeXY;
 	G4double worldSizeZ  = 4 * m;
 
 

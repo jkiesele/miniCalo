@@ -158,6 +158,12 @@ double getTrackMomentum(double pt, bool isgamma){
 
 void B4aEventAction::EndOfEventAction(const G4Event* event)
 {
+    if(event->IsAborted()){//don't fill information
+           G4cout << "event was aborted, not writing output" << G4endl;
+           clear();
+           return;
+       }
+
   // Accumulate statistics
   //
 

@@ -31,7 +31,9 @@
 #include "B4aSteppingAction.hh"
 #include "B4aEventAction.hh"
 #include "B4DetectorConstruction.hh"
-
+#include "G4TransportationManager.hh"
+#include "G4PropagatorInField.hh"
+#include "globals.hh"
 #include "G4Step.hh"
 #include "G4RunManager.hh"
 
@@ -54,16 +56,31 @@ B4aSteppingAction::~B4aSteppingAction()
 
 void B4aSteppingAction::UserSteppingAction(const G4Step* step)
 {
-	// Collect energy and track length step by step
+    // Collect energy and track length step by step
 
-	// get volume of the current step
-	auto volume = step->GetPreStepPoint()->GetTouchableHandle()->GetVolume();
+    // get volume of the current step
+    auto volume = step->GetPreStepPoint()->GetTouchableHandle()->GetVolume();
 
-	//step->GetPreStepPoint()->GetTouchableHandle()->Get
+    //step->GetPreStepPoint()->GetTouchableHandle()->Get
 
-	// energy deposit
-	//  G4cout << "step" <<G4endl;
+    // energy deposit
 
+    auto  transportMgr = G4TransportationManager::GetTransportationManager() ;
+
+    auto fFieldPropagator = transportMgr->GetPropagatorInField() ;
+
+    G4FieldManager* fieldMgr = fFieldPropagator->FindAndSetFieldManager( volume);
+    G4Track* track = step->GetTrack();
+    fieldMgr->ConfigureForTrack( track );
+
+
+    bool looper = fFieldPropagator->IsParticleLooping() ;
+    if(looper){//if anything is looping it's in vacuum
+        //G4cout << "looper " <<G4endl;
+        track->SetTrackStatus(fStopAndKill);
+        // track->
+
+    }
 	fEventAction->accumulateVolumeInfo(volume, step);
 
 
