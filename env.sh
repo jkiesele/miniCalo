@@ -12,8 +12,13 @@ eval "`lcgenv -p LCG_96c_LS x86_64-centos7-gcc9-opt Qt5`"
 eval "`lcgenv -p LCG_96c_LS x86_64-centos7-gcc9-opt fastjet`"
 eval "`lcgenv -p LCG_96c_LS x86_64-centos7-gcc9-opt pythia8 244`"
 
-
+export PYTHIA8_HOME=$PYTHIA8
+export PYTHIA8__HOME=$PYTHIA8_HOME  
 export LD_LIBRARY_PATH=$PYTHIA8__HOME/lib:$LD_LIBRARY_PATH
+
+export FASTJET_HOME=/cvmfs/sft.cern.ch/lcg/views/LCG_96c_LS/x86_64-centos7-gcc9-opt/
+export FASTJET__HOME=$FASTJET_HOME
+
 
 export G4DATAINSTALL=/cvmfs/sft.cern.ch/lcg/releases/LCG_93/Geant4/10.04/x86_64-slc6-gcc7-opt/share/Geant4-10.4.0
 export G4LEVELGAMMADATA=$G4DATAINSTALL/data/PhotonEvaporation5.2

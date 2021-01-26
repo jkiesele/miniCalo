@@ -198,14 +198,15 @@ void B4JetGeneratorAction::GenerateSingleVertex(G4PrimaryVertex* vertex)
     firstEvent_ = false;
   }
 
-  double const etaTargetMin = 1.5;
-  double const etaTargetMax = 3.0;
-  double const eMin = 10.;
-  double const eMax = 4000.;
+  double const etaTargetMin = -4.0;
+  double const etaTargetMax = 4.0;
+  double const eMin = 2.;
+  double const eMax = 20.;
 
   // jets from this position at eta ~ 3.6 will hit the center of the detector
   xorig_=0;
   yorig_=0;
+  G4double zorig=430;
 
 
   // // make a dummy primary proton
@@ -215,7 +216,7 @@ void B4JetGeneratorAction::GenerateSingleVertex(G4PrimaryVertex* vertex)
   std::vector<int> primaries;
   primaries.reserve(1024 * 16);
 
-  G4ThreeVector vertex_position(xorig_,yorig_,0);
+  G4ThreeVector vertex_position(xorig_,yorig_,zorig);
   G4double vertex_time(0.);
  
   while (true) {
@@ -255,14 +256,14 @@ void B4JetGeneratorAction::GenerateSingleVertex(G4PrimaryVertex* vertex)
         auto& part(pythia_.event[i]);
 
         if (part.isFinal()) {
-            if(part.eta()<4. && part.eta() > 1.0){
+           // if(part.eta()<4. && part.eta() > 1.0){
                 //
                 fjinputs_.emplace_back(part.px(), part.py(), part.pz(), part.e());
                 fjinputs_.back().set_user_index(i);
 
                 primaries.push_back(i);
                 totalen+=part.e();
-            }
+          //  }
         }
       }
       energy_ = 0;
