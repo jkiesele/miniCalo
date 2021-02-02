@@ -36,15 +36,20 @@
 #include "G4UnitsTable.hh"
 #include "G4SystemOfUnits.hh"
 #include "B4PrimaryGeneratorAction.hh"
-
+#include <stdlib.h>
 #include "B4aEventAction.hh"
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 B4RunAction::B4RunAction(B4PartGeneratorBase *gen, B4aEventAction* ev, G4String fname)
  : G4UserRunAction()
 { 
+    generator_=gen;
 	fname_=fname;
 	eventact_=ev;
+
+	if(!eventact_->checkConstruct())
+	    throw std::logic_error("first set all event action pointers B4RunAction::B4RunAction");
+
   // set printing event number per each event
   G4RunManager::GetRunManager()->SetPrintProgress(1);     
 
@@ -67,40 +72,22 @@ B4RunAction::B4RunAction(B4PartGeneratorBase *gen, B4aEventAction* ev, G4String 
 
   // Creating ntuple
   //
-  analysisManager->CreateNtuple("B4", "Edep and TrackL");
-  generator_=gen;
-#ifndef ONLY_ENERGY_OUTPUT
-//  //if(! generator_->isJetGenerator()){
-//      G4cout << "creating particle entries" << G4endl;
-//      auto parts=generator_->generateAvailableParticles();
-//      for(const auto& p:parts){
-//          G4cout << p << G4endl;
-//          analysisManager->CreateNtupleIColumn(p);
-//      }
-//  //}
+  analysisManager->CreateNtuple("B4", "B4");
+
   analysisManager->CreateNtupleDColumn("true_energy");
-  analysisManager->CreateNtupleDColumn("true_x");
-  analysisManager->CreateNtupleDColumn("true_y");
-  analysisManager->CreateNtupleDColumn("true_r");
-  analysisManager->CreateNtupleDColumn("true_dir_x");
-  analysisManager->CreateNtupleDColumn("true_dir_y");
-  analysisManager->CreateNtupleDColumn("true_dir_z");
-  analysisManager->CreateNtupleDColumn("true_angle");
 
 
-  analysisManager->CreateNtupleFColumn("rechit_x",eventact_->rechit_x_);
-  analysisManager->CreateNtupleFColumn("rechit_y",eventact_->rechit_y_);
-  analysisManager->CreateNtupleFColumn("rechit_z",eventact_->rechit_z_);
-  analysisManager->CreateNtupleFColumn("rechit_layer",eventact_->rechit_layer_);
-#endif
-  analysisManager->CreateNtupleFColumn("rechit_phi",eventact_->rechit_phi_);
-  analysisManager->CreateNtupleFColumn("rechit_eta",eventact_->rechit_eta_);
- // analysisManager->CreateNtupleIColumn("rechit_detid",eventact_->rechit_detid_);
+  G4cout << "creating stop branches "<< G4endl;
+  for( auto& p: eventact_->hit_stopped_){
+      G4String name=p.first+"_stopped";
+      G4cout << "created branch " << name << G4endl;
+      analysisManager->CreateNtupleIColumn(name,p.second);
 
-//if(false){
-  analysisManager->CreateNtupleFColumn("rechit_energy",eventact_->rechit_energy_);
- // analysisManager->CreateNtupleDColumn("rechit_absorber_energy",eventact_->rechit_absorber_energy_);
-//}
+  }
+  //vectors
+  analysisManager->CreateNtupleIColumn("pdgIds",eventact_->pdgids_);
+  analysisManager->CreateNtupleIColumn("layerNo",eventact_->hit_layer_);
+
   analysisManager->FinishNtuple();
 
   G4cout << "run action initialised" << G4endl;
@@ -123,6 +110,7 @@ void B4RunAction::BeginOfRunAction(const G4Run* /*run*/)
   // Get analysis manager
   auto analysisManager = G4AnalysisManager::Instance();
 
+  eventact_->checkConstruct();
   // Open an output file
   //
   G4String fileName = fname_;

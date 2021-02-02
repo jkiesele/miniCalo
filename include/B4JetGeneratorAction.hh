@@ -43,10 +43,6 @@
 
 #include "Pythia8/Pythia.h"
 
-#include "fastjet/JetDefinition.hh"
-#include "fastjet/ClusterSequence.hh"
-#include "fastjet/PseudoJet.hh"
-
 unsigned const NMAX(1024);
 
 class G4ParticleGun;
@@ -98,12 +94,9 @@ private:
 
   Pythia8::Pythia pythia_;
   particles particle_;
-  fastjet::JetDefinition* jetDef_;
-  std::vector<fastjet::PseudoJet> fjinputs_;
 
   bool firstEvent_{true};
 
-  TTree* truthTree_{nullptr};
   //mkbranch
   int jetType_;
   float jetE_;

@@ -50,8 +50,12 @@ B4aEventAction::B4aEventAction()
    fTrackLAbs(0.),
    fTrackLGap(0.),
    generator_(0),
-   nsteps_(0)
+   detector_(0),
+   nsteps_(0),
+   navail_parts(0)
 {
+    totalen_=0;
+
 	//create vector ntuple here
 //	auto analysisManager = G4AnalysisManager::Instance();
 }
@@ -62,6 +66,45 @@ B4aEventAction::~B4aEventAction()
 {}
 
 
+bool B4aEventAction::checkConstruct(){
+    if(!detector_ || bsmparticles_.size()<1)
+        return false;
+
+
+  //  const auto& activesensors=detector_->getActiveSensors();
+ //   G4cout << "B4aEventAction::checkConstruct: " << activesensors->size() << " sensors active" << G4endl;
+    if(hit_stopped_.size()){
+        pdgids_.clear();
+        for(const auto& ps: generator_->availParticles()){
+            pdgids_.push_back(ps.second);
+
+        }
+        for(auto & p:hit_stopped_)
+            p.second.clear();
+        for(auto & p:hit_stopped_)
+            p.second.resize(NACTIVELAYERS);
+
+        return true;
+    }
+
+    for(const auto& ps: generator_->availParticles()){
+        int s = ps.second;
+        bool neg=s<0;
+        if(neg)
+            s*=-1;
+        auto ss= std::to_string(s);
+        if(neg)
+            ss="m"+ss;
+        hit_stopped_.push_back({ss, std::vector<int>(NACTIVELAYERS)});
+    }
+    for(const auto& ps: generator_->availParticles()){
+        pdgids_.push_back(ps.second);
+        std::cout << "particle " << ps.second << " registered"<<std::endl;
+    }
+
+    return true;
+}
+
 void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Step* step){
 
 	const auto& activesensors=detector_->getActiveSensors();
@@ -70,21 +113,38 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 
 	nsteps_++;
 
-	G4StepPoint* preStepPoint = step->GetPreStepPoint();
-	G4TouchableHistory* theTouchable =
-	(G4TouchableHistory*)(preStepPoint->GetTouchable());
-	G4int copyNo = theTouchable->GetVolume()->GetCopyNo();
-	//G4int motherCopyNo
-//	= theTouchable->GetVolume(1)->GetCopyNo();
+	auto track = step->GetTrack();
+	G4int trackid= track->GetTrackID();
+	G4int pdgid = track->GetDefinition()->GetPDGEncoding();
+
+	//check if it's in the interesting particle ids
+	//fStopAndKill
+
+	auto stat = track->GetTrackStatus() ;
+	bool done = stat == fStopAndKill || stat == fStopButAlive;
+
+	if(!done)
+	    return; //only stopped interesting
+
+	//std::cout << "particle stopped " << pdgid << std::endl;
+
+	auto partit = std::find(bsmparticles_.begin(),bsmparticles_.end(),pdgid);
+	if(partit == bsmparticles_.end())
+	    return; //not interesting
 
 
-	//theTouchable->GetVolume()->Ge
+
+	size_t partidx = partit - bsmparticles_.begin();
+
+    G4StepPoint* preStepPoint = step->GetPreStepPoint();
+    G4TouchableHistory* theTouchable =
+    (G4TouchableHistory*)(preStepPoint->GetTouchable());
+    G4int copyNo = theTouchable->GetVolume()->GetCopyNo();
 
 	size_t idx=activesensors->size();
 	for(size_t i=0;i<activesensors->size();i++){
 		if(volume == activesensors->at(i).getVol()){
 		    if(copyNo == activesensors->at(i).getCopyNo()){
-		    //    G4cout << copyNo << " "<<G4endl;
 		        idx=i;
 		        break;
 
@@ -94,11 +154,13 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 
 	if(idx>=activesensors->size())return;//not active volume
 
-
-	auto energy=step->GetTotalEnergyDeposit();
-	if(idx<rechit_energy_.size()){
-	    rechit_energy_.at(idx)+=energy/1000.; //GeV
+	if(activesensors->at(idx).getLayer()>=0){
+	    std::cout << "BSM particle stopped! " << pdgid ;
+	    std::cout << " --> in LAr! "<< std::endl;
 	}
+
+	//auto energy=step->GetTotalEnergyDeposit();
+	hit_stopped_.at(partidx).second.at(idx)++;
 
 
 }
@@ -115,38 +177,7 @@ void B4aEventAction::BeginOfEventAction(const G4Event* /*event*/)
   clear();
   totalen_=0;
   nsteps_=0;
-  //set generator stuff
-//random particle
-  //random energy
-  /*
-  do this in the generator
-  */
 
-  //
-  //
-
-  const auto& activesensors=detector_->getActiveSensors();
-
-  rechit_absorber_energy_ = std::vector<float>(activesensors->size(),0);//reset
-  rechit_energy_ = std::vector<float>(activesensors->size(),0);//reset
-  rechit_x_.resize(activesensors->size(),0);
-  rechit_y_.resize(activesensors->size(),0);
-  rechit_z_.resize(activesensors->size(),0);
-  rechit_layer_.resize(activesensors->size(),0);
-  rechit_phi_.resize(activesensors->size(),0);
-  rechit_eta_.resize(activesensors->size(),0);
-  rechit_vxy_.resize(activesensors->size(),0);
-  rechit_detid_.resize(activesensors->size(),0);
-  for(size_t i=0;i<activesensors->size();i++){
-      rechit_x_.at     (i)=activesensors->at(i).getPosx();//eta
-      rechit_y_.at     (i)=activesensors->at(i).getPosy();//phi
-      rechit_z_.at     (i)=activesensors->at(i).getPosz();//z
-      rechit_layer_.at (i)=activesensors->at(i).getLayer();
-      rechit_phi_.at (i)=activesensors->at(i).getPhi();//0
-      rechit_eta_.at    (i)=activesensors->at(i).getEta();//lengthz
-      rechit_vxy_.at   (i)=activesensors->at(i).getArea();//0
-      rechit_detid_.at (i)=activesensors->at(i).getGlobalDetID();
-  }
 
 
 }
@@ -174,37 +205,28 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
         return;
     }
 
+    const auto& activesensors=detector_->getActiveSensors();
+    if(!hit_layer_.size()){
+        hit_layer_.resize(activesensors->size());
+        for(size_t i=0;i<hit_layer_.size();i++){
+            hit_layer_.at(i) = activesensors->at(i).getLayer();
+        }
+    }
+    auto analysisManager = G4AnalysisManager::Instance();
 
-    G4cout << "nsteps_ "<<nsteps_ <<G4endl;
-//clear();return;
-  // get analysis manager
-  auto analysisManager = G4AnalysisManager::Instance();
+  //  for(const auto& b: analysisManager->GetNtuple()->branches())
+  //      std::cout << b->name() <<" " <<  std::endl;
 
-#ifndef ONLY_ENERGY_OUTPUT
-  // fill ntuple
-  int i=0;
-  int ispart[navail_parts];
- // for( ;i<navail_parts ;i++){
- //     //G4cout << i  << G4endl;
-//	  ispart[i]=generator_->isParticle(i);
-//	  analysisManager->FillNtupleIColumn(i,ispart[i]);
- // }
-  analysisManager->FillNtupleDColumn(i,generator_->getEnergy());
-  analysisManager->FillNtupleDColumn(i+1,generator_->getX());
-  analysisManager->FillNtupleDColumn(i+2,generator_->getY());
-  analysisManager->FillNtupleDColumn(i+3,generator_->getR());
-  analysisManager->FillNtupleDColumn(i+4,generator_->getDirX()); //maybe this could be displacement?
-  analysisManager->FillNtupleDColumn(i+5,generator_->getDirY()); //maybe this could be displacement?
-  analysisManager->FillNtupleDColumn(i+6,generator_->getDirZ());
-  analysisManager->FillNtupleDColumn(i+7,generator_->getHowParallel());
+    analysisManager->FillNtupleDColumn(0,generator_->getEnergy());
 
 
-  //filling deposits and volume info for all volumes automatically..
-#endif
 
-  analysisManager->AddNtupleRow();  
 
-  clear();
+   // G4cout << "nsteps_ "<<nsteps_ <<G4endl;
+
+    analysisManager->AddNtupleRow();
+
+    clear();
 }  
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

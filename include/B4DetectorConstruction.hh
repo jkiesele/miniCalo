@@ -58,6 +58,9 @@ class G4Material;
 /// In addition a transverse uniform magnetic field is defined 
 /// via G4GlobalMagFieldMessenger class.
 
+
+#define NACTIVELAYERS 100
+
 class B4DetectorConstruction : public G4VUserDetectorConstruction
 {
   public:
@@ -66,15 +69,7 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
 
   public:
     enum geometry{
-    	standard,
-		homogenous,
-		homogenous_ecal_only,
-		ecal_only,
-		ecal_only_hi_granular,
-		hcal_only_irregular,
-		ecal_only_irregular,
-		homogenous_no_tracker,
-		fullendcap
+    	standard
     };
     virtual G4VPhysicalVolume* Construct();
     virtual void ConstructSDandField();
@@ -93,34 +88,31 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
     G4VPhysicalVolume* DefineVolumes();
 
 
-    G4VPhysicalVolume* createCellWheel(
-            G4ThreeVector position,
-            G4LogicalVolume* layerLV,
-            G4double start_eta,
-            G4double eta_width,
-            G4double start_z,
-            G4double z_length,
-            G4int nphi,
-            G4int layernum,
-            G4int cellnum,
-            G4Material* active_m,
-            G4Material* abs_m=0,
-            G4double abs_fraction=0);
+    G4VPhysicalVolume* createTubs(
 
-    G4VPhysicalVolume* createLayer(
-            G4LogicalVolume * caloLV,
-            G4double start_eta,
-            G4double end_eta,
-            G4int n_cells_eta,
-            G4int n_cells_phi,
-            G4double start_z,
-            G4double z_length,
+            const G4String& name,
             G4ThreeVector position,
-            G4String name, int layernumber);
+            G4double inner,
+            G4double outer,
+            G4double zhalf,
+            G4Material* material,
+            G4LogicalVolume* mother,
+            bool active=false,
+            int layernum=-1,
+            int copynum=-1,
+            bool halfopen=false
+    );
+
+    G4VPhysicalVolume* createCMS(
+            G4ThreeVector position,
+            G4LogicalVolume* worldLV);
+
+    G4VPhysicalVolume* createBottle(
+            G4ThreeVector position,
+            G4LogicalVolume* worldLV);
   
-    void createCalo(G4LogicalVolume * worldLV,G4ThreeVector position,G4String name);
-    // data members
-    //
+
+
     static G4ThreadLocal G4GlobalMagFieldMessenger*  fMagFieldMessenger; 
                                       // magnetic field messenger
 
@@ -137,7 +129,7 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
     std::vector<G4int> layerGranularity;
     std::vector<G4int> layerSplitGranularity;
     G4double calorSizeXY;
-    G4Material * m_vacuum, *m_pb, *m_pbtungsten, *m_silicon, *m_cu;
+    G4Material * m_vacuum, *m_pb, *m_pbtungsten, *m_silicon, *m_cu, *m_brass, *m_iron, *m_lar;
     G4int nofEELayers,nofHB, noTrackLayers;
     G4double calorThickness;
 

@@ -37,6 +37,7 @@
 #include "globals.hh"
 #include <vector>
 #include "B4PartGeneratorBase.hh"
+#include <algorithm>
 
 class G4ParticleGun;
 class G4Event;
@@ -67,8 +68,9 @@ public:
   virtual bool isJetGenerator(){return false;}
 
 
-
   std::vector<G4String> generateAvailableParticles()const;
+
+  const std::pair<G4String, int> & primaryParticle()const{return primaryPart_;}
 
   particles getParticle()const{return particleid_;}
 
@@ -81,7 +83,10 @@ public:
 private:
   G4ParticleGun*  fParticleGun; // G4 particle gun
 
+  void setParticle(const G4String & part);
   G4String setParticleID(enum particles );
+
+  std::pair<G4String, int> primaryPart_;
 
   particles particleid_;
   bool from_beamspot_;

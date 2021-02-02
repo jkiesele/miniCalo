@@ -54,6 +54,7 @@ B4aActionInitialization::~B4aActionInitialization()
 
 void B4aActionInitialization::BuildForMaster() const
 {
+    G4cout << "B4aActionInitialization::BuildForMaster" << G4endl;
 #ifndef NOPYTHIA
 #ifdef USEPYTHIA
   auto gen=new B4JetGeneratorAction(USEPYTHIA);
@@ -89,7 +90,7 @@ void B4aActionInitialization::Build() const
   SetUserAction(runact);
   SetUserAction(eventAction);
   SetUserAction(new B4aSteppingAction(fDetConstruction,eventAction));
-  G4cout << "actions initialised" <<G4endl;
+  G4cout << ">>>>>>>>>>>>>>>>>> actions initialised" <<G4endl;
 }  
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

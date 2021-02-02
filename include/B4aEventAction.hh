@@ -42,6 +42,8 @@
 #include "G4Step.hh"
 #include "B4RunAction.hh"
 #include "B4PrimaryGeneratorAction.hh"
+#include <algorithm>
+
 /// Event action class
 ///
 /// It defines data members to hold the energy deposit and track lengths
@@ -66,17 +68,11 @@ class B4aEventAction : public G4UserEventAction
     void accumulateVolumeInfo(G4VPhysicalVolume *,const G4Step* );
 
     void clear(){
-    	rechit_energy_.clear();
     	allvolumes_.clear();
-    	rechit_absorber_energy_.clear();
-        rechit_x_.clear();
-        rechit_y_.clear();
-        rechit_z_.clear();
-        rechit_eta_.clear();
-        rechit_phi_.clear();
-        rechit_vxy_.clear();
-        rechit_layer_.clear();
-        rechit_detid_.clear();
+    	for(auto& v: hit_stopped_)
+    	    for(auto& vv:v.second)
+    	        vv=0;
+    	hit_layer_.clear();
         nsteps_=0;
         totalen_=0;
     }
@@ -84,24 +80,34 @@ class B4aEventAction : public G4UserEventAction
 
     void setGenerator(B4PartGeneratorBase  * generator){
     	generator_=generator;
-    	navail_parts = generator_->generateAvailableParticles().size();
+    	auto checkparts = generator_->availParticles();
+    	for(const auto p: checkparts){
+    	    bsmparticles_.push_back(p.second);
+    	    std::cout << "added from generator " << p.second << std::endl;
+    	}
+    	navail_parts=bsmparticles_.size();
+    	checkConstruct();
     }
     void setDetector(B4DetectorConstruction * detector){
     	detector_=detector;
+    	checkConstruct();
     }
+
+    bool checkConstruct();
+
 
   private:
     G4double  fEnergyAbs;
     G4double totalen_;
-    std::vector<float>  rechit_energy_,rechit_absorber_energy_;
-    std::vector<float>  rechit_x_;
-    std::vector<float>  rechit_y_;
-    std::vector<float>  rechit_z_;
-    std::vector<float>  rechit_layer_;
-    std::vector<float>  rechit_eta_;
-    std::vector<float>  rechit_phi_;
-    std::vector<float>  rechit_vxy_;
-    std::vector<int>       rechit_detid_;
+
+    //particle in layer
+
+
+    std::vector<int> pdgids_;
+    std::vector<std::pair<G4String, std::vector< int> > > hit_stopped_;
+    std::vector<int>  hit_layer_;
+
+
     std::vector<const G4VPhysicalVolume * > allvolumes_;
 
     G4double  fEnergyGap;
@@ -114,6 +120,8 @@ class B4aEventAction : public G4UserEventAction
 
     size_t nsteps_;
     size_t navail_parts;
+
+    std::vector<int> bsmparticles_;
 
 };
 
