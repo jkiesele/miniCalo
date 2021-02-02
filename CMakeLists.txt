@@ -37,7 +37,7 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 # Add the executable, and link it to the Geant4 libraries
 #
 add_executable(exampleB4a exampleB4a.cc ${sources} ${headers})
-target_link_libraries(exampleB4a ${Geant4_LIBRARIES} $ENV{PYTHIA8__HOME}/lib/libpythia8.dylib /Users/jkiesele/work/dmbottle/G4Rhadrons_with_Regge_model/libexampleRhad.dylib)
+target_link_libraries(exampleB4a ${Geant4_LIBRARIES} $ENV{PYTHIA8__HOME}/lib/libpythia8.dylib $ENV{G4RHADRONS}/libexampleRhad.dylib)
 
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
@@ -57,6 +57,7 @@ set(EXAMPLEB4A_SCRIPTS
   condorSubmit
   batchscript.sh
   env.sh
+  osxenv.sh
   )
 
 foreach(_script ${EXAMPLEB4A_SCRIPTS})
@@ -66,6 +67,24 @@ foreach(_script ${EXAMPLEB4A_SCRIPTS})
     COPYONLY
     )
 endforeach()
+
+set(PARTICLE_FILES
+  particles.txt
+  decays.txt
+  PhysicsConfiguration.txt
+  ProcessList.txt
+  )
+
+foreach(_file ${PARTICLE_FILES})
+  configure_file(
+    $ENV{G4RHADRONS}/${_file}
+    ${PROJECT_BINARY_DIR}/${_file}
+    COPYONLY
+    )
+endforeach()
+
+file(COPY $ENV{G4RHADRONS}/data DESTINATION ${PROJECT_BINARY_DIR}/)
+
 
 #----------------------------------------------------------------------------
 # Install the executable to 'bin' directory under CMAKE_INSTALL_PREFIX
