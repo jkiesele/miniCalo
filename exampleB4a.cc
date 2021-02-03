@@ -65,11 +65,11 @@
 #include "G4ParticleDefinition.hh"
 #include "G4ProcessManager.hh"
 
-#define USEVIS
+//#define USEVIS
 
 #include "B4PartGeneratorBase.hh"
 
-#include "../G4Rhadrons_with_Regge_model/include/ExRhadPhysicsList.hh"
+#include "ExRhadPhysicsList.hh"
 
 #include "G4DecayPhysics.hh"
 #include "G4EmStandardPhysics.hh"
