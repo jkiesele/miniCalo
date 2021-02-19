@@ -65,7 +65,7 @@
 #include "G4ParticleDefinition.hh"
 #include "G4ProcessManager.hh"
 
-//#define USEVIS
+#define USEVIS
 
 #include "B4PartGeneratorBase.hh"
 

@@ -58,7 +58,7 @@ bool WriteTruthTree = false;
 
 B4JetGeneratorAction::B4JetGeneratorAction(particles p) :
 // B4PrimaryGeneratorAction(),
-  pythia_("/Applications/pythia8/share/Pythia8/xmldoc"),
+  pythia_(getenv("PYTHIA8")+(std::string)"/share/Pythia8/xmldoc"),
   particle_(p),
 nPart_(1),
 energy_(0)
