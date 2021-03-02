@@ -271,23 +271,121 @@ G4VPhysicalVolume* B4DetectorConstruction::createCMS(
 return 0;
 }
 
+G4VPhysicalVolume* B4DetectorConstruction::createBox(
+        G4String name,
+        G4ThreeVector pos,
+        G4ThreeVector dxyz,
+        G4Material* m,
+        G4LogicalVolume* mother,
+        G4LogicalVolume*& LV
+){
+
+    auto S = new G4Box(name+"_S",           // its name
+            dxyz.x()/2, dxyz.y()/2, dxyz.z()/2); // its size
+
+    LV = new G4LogicalVolume(
+            S,           // its solid
+            m,  // its material
+            name+"_LV");         // its name
+
+    LV->SetUserLimits(new G4UserLimits(
+            dxyz.x()/10., //max step length
+            dxyz.x()*50., //max track length
+            limit_world_time_max_, //max track time
+            limit_world_energy_max_)); //min track energy
+
+
+    auto PV = new G4PVPlacement(
+            0,                // no rotation
+            pos,  // at (0,0,0)
+            LV,          // its logical volume
+            name+"_P",          // its name
+            mother,                // its mother  volume
+            false,            // no boolean operation
+            0,                // copy number
+            fCheckOverlaps);  // checking overlaps
+
+    return PV;
+
+}
+
+
+
+G4VPhysicalVolume* B4DetectorConstruction::createLayer(
+        G4String name,
+        G4Material* m_scintillator,
+        G4Material* m_rods,
+        G4ThreeVector pos,
+        G4ThreeVector dxyz,
+        G4ThreeVector roddxyz,
+        G4ThreeVector roddistxyz, //distance between rods, not from centre to centre.
+        G4LogicalVolume* mother){
+
+    roddxyz.setY(dxyz.y());
+
+    G4LogicalVolume* layerLV=0;
+    auto layerPV = createBox(name+"_scintillator",pos,dxyz,m_scintillator,mother,layerLV);
+
+    int nrodsz = dxyz.z()/(roddxyz.z()+roddistxyz.z());
+    int nrodsx = 2;//fixed, two layers of offset rods
+
+    auto startpos = pos - dxyz/2.; //
+    startpos += roddxyz/2.+roddistxyz/2.;
+    auto currentpos=startpos;
+
+    for(int ix=0;ix<nrodsz;ix++){
+        G4String sx="";
+        sx+=ix;
+        for(int i=0;i<nrodsz;i++){
+            G4String s=sx+"_";
+            s+=i;
+            auto rodPV = createBox(name+"_rod_"+s,currentpos,roddxyz,m_rods,mother,layerLV);
+            currentpos += G4ThreeVector(0,0,roddxyz.z()+roddistxyz.z());
+
+
+            //just vis attributes
+
+            auto simpleBoxVisAtt= new G4VisAttributes(G4Colour(.7,0.65,0.26));
+            simpleBoxVisAtt->SetVisibility(true);
+            simpleBoxVisAtt->SetForceSolid(true);
+            rodPV->GetLogicalVolume()->SetVisAttributes(simpleBoxVisAtt);
+
+            if(ix){
+                if(i==nrodsz-2)
+                    break;//one less in second row
+            }
+        }
+        currentpos=startpos + G4ThreeVector(roddxyz.x()+roddistxyz.x(), 0, (roddxyz.z()+roddistxyz.z())/2.);
+    }
+    //now the second row
+
+
+    return layerPV;
+
+}
+
 G4VPhysicalVolume* B4DetectorConstruction::createBottle(
         G4ThreeVector position,
         G4LogicalVolume * worldLV){
 
-    G4double inner=8*m;
-    G4double zhalf=10*m;
 
-
+    auto currentpos = position;
     for (int i=0;i<NACTIVELAYERS;i++){
         G4String s="";
         s+=i;
-        createTubs("Bottle"+s,position,inner,inner+1*cm,zhalf,m_lar,worldLV,true,i,0,true);
-        inner+=1*cm;
+        createLayer("Layer_"+s,
+                m_lar,
+                m_brass,
+                currentpos,
+                G4ThreeVector(2.*cm, 0.5*m, 0.8*m),
+                G4ThreeVector(0.5*cm, 0.5*m, 1*cm),
+                G4ThreeVector(0.5*cm, 0, 0.5*cm),
+                worldLV);
+        currentpos += G4ThreeVector(2.*cm,0,0);
     }
 
+    return 0;
 
-return 0;
 
 }
 
@@ -301,7 +399,7 @@ void B4DetectorConstruction::DefineMaterials()
     nistManager->FindOrBuildMaterial("G4_Cu");
 	nistManager->FindOrBuildMaterial("G4_PbWO4");
     nistManager->FindOrBuildMaterial("G4_Si");
-    nistManager->FindOrBuildMaterial("G4_BRASS");
+    nistManager->FindOrBuildMaterial("G4_BRASS"); //lambda_0 between 16 and 19 cm, radiation length between 1.5 and 2 cm
     nistManager->FindOrBuildMaterial("G4_Fe");
  //   nistManager->FindOrBuildMaterial("G4_lAr");
 
@@ -399,8 +497,10 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 	//
 	// Calorimeter
 	//
-	createCMS(G4ThreeVector(0,0,0),worldLV);
+	//createCMS(G4ThreeVector(0,0,0),worldLV);
 	createBottle(G4ThreeVector(0,0,0),worldLV);
+
+
 
 	G4cout << "created in total "<< activecells_.size()<<" sensors" <<G4endl;
 
@@ -413,6 +513,9 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 
 	double g=0;
 	for(auto& v: activecells_){
+	    break; //not set it here
+	    if(! v.getVol()->GetName().contains("_rod_"))
+	        continue;
 	    auto simpleBoxVisAtt= new G4VisAttributes(G4Colour(.5,g,.0));
 	    simpleBoxVisAtt->SetVisibility(true);
 	    simpleBoxVisAtt->SetForceSolid(true);

@@ -59,7 +59,7 @@ class G4Material;
 /// via G4GlobalMagFieldMessenger class.
 
 
-#define NACTIVELAYERS 100
+#define NACTIVELAYERS 10
 
 class B4DetectorConstruction : public G4VUserDetectorConstruction
 {
@@ -102,6 +102,25 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
             int copynum=-1,
             bool halfopen=false
     );
+
+    G4VPhysicalVolume* createBox(
+            G4String name,
+            G4ThreeVector pos,
+            G4ThreeVector dxyz,
+            G4Material* m,
+            G4LogicalVolume* mother,
+            G4LogicalVolume*& LV
+    );
+
+    G4VPhysicalVolume* createLayer(
+            G4String name,
+            G4Material* m_scintillator,
+            G4Material* m_rods,
+            G4ThreeVector pos,
+            G4ThreeVector dxyz,
+            G4ThreeVector roddxyz,
+            G4ThreeVector roddistxyz, //distance between rods, not from centre to centre.
+            G4LogicalVolume* mother);
 
     G4VPhysicalVolume* createCMS(
             G4ThreeVector position,

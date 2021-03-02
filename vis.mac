@@ -82,11 +82,11 @@
 #/vis/viewer/flush
 
 
-/vis/viewer/set/viewpointThetaPhi 90 0
-/vis/viewer/refresh
-/vis/viewer/pan -1.0
-/vis/viewer/zoom 8
-/vis/viewer/pan -0.5
+#/vis/viewer/set/viewpointThetaPhi 90 0
+#/vis/viewer/refresh
+#/vis/viewer/pan -1.0
+#/vis/viewer/zoom 8
+#/vis/viewer/pan -0.5
 
 
 
