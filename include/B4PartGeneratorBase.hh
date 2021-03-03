@@ -33,6 +33,7 @@ public:
 
     static int seedsoffset_;
 
+    static G4String particle;
 
     const std::vector<std::pair<G4String,int > > & availParticles()const{
         return availParticles_;

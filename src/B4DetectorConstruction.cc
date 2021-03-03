@@ -100,7 +100,7 @@ B4DetectorConstruction::B4DetectorConstruction()
 
 
     limit_in_calo_time_max_=100.*ms;//this could be more low energy stuff
-    limit_in_calo_energy_max_=.1*eV;
+    limit_in_calo_energy_max_=.01*eV;
     limit_world_time_max_=100.*ms; //either got there or not (30ns should be easily sufficient
     limit_world_energy_max_=.1*eV;
 
@@ -224,7 +224,6 @@ G4VPhysicalVolume * B4DetectorConstruction::createTubs(
     if(!active)
         return PV;
 
-    G4cout << "added active cell " << name << G4endl;
 
     activecells_.push_back(
             sensorContainer(
@@ -258,12 +257,15 @@ G4VPhysicalVolume* B4DetectorConstruction::createCMS(
     G4double MuonOuter=5*m;
     G4double InnerZ= 6.5*m;
 
-    bool consideractive=true;
 
-    createTubs("ECal",position,ECalInner,ECalOuter,InnerZ,m_pbtungsten,worldLV,consideractive,-4,0);
-    createTubs("HCal",position,HCalInner,HCalOuter,InnerZ,m_brass,worldLV,     consideractive,-3,0);
-    createTubs("Sol",position,SolenoidInner,SolenoidOuter,InnerZ,m_brass,worldLV,consideractive,-2,0);
-    createTubs("Muons",position,MuonInner,MuonOuter,InnerZ,m_iron,worldLV,consideractive,-1,0);
+    bool consideractive=false;
+#ifdef USECMSACTIVE
+    consideractive=true;
+#endif
+    createTubs("ECal",position,ECalInner,ECalOuter,InnerZ,m_pbtungsten,worldLV,consideractive,0,0);
+    createTubs("HCal",position,HCalInner,HCalOuter,InnerZ,m_brass,worldLV,     consideractive,1,0);
+    createTubs("Sol",position,SolenoidInner,SolenoidOuter,InnerZ,m_brass,worldLV,consideractive,2,0);
+    createTubs("Muons",position,MuonInner,MuonOuter,InnerZ,m_iron,worldLV,consideractive,3,0);
 
 
 
@@ -288,11 +290,11 @@ G4VPhysicalVolume* B4DetectorConstruction::createBox(
             m,  // its material
             name+"_LV");         // its name
 
-    LV->SetUserLimits(new G4UserLimits(
-            dxyz.x()/10., //max step length
-            dxyz.x()*50., //max track length
-            limit_world_time_max_, //max track time
-            limit_world_energy_max_)); //min track energy
+    //LV->SetUserLimits(new G4UserLimits(
+    //        DBL_MAX, //max step length
+    //        DBL_MAX, //max track length
+    //        DBL_MAX, //max track time
+    //        0.1*eV)); //min track energy
 
 
     auto PV = new G4PVPlacement(
@@ -319,12 +321,14 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(
         G4ThreeVector dxyz,
         G4ThreeVector roddxyz,
         G4ThreeVector roddistxyz, //distance between rods, not from centre to centre.
-        G4LogicalVolume* mother){
+        G4LogicalVolume* mother,
+        G4int layerno){
 
     roddxyz.setY(dxyz.y());
 
-    G4LogicalVolume* layerLV=0;
-    auto layerPV = createBox(name+"_scintillator",pos,dxyz,m_scintillator,mother,layerLV);
+    //directly place rods
+  //  G4LogicalVolume* layerLV=0;
+   // auto layerPV = createBox(name+"_scintillator",pos,dxyz,m_scintillator,mother,layerLV);
 
     int nrodsz = dxyz.z()/(roddxyz.z()+roddistxyz.z());
     int nrodsx = 2;//fixed, two layers of offset rods
@@ -338,9 +342,9 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(
         sx+=ix;
         for(int i=0;i<nrodsz;i++){
             G4String s=sx+"_";
-            s+=i;
-            auto rodPV = createBox(name+"_rod_"+s,currentpos,roddxyz,m_rods,mother,layerLV);
-            currentpos += G4ThreeVector(0,0,roddxyz.z()+roddistxyz.z());
+            s+=std::to_string(i);
+            G4LogicalVolume* rodLV=0;
+            auto rodPV = createBox(name+"_rod_"+s,currentpos,roddxyz,m_rods,mother,rodLV);
 
 
             //just vis attributes
@@ -349,6 +353,23 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(
             simpleBoxVisAtt->SetVisibility(true);
             simpleBoxVisAtt->SetForceSolid(true);
             rodPV->GetLogicalVolume()->SetVisAttributes(simpleBoxVisAtt);
+
+            activecells_.push_back(
+                            sensorContainer(
+                                    rodPV,
+                                    0,//sensor size   // G4double dimxy
+                                    0,                              // G4double dimz,
+                                    0,       // G4double area,
+                                    currentpos.x(),                   // G4double posx,
+                                    currentpos.y(),                   // G4double posy,
+                                    currentpos.z(),                   // G4double posz,
+                                    layerno,
+                                    0 //copyno
+                            ));
+
+            G4cout << "added active cell " << name+"_rod_"+s << " layer "<< layerno << G4endl;
+
+            currentpos += G4ThreeVector(0,0,roddxyz.z()+roddistxyz.z());
 
             if(ix){
                 if(i==nrodsz-2)
@@ -360,7 +381,9 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(
     //now the second row
 
 
-    return layerPV;
+
+
+    return 0;//layerPV;
 
 }
 
@@ -370,18 +393,28 @@ G4VPhysicalVolume* B4DetectorConstruction::createBottle(
 
 
     auto currentpos = position;
-    for (int i=0;i<NACTIVELAYERS;i++){
+    int startat=0;
+#ifdef USECMSACTIVE
+    startat=4;
+#endif
+
+
+    for (int i=startat;i<NACTIVELAYERS;i++){
         G4String s="";
-        s+=i;
+        s+=std::to_string(i);
         createLayer("Layer_"+s,
-                m_lar,
+                m_vacuum,
                 m_brass,
                 currentpos,
-                G4ThreeVector(2.*cm, 0.5*m, 0.8*m),
-                G4ThreeVector(0.5*cm, 0.5*m, 1*cm),
-                G4ThreeVector(0.5*cm, 0, 0.5*cm),
-                worldLV);
+                G4ThreeVector(2.*cm, 6.*m, 6*m),//layer size
+                G4ThreeVector(0.5*cm, 6*m, 20*cm),//rod size //1cm
+                G4ThreeVector(0.5*cm, 0, 0.5*cm),//rod distance
+                worldLV,
+                i);
+
+
         currentpos += G4ThreeVector(2.*cm,0,0);
+
     }
 
     return 0;
@@ -476,11 +509,11 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 			m_vacuum,  // its material
 			"World");         // its name
 
-	worldLV->SetUserLimits(new G4UserLimits(
-	        worldSizeZ/10., //max step length
-            worldSizeZ*50., //max track length
-            limit_world_time_max_, //max track time
-            limit_world_energy_max_)); //min track energy
+	//worldLV->SetUserLimits(new G4UserLimits(
+	//        worldSizeZ/10., //max step length
+    //        worldSizeZ*50., //max track length
+    //        limit_world_time_max_, //max track time
+    //        limit_world_energy_max_)); //min track energy
 
 
 	auto worldPV
@@ -497,8 +530,8 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 	//
 	// Calorimeter
 	//
-	//createCMS(G4ThreeVector(0,0,0),worldLV);
-	createBottle(G4ThreeVector(0,0,0),worldLV);
+	createCMS(G4ThreeVector(0,0,0),worldLV);
+	createBottle(G4ThreeVector(6*m,0,0),worldLV);
 
 
 
@@ -511,17 +544,7 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 
 	worldLV->SetVisAttributes (G4VisAttributes::GetInvisible());
 
-	double g=0;
-	for(auto& v: activecells_){
-	    break; //not set it here
-	    if(! v.getVol()->GetName().contains("_rod_"))
-	        continue;
-	    auto simpleBoxVisAtt= new G4VisAttributes(G4Colour(.5,g,.0));
-	    simpleBoxVisAtt->SetVisibility(true);
-	    simpleBoxVisAtt->SetForceSolid(true);
-		v.getVol()->GetLogicalVolume()->SetVisAttributes(simpleBoxVisAtt);
-		g+= 1./(double)activecells_.size();
-	}
+
 	//
 	// Always return the physical World
 	//

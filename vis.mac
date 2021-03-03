@@ -6,6 +6,7 @@
 #
 # Use this open statement to create an OpenGL view:
 /vis/open OGL 2048x1280-0+0
+/vis/ogl/set/displayListLimit 500000
 #
 # Use this open statement to create an OpenInventor view:
 #/vis/open OIX

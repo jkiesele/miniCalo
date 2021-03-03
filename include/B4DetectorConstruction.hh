@@ -59,7 +59,11 @@ class G4Material;
 /// via G4GlobalMagFieldMessenger class.
 
 
-#define NACTIVELAYERS 10
+#define NACTIVELAYERS 50
+#define USECMSACTIVE
+#ifdef USECMSACTIVE
+#define NACTIVELAYERS 54
+#endif
 
 class B4DetectorConstruction : public G4VUserDetectorConstruction
 {
@@ -120,7 +124,8 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
             G4ThreeVector dxyz,
             G4ThreeVector roddxyz,
             G4ThreeVector roddistxyz, //distance between rods, not from centre to centre.
-            G4LogicalVolume* mother);
+            G4LogicalVolume* mother,
+            G4int layerno);
 
     G4VPhysicalVolume* createCMS(
             G4ThreeVector position,

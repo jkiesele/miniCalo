@@ -115,24 +115,39 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 
 	auto track = step->GetTrack();
 	G4int trackid= track->GetTrackID();
+	G4double momentum = track->GetMomentum().mag();
+	size_t secondaries = step->GetNumberOfSecondariesInCurrentStep();
+	if(false && !secondaries && !momentum){//primary
+	    std::cout << trackid<< " " <<  track->GetDefinition()->GetPDGEncoding() << " status " << track->GetTrackStatus()<< " step "<< track->GetCurrentStepNumber() << std::endl;
+	    std::cout << "secondaries: " << step->GetNumberOfSecondariesInCurrentStep()  << std::endl;
+	    std::cout << "momentum "<< track->GetMomentum().mag() << std::endl;
+	}
+
+
 	G4int pdgid = track->GetDefinition()->GetPDGEncoding();
 
 	//check if it's in the interesting particle ids
 	//fStopAndKill
 
 	auto stat = track->GetTrackStatus() ;
-	bool done = stat == fStopAndKill || stat == fStopButAlive;
+
+	bool done = stat == fStopButAlive || (!secondaries && !momentum);//stopped and no secondaries (stop and kill would be after decay)
+
+
 
 	if(!done)
 	    return; //only stopped interesting
 
-	//std::cout << "particle stopped " << pdgid << std::endl;
 
 	auto partit = std::find(bsmparticles_.begin(),bsmparticles_.end(),pdgid);
-	if(partit == bsmparticles_.end())
+	if(partit == bsmparticles_.end()){
+	    //if it has already decayed to SM particles, we don't care anymore, kill them
+	    track->SetTrackStatus(fStopAndKill);// doesn't seem to bring many performance improvements
+
 	    return; //not interesting
+	}
 
-
+   // std::cout << "BSM particle stopped " << pdgid << std::endl;
 
 	size_t partidx = partit - bsmparticles_.begin();
 
@@ -154,14 +169,16 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 
 	if(idx>=activesensors->size())return;//not active volume
 
-	if(activesensors->at(idx).getLayer()>=0){
-	    std::cout << "BSM particle stopped! " << pdgid ;
-	    std::cout << " --> in LAr! "<< std::endl;
+	int laynum = activesensors->at(idx).getLayer();
+
+	if(laynum>=0){
+	    //std::cout << "BSM particle stopped! " << pdgid ;
+	    //std::cout << " --> in in detector layer "<< laynum<< "/"<<
+	    //        hit_stopped_.at(partidx).second.size() <<std::endl;
+        //
+	    //auto energy=step->GetTotalEnergyDeposit();
+	    hit_stopped_.at(partidx).second.at(laynum)++;
 	}
-
-	//auto energy=step->GetTotalEnergyDeposit();
-	hit_stopped_.at(partidx).second.at(idx)++;
-
 
 }
 

@@ -175,12 +175,12 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   // Set gun position
 
 
-  setParticle("~g_rho0");
+  setParticle(particle);
 
 
 
   G4double energy_max=10;//GeV
-  G4double energy_min=2.;
+  G4double energy_min=.1;
 
   energy_=10001;
   while(energy_>energy_max){//somehow sometimes the random gen shoots >1??

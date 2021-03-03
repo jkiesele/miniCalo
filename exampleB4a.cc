@@ -182,7 +182,8 @@ int main(int argc,char** argv)
   //
 
     B4PartGeneratorBase::seedsoffset_ = 800*rseed;
-    G4cout << "random seed " << rseed << G4endl;
+    B4PartGeneratorBase::particle = "~g_rho0";
+    G4cout << "random seed " << rseed << " particle " << B4PartGeneratorBase::particle<< G4endl;
   
   // Construct the default run manager
   //
