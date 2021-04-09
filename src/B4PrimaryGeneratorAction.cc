@@ -77,7 +77,7 @@ B4PrimaryGeneratorAction::B4PrimaryGeneratorAction()
   yorig_=0;
   setParticleID(gamma);
 
-  for(int i=0;i<1000*global_seed+1;i++){
+  for(int i=0;i<5000*(global_seed+1);i++){
       G4INCL::Random::shoot();
   }
 
@@ -211,7 +211,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
  }
 
  //for test sampel bin the energy
- bool testsample=true;
+ bool testsample=false;
  if(testsample){
      energy_ = (int)energy_/10 * 10. + 5. ;
  }

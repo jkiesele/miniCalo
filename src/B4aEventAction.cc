@@ -85,7 +85,7 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 	}
 
 	if(idx>=activesensors->size())return;//not active volume
-
+	if(! issensor) return;
 
 	auto energy=step->GetTotalEnergyDeposit();
 	if(idx<rechit_energy_.size()){

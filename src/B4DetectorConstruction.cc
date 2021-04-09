@@ -80,7 +80,7 @@ static G4String createString(const T& i){
 
 B4DetectorConstruction::B4DetectorConstruction()
 : G4VUserDetectorConstruction(),
-  fCheckOverlaps(false),
+  fCheckOverlaps(true),
   defaultMaterial(0),
   absorberMaterial(0),
   gapMaterial(0)
@@ -227,7 +227,7 @@ void  B4DetectorConstruction::DefineGeometry(geometry geo){
 
 	}
 	else if(geo == homogenous_no_tracker){
-	    calorThickness=2000*mm;
+	    calorThickness=2500*mm;//CHANGE
 
 	    layerGranularity.clear();
 	    layerSplitGranularity.clear();
@@ -239,7 +239,7 @@ void  B4DetectorConstruction::DefineGeometry(geometry geo){
 	        layerSplitGranularity.push_back(-granularity/2);
 	    }
 
-	    layerThicknessEE=2500*mm / (float)nofEELayers;//26*8.903*mm ;//* calorThickness/2000*mm; //26 radiation lengths like CMS (23.2cm
+	    layerThicknessEE=calorThickness / (float)nofEELayers;//26*8.903*mm ;//* calorThickness/2000*mm; //26 radiation lengths like CMS (23.2cm
 	    layerThicknessHB=0;//(calorThickness-nofEELayers*layerThicknessEE)/(float)nofHB;  //the rest 1'768, about 8.7 nuclear int lengths
 
 	    if(nofHB<1)
@@ -336,7 +336,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createSandwich(G4LogicalVolume* layer
 	    absorber
 	    = new G4PVPlacement(
 	            rot,                //  rotation
-	            G4ThreeVector(0., 0., -absdz/2), // its position
+	            G4ThreeVector(0., 0., -(absdz+gapdz)/2.+absdz/2.), // its position
 	            absorberLV,       // its logical volume
 	            "Abso_"+name,           // its name
 	            sandwichLV,          // its mother  volume
@@ -372,7 +372,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createSandwich(G4LogicalVolume* layer
 	auto activeMaterial
 	= new G4PVPlacement(
 	        rot,                // no rotation
-			G4ThreeVector(0., 0., 0), // its position
+			G4ThreeVector(0., 0., absdz/2.), // its position
 			gapLV,            // its logical volume
 			"Gap_"+name,            // its name
 			sandwichLV,          // its mother  volume
@@ -521,7 +521,8 @@ G4VPhysicalVolume* B4DetectorConstruction::createLayer(G4LogicalVolume * caloLV,
 
 void B4DetectorConstruction::createCalo(G4LogicalVolume * caloLV,G4ThreeVector position,G4String name){
 
-	G4double absorberFractionEE=0;//1e-5;
+    //CHANGE
+	G4double absorberFractionEE=0.95;//1e-5;
 	G4double absorberFractionHB=absorberFractionEE;
 	G4double calibrationEE=1;
 	G4double calibrationHB=1;
@@ -594,6 +595,7 @@ void B4DetectorConstruction::DefineMaterials()
 	nistManager->FindOrBuildMaterial("G4_Pb");
 	nistManager->FindOrBuildMaterial("G4_PbWO4");
     nistManager->FindOrBuildMaterial("G4_Si");
+    nistManager->FindOrBuildMaterial("G4_Fe");
 
 	//nistManager->ListMaterials("all");
 
@@ -612,10 +614,11 @@ void B4DetectorConstruction::DefineMaterials()
 	//G4cout << *(G4Material::GetMaterialTable()) << G4endl;
 
 
+	//CHANGE
 	// Get materials
 	defaultMaterial = G4Material::GetMaterial("Galactic");
-	absorberMaterial = G4Material::GetMaterial("G4_Pb");
-	gapMaterial = G4Material::GetMaterial("G4_PbWO4");
+	absorberMaterial = G4Material::GetMaterial("G4_Fe");//G4_Pb
+	gapMaterial = G4Material::GetMaterial("G4_PbWO4");//G4_PbWO4
 	trackerMaterial = G4Material::GetMaterial("G4_Si");
 
 	if ( ! defaultMaterial || ! absorberMaterial || ! gapMaterial || !trackerMaterial ) {
