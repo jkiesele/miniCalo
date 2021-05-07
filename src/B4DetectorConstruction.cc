@@ -89,7 +89,7 @@ static G4String createString(const T& i){
 
 B4DetectorConstruction::B4DetectorConstruction()
 : G4VUserDetectorConstruction(),
-  fCheckOverlaps(true),
+  fCheckOverlaps(false),
   m_vacuum(0),
   m_pb(0),
   m_pbtungsten(0),
