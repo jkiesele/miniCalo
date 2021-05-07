@@ -89,7 +89,7 @@ static G4String createString(const T& i){
 
 B4DetectorConstruction::B4DetectorConstruction()
 : G4VUserDetectorConstruction(),
-  fCheckOverlaps(false),
+  fCheckOverlaps(true),
   m_vacuum(0),
   m_pb(0),
   m_pbtungsten(0),
@@ -406,9 +406,9 @@ G4VPhysicalVolume* B4DetectorConstruction::createBottle(
                 m_vacuum,
                 m_brass,
                 currentpos,
-                G4ThreeVector(3.*cm, 6.*m, 6*m),//layer size
+                G4ThreeVector(2.*cm, 6.*m, 6*m),//layer size always two rods in x
                 G4ThreeVector(1.0*cm, 6*m, 20*cm),//rod size //1cm
-                G4ThreeVector(0.5*cm, 0, 0.5*cm),//rod distance
+                G4ThreeVector(0.*cm, 0, 0.*cm),//rod distance
                 worldLV,
                 i);
 
