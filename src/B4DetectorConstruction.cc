@@ -406,14 +406,14 @@ G4VPhysicalVolume* B4DetectorConstruction::createBottle(
                 m_vacuum,
                 m_brass,
                 currentpos,
-                G4ThreeVector(2.*cm, 6.*m, 6*m),//layer size
-                G4ThreeVector(0.5*cm, 6*m, 20*cm),//rod size //1cm
+                G4ThreeVector(3.*cm, 6.*m, 6*m),//layer size
+                G4ThreeVector(1.0*cm, 6*m, 20*cm),//rod size //1cm
                 G4ThreeVector(0.5*cm, 0, 0.5*cm),//rod distance
                 worldLV,
                 i);
 
 
-        currentpos += G4ThreeVector(2.*cm,0,0);
+        currentpos += G4ThreeVector(3.*cm,0,0);
 
     }
 

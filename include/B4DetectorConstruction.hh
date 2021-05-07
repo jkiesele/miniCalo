@@ -59,10 +59,10 @@ class G4Material;
 /// via G4GlobalMagFieldMessenger class.
 
 
-#define NACTIVELAYERS 50
+#define NACTIVELAYERS 100
 #define USECMSACTIVE
 #ifdef USECMSACTIVE
-#define NACTIVELAYERS 54
+#define NACTIVELAYERS 104
 #endif
 
 class B4DetectorConstruction : public G4VUserDetectorConstruction

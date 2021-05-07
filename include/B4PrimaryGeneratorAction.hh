@@ -74,6 +74,7 @@ public:
 
   particles getParticle()const{return particleid_;}
 
+
   int isParticle(int i)const{
 	  return i==particleid_;
   }

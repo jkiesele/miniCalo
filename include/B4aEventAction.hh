@@ -69,10 +69,10 @@ class B4aEventAction : public G4UserEventAction
 
     void clear(){
     	allvolumes_.clear();
-    	for(auto& v: hit_stopped_)
-    	    for(auto& vv:v.second)
-    	        vv=0;
-    	hit_layer_.clear();
+    	//for(auto& v: hit_stopped_)
+    	 //   for(auto& vv:v.second)
+    	  //      vv=0;
+    	//hit_layer_.clear();
         nsteps_=0;
         totalen_=0;
     }
@@ -95,6 +95,7 @@ class B4aEventAction : public G4UserEventAction
 
     bool checkConstruct();
 
+    size_t nevents_;
 
   private:
     G4double  fEnergyAbs;

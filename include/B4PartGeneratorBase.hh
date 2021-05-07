@@ -11,6 +11,8 @@
 #include "G4VUserPrimaryGeneratorAction.hh"
 #include "G4INCLRandomSeedVector.hh"
 
+class G4ParticleGun;
+
 class B4PartGeneratorBase : public G4VUserPrimaryGeneratorAction{
 public:
     B4PartGeneratorBase(): G4VUserPrimaryGeneratorAction(),energy_(0){}
@@ -31,9 +33,12 @@ public:
 
     virtual int isParticle(int i)const=0;
 
+    virtual  G4ParticleGun* getGun(){return 0;}
+
     static int seedsoffset_;
 
     static G4String particle;
+    static G4double beta;
 
     const std::vector<std::pair<G4String,int > > & availParticles()const{
         return availParticles_;

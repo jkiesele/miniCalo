@@ -85,12 +85,11 @@
 namespace {
   void PrintUsage() {
     G4cerr << " Usage: " << G4endl;
-    G4cerr << " exampleB4a [-m macro ] [-f filenumber=seed] [-o seedoffset (to be added to filenumber)]" << G4endl;
+    G4cerr << " exampleB4a [-m macro ] [-f filenumber=seed] [-o seedoffset (to be added to filenumber)] [-b beta]" << G4endl;
     G4cerr << "   note: -t option is available only for multi-threaded mode."
            << G4endl;
   }
 }
-
 
 
 void enable_physlimits(void)
@@ -131,14 +130,20 @@ int main(int argc,char** argv)
 {
   // Evaluate arguments
   //
-  if ( argc > 7 ) {
+  if ( argc > 9 ) {
     PrintUsage();
+
     return 1;
   }
   long rseed=0;
   G4String macro;
   G4String session="";
   G4String outfile="out";
+  G4String betastr="";
+
+  B4PartGeneratorBase::particle = "~g_rho0";
+  B4PartGeneratorBase::beta = .1;
+
 #ifdef G4MULTITHREADED
   G4int nThreads = 0;
 #endif
@@ -157,12 +162,19 @@ int main(int argc,char** argv)
     else if (G4String(argv[i]) == "-o" ) {
         rseed += atoi(argv[i+1]);
         }
+    else if (G4String(argv[i]) == "-b" ) {
+        B4PartGeneratorBase::beta = atof(argv[i+1]);
+        betastr=argv[i+1];
+        }
     else {
       PrintUsage();
       return 1;
     }
   }  
-  outfile += std::to_string(rseed);
+
+  betastr="_beta_"+betastr+"_";
+
+  outfile += betastr + std::to_string(rseed)+".root";
   rseed++;
   // Detect interactive mode (if no macro provided) and define UI session
   //
@@ -182,7 +194,7 @@ int main(int argc,char** argv)
   //
 
     B4PartGeneratorBase::seedsoffset_ = 800*rseed;
-    B4PartGeneratorBase::particle = "~g_rho0";
+
     G4cout << "random seed " << rseed << " particle " << B4PartGeneratorBase::particle<< G4endl;
   
   // Construct the default run manager

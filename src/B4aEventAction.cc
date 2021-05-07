@@ -55,6 +55,7 @@ B4aEventAction::B4aEventAction()
    navail_parts(0)
 {
     totalen_=0;
+    nevents_=0;
 
 	//create vector ntuple here
 //	auto analysisManager = G4AnalysisManager::Instance();
@@ -129,6 +130,14 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 	//check if it's in the interesting particle ids
 	//fStopAndKill
 
+	auto partit = std::find(bsmparticles_.begin(),bsmparticles_.end(),pdgid);
+	if(partit == bsmparticles_.end()){
+	    //if it has already decayed to SM particles, we don't care anymore, kill them
+	    track->SetTrackStatus(fStopAndKill);// doesn't seem to bring many performance improvements
+
+	    return; //not interesting
+	}
+
 	auto stat = track->GetTrackStatus() ;
 
 	bool done = stat == fStopButAlive || (!secondaries && !momentum);//stopped and no secondaries (stop and kill would be after decay)
@@ -139,13 +148,7 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 	    return; //only stopped interesting
 
 
-	auto partit = std::find(bsmparticles_.begin(),bsmparticles_.end(),pdgid);
-	if(partit == bsmparticles_.end()){
-	    //if it has already decayed to SM particles, we don't care anymore, kill them
-	    track->SetTrackStatus(fStopAndKill);// doesn't seem to bring many performance improvements
 
-	    return; //not interesting
-	}
 
    // std::cout << "BSM particle stopped " << pdgid << std::endl;
 
@@ -222,26 +225,25 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
         return;
     }
 
+    nevents_++;
+
     const auto& activesensors=detector_->getActiveSensors();
     if(!hit_layer_.size()){
-        hit_layer_.resize(activesensors->size());
-        for(size_t i=0;i<hit_layer_.size();i++){
-            hit_layer_.at(i) = activesensors->at(i).getLayer();
+        hit_layer_.resize(NACTIVELAYERS);
+        for(size_t i=0;i<NACTIVELAYERS;i++){
+            hit_layer_.at(i) = i;
         }
     }
-    auto analysisManager = G4AnalysisManager::Instance();
+  //  auto analysisManager = G4AnalysisManager::Instance();
 
   //  for(const auto& b: analysisManager->GetNtuple()->branches())
   //      std::cout << b->name() <<" " <<  std::endl;
-
-    analysisManager->FillNtupleDColumn(0,generator_->getEnergy());
-
 
 
 
    // G4cout << "nsteps_ "<<nsteps_ <<G4endl;
 
-    analysisManager->AddNtupleRow();
+  //  analysisManager->AddNtupleRow();
 
     clear();
 }  

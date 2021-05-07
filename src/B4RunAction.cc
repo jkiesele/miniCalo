@@ -30,6 +30,7 @@
 
 #include "B4RunAction.hh"
 #include "B4Analysis.hh"
+#include "G4ParticleGun.hh"
 
 #include "G4Run.hh"
 #include "G4RunManager.hh"
@@ -75,6 +76,9 @@ B4RunAction::B4RunAction(B4PartGeneratorBase *gen, B4aEventAction* ev, G4String 
   analysisManager->CreateNtuple("B4", "B4");
 
   analysisManager->CreateNtupleDColumn("true_energy");
+  analysisManager->CreateNtupleIColumn("Nevents");
+  analysisManager->CreateNtupleDColumn("mass");
+  analysisManager->CreateNtupleDColumn("beta");
 
 
   G4cout << "creating stop branches "<< G4endl;
@@ -115,6 +119,7 @@ void B4RunAction::BeginOfRunAction(const G4Run* /*run*/)
   //
   G4String fileName = fname_;
   analysisManager->OpenFile(fileName);
+  eventact_->nevents_=0;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -127,6 +132,18 @@ void B4RunAction::EndOfRunAction(const G4Run* /*run*/)
   if (false && analysisManager->GetH1(1) ) {
     
   }
+
+  //write only one event, containing all sums
+
+  analysisManager->FillNtupleDColumn(0,generator_->getEnergy()/GeV);
+  analysisManager->FillNtupleIColumn(1,eventact_->nevents_);
+  analysisManager->FillNtupleDColumn(2,generator_->getGun()->GetParticleDefinition()->GetPDGMass());
+  analysisManager->FillNtupleDColumn(3,B4PartGeneratorBase::beta);
+  analysisManager->AddNtupleRow();
+
+
+
+  ///standard
 
   // save histograms & ntuple
   //
