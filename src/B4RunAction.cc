@@ -133,25 +133,8 @@ void B4RunAction::EndOfRunAction(const G4Run* /*run*/)
 {
   // print histogram statistics
   //
-  auto analysisManager = G4AnalysisManager::Instance();
+    auto analysisManager = G4AnalysisManager::Instance();
 
-  //write only one event, containing all sums
-  eventact_->readInitialParticleInfo();//propagate info
-
-  analysisManager->FillNtupleDColumn(0,eventact_->in_px);
-  analysisManager->FillNtupleDColumn(1,eventact_->in_py);
-  analysisManager->FillNtupleDColumn(2,eventact_->in_pz);
-  analysisManager->FillNtupleDColumn(3,eventact_->in_polx);
-  analysisManager->FillNtupleDColumn(4,eventact_->in_poly);
-  analysisManager->FillNtupleDColumn(5,eventact_->in_polz);
-  analysisManager->FillNtupleDColumn(6,eventact_->out_px);
-  analysisManager->FillNtupleDColumn(7,eventact_->out_py);
-  analysisManager->FillNtupleDColumn(8,eventact_->out_pz);
-  analysisManager->FillNtupleDColumn(9,eventact_->out_polx);
-  analysisManager->FillNtupleDColumn(10,eventact_->out_poly);
-  analysisManager->FillNtupleDColumn(11,eventact_->out_polz);
-
-  analysisManager->AddNtupleRow();
 
   analysisManager->Write();
   analysisManager->CloseFile();

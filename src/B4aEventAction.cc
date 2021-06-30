@@ -102,6 +102,23 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
         clear();
         return;
     }
+    auto analysisManager = G4AnalysisManager::Instance();
+
+
+    analysisManager->FillNtupleDColumn(0,in_px);
+    analysisManager->FillNtupleDColumn(1,in_py);
+    analysisManager->FillNtupleDColumn(2,in_pz);
+    analysisManager->FillNtupleDColumn(3,in_polx);
+    analysisManager->FillNtupleDColumn(4,in_poly);
+    analysisManager->FillNtupleDColumn(5,in_polz);
+    analysisManager->FillNtupleDColumn(6,out_px);
+    analysisManager->FillNtupleDColumn(7,out_py);
+    analysisManager->FillNtupleDColumn(8,out_pz);
+    analysisManager->FillNtupleDColumn(9,out_polx);
+    analysisManager->FillNtupleDColumn(10,out_poly);
+    analysisManager->FillNtupleDColumn(11,out_polz);
+
+    analysisManager->AddNtupleRow();
 
     nevents_++;
 

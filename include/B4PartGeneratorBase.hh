@@ -10,13 +10,13 @@
 
 #include "G4VUserPrimaryGeneratorAction.hh"
 #include "G4INCLRandomSeedVector.hh"
-#include "B4aEventAction.hh"
 
+class B4aEventAction;
 class G4ParticleGun;
 
 class B4PartGeneratorBase : public G4VUserPrimaryGeneratorAction{
 public:
-    B4PartGeneratorBase(): G4VUserPrimaryGeneratorAction(),energy_(0){}
+    B4PartGeneratorBase(): G4VUserPrimaryGeneratorAction(),initial_pz_(0){}
 
     virtual ~B4PartGeneratorBase(){};
 
@@ -26,7 +26,7 @@ public:
         particles_size //leave this one
     };
 
-    G4double getEnergy()const{return energy_;}
+    G4double getEnergy()const{return initial_pz_;}
 
     virtual std::vector<G4String> generateAvailableParticles()const=0;
 
@@ -52,7 +52,7 @@ protected:
     std::vector<std::pair<G4String, int>> availParticles_;
     std::vector<int> availPids_;
 
-    G4double energy_;
+    G4double initial_pz_;
 
 };
 

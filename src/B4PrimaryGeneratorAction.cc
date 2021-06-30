@@ -46,6 +46,7 @@
 #include<ctime>
 #include<sys/types.h>
 #include <fstream>
+#include "B4aEventAction.hh"
 
 template<class T>
 static G4String createString(const T& i){
@@ -168,25 +169,29 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   G4double energy_max=10;//GeV
   G4double energy_min=.1;
 
-  energy_=10001;
-  while(energy_>energy_max){//somehow sometimes the random gen shoots >1??
+  initial_pz_=10001;
+  while(initial_pz_>energy_max){//somehow sometimes the random gen shoots >1??
       G4double rand =  G4INCL::Random::shoot();
-      energy_=(energy_max-energy_min)*rand+energy_min;
+      initial_pz_=(energy_max-energy_min)*rand+energy_min;
   }
 
-  std::cout << "energy " << energy_/GeV << " GeV, mass "<< fParticleGun->GetParticleDefinition()->GetPDGMass() << std::endl;
+  std::cout << "energy " << initial_pz_/GeV << " GeV, mass "<<
+          fParticleGun->GetParticleDefinition()->GetPDGMass() << std::endl;
 
-  auto initialmom = G4ThreeVector(0,0,1);
+  auto initialmom = G4ThreeVector(0,0,initial_pz_*GeV);
 
-  fParticleGun->SetParticleMomentumDirection(initialmom);
-  fParticleGun->SetParticleEnergy(energy_ * GeV);
-  initialmom *= fParticleGun->GetParticleMomentum();
+  fParticleGun->SetParticleMomentumDirection(initialmom.unit());
+  fParticleGun->SetParticleMomentum(initialmom.mag());
+
+  evtact->setInitialMomentum(initialmom);
+  evtact->setInitialPol(fParticleGun->GetParticlePolarization());
+
+  std::cout << initialmom << std::endl;
+
 
   fParticleGun->SetParticlePosition(G4ThreeVector(0,0,-5.5*cm));
   fParticleGun->GeneratePrimaryVertex(anEvent);
 
-  evtact->setInitialMomentum(initialmom);
-  evtact->setInitialPol(fParticleGun->GetParticlePolarization());
 
  // G4cout << "energy: " << energy_ <<  G4endl;
 }

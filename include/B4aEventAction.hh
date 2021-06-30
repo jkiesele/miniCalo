@@ -63,14 +63,6 @@ class B4aEventAction : public G4UserEventAction
     virtual void  BeginOfEventAction(const G4Event* event);
     virtual void    EndOfEventAction(const G4Event* event);
     
-    inline void readInitialParticleInfo(){
-        auto mom = generator_->getGun()->GetParticleMomentumDirection();
-        mom *= generator_->getGun()->GetParticleMomentum();
-        setInitialMomentum(mom);
-
-        setInitialPol(generator_->getGun()->GetParticlePolarization());
-
-    }
 
     void accumulateParticleInfo(const G4Track *);
 
