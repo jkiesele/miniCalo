@@ -63,18 +63,6 @@ B4PrimaryGeneratorAction::B4PrimaryGeneratorAction()
    fParticleGun(nullptr)
 {
 
-    //read particles from file
-    std::ifstream file("particles.txt");
-    std::string a,b,c;//dummy
-    int pid;
-    if(!file)
-        throw std::runtime_error("file particles.txt could not be opened");
-
-    while (file >> pid >> a >> b >> c){
-        G4cout << pid <<" " << c << G4endl;
-        availParticles_.push_back({c,pid});
-    }
-
 
 
     G4int nofParticles = 1;
@@ -83,7 +71,7 @@ B4PrimaryGeneratorAction::B4PrimaryGeneratorAction()
     // default particle kinematic
     //
     auto particleDefinition
-    = G4ParticleTable::GetParticleTable()->FindParticle("Neutralino");
+    = G4ParticleTable::GetParticleTable()->FindParticle("mu-");
   //  G4ParticleTable::GetParticleTable()->DumpTable();
     fParticleGun->SetParticleDefinition(particleDefinition);
     fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
@@ -175,30 +163,30 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   // Set gun position
 
 
-  setParticle(particle);
-
-
+  setParticle("mu-");
 
   G4double energy_max=10;//GeV
   G4double energy_min=.1;
 
-  //energy_=10001;
-  //while(energy_>energy_max){//somehow sometimes the random gen shoots >1??
-  //    G4double rand =  G4INCL::Random::shoot();
-  //    energy_=(energy_max-energy_min)*rand+energy_min;
-  //}
+  energy_=10001;
+  while(energy_>energy_max){//somehow sometimes the random gen shoots >1??
+      G4double rand =  G4INCL::Random::shoot();
+      energy_=(energy_max-energy_min)*rand+energy_min;
+  }
 
-  //this is kinetic energy
-  G4double gamma = 1 / sqrt(1 - beta*beta);
-  energy_ = (gamma-1.)*fParticleGun->GetParticleDefinition()->GetPDGMass();
+  std::cout << "energy " << energy_/GeV << " GeV, mass "<< fParticleGun->GetParticleDefinition()->GetPDGMass() << std::endl;
 
-  //std::cout << "energy " << energy_/GeV << " GeV" << std::endl;
+  auto initialmom = G4ThreeVector(0,0,1);
 
-  fParticleGun->SetParticleMomentumDirection(G4ThreeVector(1,0,0));
-  fParticleGun->SetParticleEnergy(energy_ * MeV);
-  fParticleGun->SetParticlePosition(G4ThreeVector(0,0,0));
+  fParticleGun->SetParticleMomentumDirection(initialmom);
+  fParticleGun->SetParticleEnergy(energy_ * GeV);
+  initialmom *= fParticleGun->GetParticleMomentum();
+
+  fParticleGun->SetParticlePosition(G4ThreeVector(0,0,-5.5*cm));
   fParticleGun->GeneratePrimaryVertex(anEvent);
 
+  evtact->setInitialMomentum(initialmom);
+  evtact->setInitialPol(fParticleGun->GetParticlePolarization());
 
  // G4cout << "energy: " << energy_ <<  G4endl;
 }

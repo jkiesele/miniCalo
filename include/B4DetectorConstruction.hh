@@ -59,11 +59,6 @@ class G4Material;
 /// via G4GlobalMagFieldMessenger class.
 
 
-#define NACTIVELAYERS 100
-#define USECMSACTIVE
-#ifdef USECMSACTIVE
-#define NACTIVELAYERS 104
-#endif
 
 class B4DetectorConstruction : public G4VUserDetectorConstruction
 {
@@ -82,9 +77,8 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
 
     bool isActiveVolume(G4VPhysicalVolume*)const;
 
-    const std::vector<sensorContainer>* getActiveSensors()const;
 
-     
+    G4VPhysicalVolume * targetvolume_;
   private:
     // methods
     //
@@ -92,20 +86,6 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
     G4VPhysicalVolume* DefineVolumes();
 
 
-    G4VPhysicalVolume* createTubs(
-
-            const G4String& name,
-            G4ThreeVector position,
-            G4double inner,
-            G4double outer,
-            G4double zhalf,
-            G4Material* material,
-            G4LogicalVolume* mother,
-            bool active=false,
-            int layernum=-1,
-            int copynum=-1,
-            bool halfopen=false
-    );
 
     G4VPhysicalVolume* createBox(
             G4String name,
@@ -116,46 +96,19 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
             G4LogicalVolume*& LV
     );
 
-    G4VPhysicalVolume* createLayer(
-            G4String name,
-            G4Material* m_scintillator,
-            G4Material* m_rods,
-            G4ThreeVector pos,
-            G4ThreeVector dxyz,
-            G4ThreeVector roddxyz,
-            G4ThreeVector roddistxyz, //distance between rods, not from centre to centre.
-            G4LogicalVolume* mother,
-            G4int layerno);
-
-    G4VPhysicalVolume* createCMS(
-            G4ThreeVector position,
-            G4LogicalVolume* worldLV);
-
-    G4VPhysicalVolume* createBottle(
-            G4ThreeVector position,
-            G4LogicalVolume* worldLV);
   
 
 
     static G4ThreadLocal G4GlobalMagFieldMessenger*  fMagFieldMessenger; 
                                       // magnetic field messenger
 
-    std::vector<sensorContainer> activecells_;
+
 
     G4bool  fCheckOverlaps; // option to activate checking of volumes overlaps
 
-    G4double layerThicknessEE,layerThicknessHB;
-    G4double Calo_start_eta;
-    G4double Calo_end_eta;
-    G4double Calo_start_z;
-    std::vector<G4double> layerThicknesses;
-    G4int Ncalowedges;
-    std::vector<G4int> layerGranularity;
-    std::vector<G4int> layerSplitGranularity;
-    G4double calorSizeXY;
-    G4Material * m_vacuum, *m_pb, *m_pbtungsten, *m_silicon, *m_cu, *m_brass, *m_iron, *m_lar;
-    G4int nofEELayers,nofHB, noTrackLayers;
-    G4double calorThickness;
+
+    G4String target_material_str_;
+    G4Material * m_vacuum, *m_target;
 
 
     G4double limit_in_calo_time_max_, limit_in_calo_energy_max_;
@@ -164,13 +117,6 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
 
 };
 
-// inline functions
-
-inline const std::vector<sensorContainer>* B4DetectorConstruction::getActiveSensors()const{
-	return &activecells_;
-}
-
-     
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 

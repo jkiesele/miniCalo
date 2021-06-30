@@ -81,6 +81,7 @@ public:
 
   G4String getParticleName(enum particles )const;
 
+
 private:
   G4ParticleGun*  fParticleGun; // G4 particle gun
 

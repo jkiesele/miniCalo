@@ -25,7 +25,6 @@ endif()
 include(${Geant4_USE_FILE})
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories($ENV{PYTHIA8_HOME}/include)
-include_directories($ENV{G4RHADRONS}/include)
 
 #----------------------------------------------------------------------------
 # Locate sources and headers for this project
@@ -38,7 +37,7 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 # Add the executable, and link it to the Geant4 libraries
 #
 add_executable(exampleB4a exampleB4a.cc ${sources} ${headers})
-target_link_libraries(exampleB4a ${Geant4_LIBRARIES} $ENV{PYTHIA8__HOME}/lib/libpythia8.so $ENV{G4RHADRONS}/libexampleRhad.so)
+target_link_libraries(exampleB4a ${Geant4_LIBRARIES} $ENV{PYTHIA8__HOME}/lib/libpythia8.so )
 
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
@@ -69,22 +68,7 @@ foreach(_script ${EXAMPLEB4A_SCRIPTS})
     )
 endforeach()
 
-set(PARTICLE_FILES
-  particles.txt
-  decays.txt
-  PhysicsConfiguration.txt
-  ProcessList.txt
-  )
 
-foreach(_file ${PARTICLE_FILES})
-  configure_file(
-    $ENV{G4RHADRONS}/${_file}
-    ${PROJECT_BINARY_DIR}/${_file}
-    COPYONLY
-    )
-endforeach()
-
-file(COPY $ENV{G4RHADRONS}/data DESTINATION ${PROJECT_BINARY_DIR}/)
 
 
 #----------------------------------------------------------------------------

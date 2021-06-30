@@ -39,17 +39,20 @@
 #include "B4PrimaryGeneratorAction.hh"
 #include <stdlib.h>
 #include "B4aEventAction.hh"
+
+#include "G4ParticleGun.hh"
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 B4RunAction::B4RunAction(B4PartGeneratorBase *gen, B4aEventAction* ev, G4String fname)
  : G4UserRunAction()
 { 
     generator_=gen;
-	fname_=fname;
-	eventact_=ev;
+    fname_=fname;
+    eventact_=ev;
 
-	if(!eventact_->checkConstruct())
-	    throw std::logic_error("first set all event action pointers B4RunAction::B4RunAction");
+    if(!eventact_->checkConstruct())
+        throw std::logic_error("first set all event action pointers B4RunAction::B4RunAction");
 
   // set printing event number per each event
   G4RunManager::GetRunManager()->SetPrintProgress(1);     
@@ -75,22 +78,24 @@ B4RunAction::B4RunAction(B4PartGeneratorBase *gen, B4aEventAction* ev, G4String 
   //
   analysisManager->CreateNtuple("B4", "B4");
 
-  analysisManager->CreateNtupleDColumn("true_energy");
-  analysisManager->CreateNtupleIColumn("Nevents");
-  analysisManager->CreateNtupleDColumn("mass");
-  analysisManager->CreateNtupleDColumn("beta");
+
+  analysisManager->CreateNtupleDColumn("in_px");
+  analysisManager->CreateNtupleDColumn("in_py");
+  analysisManager->CreateNtupleDColumn("in_pz");
+
+  analysisManager->CreateNtupleDColumn("in_polx");
+  analysisManager->CreateNtupleDColumn("in_poly");
+  analysisManager->CreateNtupleDColumn("in_polz");
+
+  analysisManager->CreateNtupleDColumn("out_px");
+  analysisManager->CreateNtupleDColumn("out_py");
+  analysisManager->CreateNtupleDColumn("out_pz");
+
+  analysisManager->CreateNtupleDColumn("out_polx");
+  analysisManager->CreateNtupleDColumn("out_poly");
+  analysisManager->CreateNtupleDColumn("out_polz");
 
 
-  G4cout << "creating stop branches "<< G4endl;
-  for( auto& p: eventact_->hit_stopped_){
-      G4String name=p.first+"_stopped";
-      G4cout << "created branch " << name << G4endl;
-      analysisManager->CreateNtupleIColumn(name,p.second);
-
-  }
-  //vectors
-  analysisManager->CreateNtupleIColumn("pdgIds",eventact_->pdgids_);
-  analysisManager->CreateNtupleIColumn("layerNo",eventact_->hit_layer_);
 
   analysisManager->FinishNtuple();
 
@@ -129,24 +134,25 @@ void B4RunAction::EndOfRunAction(const G4Run* /*run*/)
   // print histogram statistics
   //
   auto analysisManager = G4AnalysisManager::Instance();
-  if (false && analysisManager->GetH1(1) ) {
-    
-  }
 
   //write only one event, containing all sums
+  eventact_->readInitialParticleInfo();//propagate info
 
-  analysisManager->FillNtupleDColumn(0,generator_->getEnergy()/GeV);
-  analysisManager->FillNtupleIColumn(1,eventact_->nevents_);
-  analysisManager->FillNtupleDColumn(2,generator_->getGun()->GetParticleDefinition()->GetPDGMass());
-  analysisManager->FillNtupleDColumn(3,B4PartGeneratorBase::beta);
+  analysisManager->FillNtupleDColumn(0,eventact_->in_px);
+  analysisManager->FillNtupleDColumn(1,eventact_->in_py);
+  analysisManager->FillNtupleDColumn(2,eventact_->in_pz);
+  analysisManager->FillNtupleDColumn(3,eventact_->in_polx);
+  analysisManager->FillNtupleDColumn(4,eventact_->in_poly);
+  analysisManager->FillNtupleDColumn(5,eventact_->in_polz);
+  analysisManager->FillNtupleDColumn(6,eventact_->out_px);
+  analysisManager->FillNtupleDColumn(7,eventact_->out_py);
+  analysisManager->FillNtupleDColumn(8,eventact_->out_pz);
+  analysisManager->FillNtupleDColumn(9,eventact_->out_polx);
+  analysisManager->FillNtupleDColumn(10,eventact_->out_poly);
+  analysisManager->FillNtupleDColumn(11,eventact_->out_polz);
+
   analysisManager->AddNtupleRow();
 
-
-
-  ///standard
-
-  // save histograms & ntuple
-  //
   analysisManager->Write();
   analysisManager->CloseFile();
 }

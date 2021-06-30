@@ -43,6 +43,7 @@
 #include "B4RunAction.hh"
 #include "B4PrimaryGeneratorAction.hh"
 #include <algorithm>
+#include "G4ParticleGun.hh"
 
 /// Event action class
 ///
@@ -54,7 +55,7 @@
 class G4VPhysicalVolume;
 class B4aEventAction : public G4UserEventAction
 {
-	friend B4RunAction;
+    friend B4RunAction;
   public:
     B4aEventAction();
     virtual ~B4aEventAction();
@@ -62,35 +63,52 @@ class B4aEventAction : public G4UserEventAction
     virtual void  BeginOfEventAction(const G4Event* event);
     virtual void    EndOfEventAction(const G4Event* event);
     
-    void AddEnergy(G4double de, G4double dl);
-    
+    inline void readInitialParticleInfo(){
+        auto mom = generator_->getGun()->GetParticleMomentumDirection();
+        mom *= generator_->getGun()->GetParticleMomentum();
+        setInitialMomentum(mom);
 
-    void accumulateVolumeInfo(G4VPhysicalVolume *,const G4Step* );
+        setInitialPol(generator_->getGun()->GetParticlePolarization());
+
+    }
+
+    void accumulateParticleInfo(const G4Track *);
+
+    inline void setInitialMomentum(const G4ThreeVector& vec){
+        in_px = vec.x();
+        in_py = vec.y();
+        in_pz = vec.z();
+    }
+    inline void setInitialPol(const G4ThreeVector& vec){
+        in_polx = vec.x();
+        in_poly = vec.y();
+        in_polz = vec.z();
+    }
+    inline void setOutMomentum(const G4ThreeVector& vec){
+        out_px = vec.x();
+        out_py = vec.y();
+        out_pz = vec.z();
+    }
+    inline void setOutPol(const G4ThreeVector& vec){
+        out_polx = vec.x();
+        out_poly = vec.y();
+        out_polz = vec.z();
+    }
+
+
 
     void clear(){
-    	allvolumes_.clear();
-    	//for(auto& v: hit_stopped_)
-    	 //   for(auto& vv:v.second)
-    	  //      vv=0;
-    	//hit_layer_.clear();
-        nsteps_=0;
-        totalen_=0;
+
     }
 
 
     void setGenerator(B4PartGeneratorBase  * generator){
-    	generator_=generator;
-    	auto checkparts = generator_->availParticles();
-    	for(const auto p: checkparts){
-    	    bsmparticles_.push_back(p.second);
-    	    std::cout << "added from generator " << p.second << std::endl;
-    	}
-    	navail_parts=bsmparticles_.size();
-    	checkConstruct();
+        generator_=generator;
+        generator_->evtact = this;
     }
     void setDetector(B4DetectorConstruction * detector){
-    	detector_=detector;
-    	checkConstruct();
+        detector_=detector;
+        checkConstruct();
     }
 
     bool checkConstruct();
@@ -98,42 +116,22 @@ class B4aEventAction : public G4UserEventAction
     size_t nevents_;
 
   private:
-    G4double  fEnergyAbs;
-    G4double totalen_;
 
-    //particle in layer
+    G4double out_px,out_py,out_pz;
+    G4double out_polx,out_poly,out_polz;
 
-
-    std::vector<int> pdgids_;
-    std::vector<std::pair<G4String, std::vector< int> > > hit_stopped_;
-    std::vector<int>  hit_layer_;
-
-
-    std::vector<const G4VPhysicalVolume * > allvolumes_;
-
-    G4double  fEnergyGap;
-    G4double  fTrackLAbs; 
-    G4double  fTrackLGap;
-
+    G4double in_polx,in_poly,in_polz;
+    G4double in_px,in_py,in_pz;
 
     B4PartGeneratorBase * generator_;
     B4DetectorConstruction * detector_;
 
-    size_t nsteps_;
-    size_t navail_parts;
-
-    std::vector<int> bsmparticles_;
 
 };
 
 // inline functions
 
 
-
-inline void B4aEventAction::AddEnergy(G4double de, G4double dl) {
-  fEnergyGap += de; 
-  fTrackLGap += dl;
-}
                      
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 

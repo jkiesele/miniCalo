@@ -59,7 +59,17 @@ void B4aSteppingAction::UserSteppingAction(const G4Step* step)
 	// Collect energy and track length step by step
 
 	// get volume of the current step
-	auto volume = step->GetPreStepPoint()->GetTouchableHandle()->GetVolume();
+
+	auto prevolume = step->GetPreStepPoint()->GetTouchableHandle()->GetVolume();
+	auto postvol =  step->GetPostStepPoint()->GetTouchableHandle()->GetVolume();
+	G4Track* track = step->GetTrack();
+
+	if(prevolume == fDetConstruction->targetvolume_){
+	    auto pdgid = track->GetDefinition()->GetPDGEncoding();
+	    if(pdgid == 13 || pdgid == -13){
+	        fEventAction->accumulateParticleInfo(track);
+	    }
+	}
 
 	//step->GetPreStepPoint()->GetTouchableHandle()->Get
 
@@ -69,8 +79,8 @@ void B4aSteppingAction::UserSteppingAction(const G4Step* step)
 
     auto fFieldPropagator = transportMgr->GetPropagatorInField() ;
 
-    G4FieldManager* fieldMgr = fFieldPropagator->FindAndSetFieldManager( volume);
-    G4Track* track = step->GetTrack();
+    G4FieldManager* fieldMgr = fFieldPropagator->FindAndSetFieldManager( prevolume);
+
     fieldMgr->ConfigureForTrack( track );
 
 
@@ -82,7 +92,6 @@ void B4aSteppingAction::UserSteppingAction(const G4Step* step)
 
     }
 
-	fEventAction->accumulateVolumeInfo(volume, step);
 
 
 }

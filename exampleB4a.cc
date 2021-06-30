@@ -69,8 +69,6 @@
 
 #include "B4PartGeneratorBase.hh"
 
-#include "ExRhadPhysicsList.hh"
-
 #include "G4DecayPhysics.hh"
 #include "G4EmStandardPhysics.hh"
 #include "G4EmExtraPhysics.hh"
@@ -141,7 +139,7 @@ int main(int argc,char** argv)
   G4String outfile="out";
   G4String betastr="";
 
-  B4PartGeneratorBase::particle = "~g_rho0";
+  B4PartGeneratorBase::particle = "mu-";
   B4PartGeneratorBase::beta = .1;
 
 #ifdef G4MULTITHREADED
@@ -174,24 +172,8 @@ int main(int argc,char** argv)
 
   betastr="_beta_"+betastr+"_";
 
-  outfile += betastr + std::to_string(rseed)+".root";
+  outfile += std::to_string(rseed)+".root";
   rseed++;
-  // Detect interactive mode (if no macro provided) and define UI session
-  //
-  //G4UIExecutive* ui = 0;
-  //  if ( ! macro.size() ) {
-  //      G4cout << "G4UIExecutive...." << G4endl;
-  //    ui = new G4UIExecutive(argc, argv, session);
-  //    G4cout << "G4UIExecutive done" << G4endl;
-  //    G4cout << "G4UIExecutive done" << G4endl;
-  //    G4cout << "G4UIExecutive done" << G4endl;
-  //    usleep(2000000);
-  //  }
-  //  G4cout << "G4UIExecutive done" << G4endl;
-  //
-
-  // Choose the Random engine
-  //
 
     B4PartGeneratorBase::seedsoffset_ = 800*rseed;
 
@@ -217,7 +199,6 @@ int main(int argc,char** argv)
 
   auto physicsList = new FTFP_BERT;
   physicsList->RegisterPhysics(new G4StepLimiterPhysics());
-  physicsList->RegisterPhysics(new ExRhadPhysicsList());
 
    runManager->SetUserInitialization(physicsList);
 

@@ -10,6 +10,7 @@
 
 #include "G4VUserPrimaryGeneratorAction.hh"
 #include "G4INCLRandomSeedVector.hh"
+#include "B4aEventAction.hh"
 
 class G4ParticleGun;
 
@@ -39,6 +40,8 @@ public:
 
     static G4String particle;
     static G4double beta;
+
+    B4aEventAction* evtact;
 
     const std::vector<std::pair<G4String,int > > & availParticles()const{
         return availParticles_;

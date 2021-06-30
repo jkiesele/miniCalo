@@ -11,16 +11,16 @@ cd -
 #export LCGENV_PATH=/cvmfs/sft.cern.ch/lcg/releases/
 #export PATH=/cvmfs/sft.cern.ch/lcg/releases/lcgenv/latest/:$PATH
 #export PATH=/usr/bin:$PATH
-cd /cvmfs/sft.cern.ch/lcg/views/
+#cd /cvmfs/sft.cern.ch/lcg/views/
 
-eval "`lcgenv_py2 -p LCG_96c_LS x86_64-centos7-gcc9-opt CMake`"
-eval "`lcgenv_py2 -p LCG_96c_LS x86_64-centos7-gcc9-opt cmaketools`"
-eval "`lcgenv_py2 -p LCG_96c_LS x86_64-centos7-gcc9-opt Geant4`"
-eval "`lcgenv_py2 -p LCG_96c_LS x86_64-centos7-gcc9-opt Qt`"
-eval "`lcgenv_py2 -p LCG_96c_LS x86_64-centos7-gcc9-opt Qt5`"
-eval "`lcgenv_py2 -p LCG_96c_LS x86_64-centos7-gcc9-opt fastjet`"
-eval "`lcgenv_py2 -p LCG_96c_LS x86_64-centos7-gcc9-opt pythia8 244`"
-cd -
+#eval "`lcgenv_py2 -p LCG_96c_LS x86_64-centos7-gcc9-opt CMake`"
+#eval "`lcgenv_py2 -p LCG_96c_LS x86_64-centos7-gcc9-opt cmaketools`"
+#eval "`lcgenv_py2 -p LCG_96c_LS x86_64-centos7-gcc9-opt Geant4`"
+#eval "`lcgenv_py2 -p LCG_96c_LS x86_64-centos7-gcc9-opt Qt`"
+#eval "`lcgenv_py2 -p LCG_96c_LS x86_64-centos7-gcc9-opt Qt5`"
+#eval "`lcgenv_py2 -p LCG_96c_LS x86_64-centos7-gcc9-opt fastjet`"
+#eval "`lcgenv_py2 -p LCG_96c_LS x86_64-centos7-gcc9-opt pythia8 244`"
+#cd -
 
 export PYTHIA8_HOME=$PYTHIA8
 export PYTHIA8__HOME=$PYTHIA8_HOME  
