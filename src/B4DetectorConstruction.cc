@@ -87,13 +87,24 @@ static G4String createString(const T& i){
 }
 
 
-B4DetectorConstruction::B4DetectorConstruction()
+B4DetectorConstruction::B4DetectorConstruction(G4String targetmaterial,
+        G4double thickness_radlength,
+        G4double thickness)
 : G4VUserDetectorConstruction(),
   fCheckOverlaps(false),
   m_vacuum(0),
   m_target(0),
-  target_material_str_("G4_Pb")
+  target_material_str_(targetmaterial)
 {
+    thickness_cm_=thickness*cm;
+    thickness_radlength_=thickness_radlength;
+
+    if(thickness_cm_<0 && thickness_radlength_<0){
+        throw std::runtime_error("B4DetectorConstruction::B4DetectorConstruction: at least one of the thicknesses needs to be >0");
+    }
+    else if(thickness_cm_>0&&thickness_radlength_>0){
+        throw std::runtime_error("B4DetectorConstruction::B4DetectorConstruction: can only define either thickness in rad length or cm");
+    }
 
     targetvolume_=0;
 
@@ -183,6 +194,14 @@ void B4DetectorConstruction::DefineMaterials()
 	m_vacuum = G4Material::GetMaterial("Galactic"); // "Galactic"
 	m_target = G4Material::GetMaterial(target_material_str_); // "Galactic"
 
+	if(thickness_cm_<0){
+	    thickness_cm_ = thickness_radlength_ * m_target->GetRadlen();
+	}
+	else{//cm given, for bookkeeping
+	    thickness_radlength_ = thickness_cm_ / m_target->GetRadlen();
+	}
+
+
 	if ( ! m_vacuum || ! m_target) {
 		G4ExceptionDescription msg;
 		msg << "Cannot retrieve materials already defined.";
@@ -206,7 +225,7 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 
     //auto calorThickness = nofEELayers * layerThicknessEE + nofHB*layerThicknessHB;
     G4double worldSizeXY = 1. * m;
-	G4double worldSizeZ  = 1. * m;
+	G4double worldSizeZ  = 10.*thickness_cm_;
 
 
 
@@ -245,7 +264,7 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 	//add the target
 	G4LogicalVolume * boxvol=0;
 	targetvolume_ = createBox("target",G4ThreeVector(),
-	        G4ThreeVector(10.*cm , 10.*cm, 1.*cm),
+	        G4ThreeVector(10.*cm , 10.*cm, thickness_cm_),
 	        m_target,worldLV,boxvol);
 
 

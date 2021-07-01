@@ -64,27 +64,12 @@ class B4aEventAction : public G4UserEventAction
     virtual void    EndOfEventAction(const G4Event* event);
     
 
-    void accumulateParticleInfo(const G4Track *);
-
-    inline void setInitialMomentum(const G4ThreeVector& vec){
-        in_px = vec.x();
-        in_py = vec.y();
-        in_pz = vec.z();
-    }
-    inline void setInitialPol(const G4ThreeVector& vec){
-        in_polx = vec.x();
-        in_poly = vec.y();
-        in_polz = vec.z();
-    }
-    inline void setOutMomentum(const G4ThreeVector& vec){
-        out_px = vec.x();
-        out_py = vec.y();
-        out_pz = vec.z();
-    }
-    inline void setOutPol(const G4ThreeVector& vec){
-        out_polx = vec.x();
-        out_poly = vec.y();
-        out_polz = vec.z();
+    void accumulateParticleInfo(const G4Track *,
+            const G4ThreeVector& pos);
+    void clearParticleInfo(){
+        ps_.clear();
+        pols_.clear();
+        poss_.clear();
     }
 
 
@@ -107,16 +92,14 @@ class B4aEventAction : public G4UserEventAction
 
     size_t nevents_;
 
+    B4DetectorConstruction * detector_;
   private:
 
-    G4double out_px,out_py,out_pz;
-    G4double out_polx,out_poly,out_polz;
+    std::vector<G4ThreeVector> ps_,pols_,poss_;
 
-    G4double in_polx,in_poly,in_polz;
-    G4double in_px,in_py,in_pz;
+    std::vector<double> t_px, t_py, t_pz, t_polx, t_poly, t_polz, t_posx, t_posy, t_posz;
 
     B4PartGeneratorBase * generator_;
-    B4DetectorConstruction * detector_;
 
 
 };

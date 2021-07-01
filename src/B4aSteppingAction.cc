@@ -64,10 +64,13 @@ void B4aSteppingAction::UserSteppingAction(const G4Step* step)
 	auto postvol =  step->GetPostStepPoint()->GetTouchableHandle()->GetVolume();
 	G4Track* track = step->GetTrack();
 
-	if(prevolume == fDetConstruction->targetvolume_){
+
+
+	if(prevolume == fDetConstruction->targetvolume_
+	        || postvol == fDetConstruction->targetvolume_){
 	    auto pdgid = track->GetDefinition()->GetPDGEncoding();
 	    if(pdgid == 13 || pdgid == -13){
-	        fEventAction->accumulateParticleInfo(track);
+	        fEventAction->accumulateParticleInfo(track,step->GetPostStepPoint()->GetPosition());
 	    }
 	}
 

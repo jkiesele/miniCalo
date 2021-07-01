@@ -183,13 +183,9 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   fParticleGun->SetParticleMomentumDirection(initialmom.unit());
   fParticleGun->SetParticleMomentum(initialmom.mag());
 
-  evtact->setInitialMomentum(initialmom);
-  evtact->setInitialPol(fParticleGun->GetParticlePolarization());
-
-  std::cout << initialmom << std::endl;
 
 
-  fParticleGun->SetParticlePosition(G4ThreeVector(0,0,-5.5*cm));
+  fParticleGun->SetParticlePosition(G4ThreeVector(0,0,-(evtact->detector_->thickness_cm_)/2.-0.5*cm));
   fParticleGun->GeneratePrimaryVertex(anEvent);
 
 

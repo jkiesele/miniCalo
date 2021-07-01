@@ -51,9 +51,6 @@ B4aEventAction::B4aEventAction()
     nevents_=0;
 
 
-    setOutPol(G4ThreeVector());
-    setOutMomentum(G4ThreeVector());
-
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -69,13 +66,23 @@ bool B4aEventAction::checkConstruct(){
 }
 
 
-void B4aEventAction::accumulateParticleInfo(const G4Track * track){
+void B4aEventAction::accumulateParticleInfo(const G4Track * track,
+        const G4ThreeVector& pos){
 
     auto pol = track->GetPolarization();
     auto mom = track->GetMomentum();
 
-    setOutPol(pol);
-    setOutMomentum(mom);
+
+  //  std::cout << "step at " << pos << " momentum " << mom << std::endl;
+
+    if(ps_.size()){
+        if(mom == ps_.at(ps_.size()-1)) //no change, just boundary crossing
+            return;
+    }
+    ps_.push_back(mom);
+    pols_.push_back(pol);
+    poss_.push_back(pos);
+
 }
 
 
@@ -83,12 +90,22 @@ void B4aEventAction::accumulateParticleInfo(const G4Track * track){
 
 void B4aEventAction::BeginOfEventAction(const G4Event* /*event*/)
 {
-    setOutMomentum(G4ThreeVector());
-    setOutPol(G4ThreeVector());
-
+    clear();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+static void fillflatvector(std::vector<std::vector<double> * > tofill,
+        const std::vector<G4ThreeVector>& data){
+    if(tofill.size()!=3)
+        throw std::out_of_range("fillflatvector");
+    for(const auto& v:data){
+        tofill.at(0)->push_back(v.x());
+        tofill.at(1)->push_back(v.y());
+        tofill.at(2)->push_back(v.z());
+    }
+
+}
 
 void B4aEventAction::EndOfEventAction(const G4Event* event)
 {
@@ -102,21 +119,17 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
         clear();
         return;
     }
+
+    //fill into flat vectors
+   // t_px, t_py, t_pz, t_polx, t_poly, t_polz, t_posx, t_posy, t_posz
+
+   fillflatvector({&t_px,   &t_py,   &t_pz}, ps_);
+   fillflatvector({&t_polx, &t_poly, &t_polz}, pols_);
+   fillflatvector({&t_posx, &t_posy, &t_posz}, poss_);
+
+
     auto analysisManager = G4AnalysisManager::Instance();
 
-
-    analysisManager->FillNtupleDColumn(0,in_px);
-    analysisManager->FillNtupleDColumn(1,in_py);
-    analysisManager->FillNtupleDColumn(2,in_pz);
-    analysisManager->FillNtupleDColumn(3,in_polx);
-    analysisManager->FillNtupleDColumn(4,in_poly);
-    analysisManager->FillNtupleDColumn(5,in_polz);
-    analysisManager->FillNtupleDColumn(6,out_px);
-    analysisManager->FillNtupleDColumn(7,out_py);
-    analysisManager->FillNtupleDColumn(8,out_pz);
-    analysisManager->FillNtupleDColumn(9,out_polx);
-    analysisManager->FillNtupleDColumn(10,out_poly);
-    analysisManager->FillNtupleDColumn(11,out_polz);
 
     analysisManager->AddNtupleRow();
 

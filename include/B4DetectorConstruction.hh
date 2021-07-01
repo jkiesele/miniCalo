@@ -63,7 +63,9 @@ class G4Material;
 class B4DetectorConstruction : public G4VUserDetectorConstruction
 {
   public:
-    B4DetectorConstruction();
+    B4DetectorConstruction(G4String targetmaterial,
+            G4double thickness_radlength=-0.1,
+            G4double thickness=-1);
     virtual ~B4DetectorConstruction();
 
   public:
@@ -79,6 +81,7 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
 
 
     G4VPhysicalVolume * targetvolume_;
+    G4double thickness_cm_,thickness_radlength_;
   private:
     // methods
     //

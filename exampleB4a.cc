@@ -136,8 +136,10 @@ int main(int argc,char** argv)
   long rseed=0;
   G4String macro;
   G4String session="";
-  G4String outfile="out";
-  G4String betastr="";
+  G4String outfile="";
+  G4String material="";
+  G4double thicknesscm=-1;
+  G4double thicknessrad=-1;
 
   B4PartGeneratorBase::particle = "mu-";
   B4PartGeneratorBase::beta = .1;
@@ -146,33 +148,37 @@ int main(int argc,char** argv)
   G4int nThreads = 0;
 #endif
   for ( G4int i=1; i<argc; i=i+2 ) {
-    if      ( G4String(argv[i]) == "-m" ) macro = argv[i+1];
-    else if ( G4String(argv[i]) == "-u" ) session = argv[i+1];
-#ifdef G4MULTITHREADED
-    else if ( G4String(argv[i]) == "-t" ) {
-      nThreads = G4UIcommand::ConvertToInt(argv[i+1]);
-    }
-#endif
-    else if (G4String(argv[i]) == "-f" ) {
+      if      ( G4String(argv[i]) == "-m" )
+          macro = argv[i+1];
 
-    	rseed += atoi(argv[i+1]);
-    }
-    else if (G4String(argv[i]) == "-o" ) {
-        rseed += atoi(argv[i+1]);
-        }
-    else if (G4String(argv[i]) == "-b" ) {
-        B4PartGeneratorBase::beta = atof(argv[i+1]);
-        betastr=argv[i+1];
-        }
-    else {
-      PrintUsage();
-      return 1;
+      else if (G4String(argv[i]) == "-o" ) {
+          rseed += atoi(argv[i+1]);
+      }
+      else if (G4String(argv[i]) == "-t" ) {
+          material=argv[i+1];
+      }
+      else if (G4String(argv[i]) == "-r" ) {
+          thicknessrad=atof(argv[i+1]);
+          outfile+=argv[i+1];
+          outfile+="X0";
+      }
+      else if (G4String(argv[i]) == "-c" ) {
+          thicknesscm=atof(argv[i+1]);
+          outfile+=argv[i+1];
+          outfile+="cm";
+      }
+      else {
+          PrintUsage();
+          return 1;
     }
   }  
 
-  betastr="_beta_"+betastr+"_";
-
-  outfile += std::to_string(rseed)+".root";
+  if(material.length()<1){
+      G4cout << "Must define a material" << G4endl;
+      PrintUsage();
+  }
+  outfile = material+"_"+outfile;
+  outfile += "_"+std::to_string(rseed)+".root";
   rseed++;
 
     B4PartGeneratorBase::seedsoffset_ = 800*rseed;
@@ -193,7 +199,7 @@ int main(int argc,char** argv)
   G4cout << "B4DetectorConstruction" << G4endl;
   // Set mandatory initialization classes
   //
-  auto detConstruction = new B4DetectorConstruction();
+  auto detConstruction = new B4DetectorConstruction(material,thicknessrad,thicknesscm);
   runManager->SetUserInitialization(detConstruction);
 
 
@@ -232,7 +238,7 @@ int main(int argc,char** argv)
      G4cout << "UImanager" << G4endl;
   G4UImanager* UImanager = G4UImanager::GetUIpointer();
 
-    if (argc!=1)   // batch mode
+    if (macro.length())   // batch mode
       {
         G4String command = "/control/execute ";
         G4String fileName = macro;
@@ -267,5 +273,21 @@ int main(int argc,char** argv)
 //  delete visManager;
   delete runManager;
 }
-
+/*
+ *
+ * Air STP,
+liquid H2O (i guess we need to specify pressure and temperature; let's say STP and 20 degrees?),
+SiO2,
+Ca,
+Al,
+Fe,
+Pb,
+U
+ *
+ *
+ *  (1,3,10,30,100 GeV, is that reasonable?), so 4M events should do the job.
+ *
+ *
+ *
+ */
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo.....

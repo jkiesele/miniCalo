@@ -78,24 +78,19 @@ B4RunAction::B4RunAction(B4PartGeneratorBase *gen, B4aEventAction* ev, G4String 
   //
   analysisManager->CreateNtuple("B4", "B4");
 
+  // t_px, t_py, t_pz, t_polx, t_poly, t_polz, t_posx, t_posy, t_posz
 
-  analysisManager->CreateNtupleDColumn("in_px");
-  analysisManager->CreateNtupleDColumn("in_py");
-  analysisManager->CreateNtupleDColumn("in_pz");
+  analysisManager->CreateNtupleDColumn("p_x",eventact_->t_px);
+  analysisManager->CreateNtupleDColumn("p_y",eventact_->t_py);
+  analysisManager->CreateNtupleDColumn("p_z",eventact_->t_pz);
 
-  analysisManager->CreateNtupleDColumn("in_polx");
-  analysisManager->CreateNtupleDColumn("in_poly");
-  analysisManager->CreateNtupleDColumn("in_polz");
+  analysisManager->CreateNtupleDColumn("pol_x",eventact_->t_polx);
+  analysisManager->CreateNtupleDColumn("pol_y",eventact_->t_poly);
+  analysisManager->CreateNtupleDColumn("pol_z",eventact_->t_polz);
 
-  analysisManager->CreateNtupleDColumn("out_px");
-  analysisManager->CreateNtupleDColumn("out_py");
-  analysisManager->CreateNtupleDColumn("out_pz");
-
-  analysisManager->CreateNtupleDColumn("out_polx");
-  analysisManager->CreateNtupleDColumn("out_poly");
-  analysisManager->CreateNtupleDColumn("out_polz");
-
-
+  analysisManager->CreateNtupleDColumn("pos_x",eventact_->t_posx);
+  analysisManager->CreateNtupleDColumn("pos_y",eventact_->t_posy);
+  analysisManager->CreateNtupleDColumn("pos_z",eventact_->t_posz);
 
   analysisManager->FinishNtuple();
 
