@@ -130,7 +130,8 @@ int main(int argc,char** argv)
 {
   // Evaluate arguments
   //
-  if ( argc > 9 ) {
+
+  if ( argc > 11 ) {
     PrintUsage();
 
     return 1;
@@ -166,6 +167,9 @@ int main(int argc,char** argv)
         B4PartGeneratorBase::beta = atof(argv[i+1]);
         betastr=argv[i+1];
         }
+    else if (G4String(argv[i]) == "-a" ) {
+        outfile += argv[i+1];
+    }
     else {
       PrintUsage();
       return 1;
