@@ -92,11 +92,12 @@ def createDF():
     
 
 #createDF()
-
+#exit()
 
 df = pandas.read_pickle("dataframe.pkl")
 
 #exit()
+print('loaded dataframe')
 
 df['logE'] = np.log10(df['energy'])
 
@@ -133,6 +134,7 @@ def makeAbsPlot(fieldname,xfieldname):
     
    
 for x in ['beta','energy']: 
+    print('printing',x)
     betas, abs = makeAbsPlot('totalabs',x)
     plt.title("2 m brass")
     plt.ylim([0,0.13])

@@ -1,6 +1,6 @@
 from multiprocessing import Pool
 import os
-
+import time
 
 parttemp='''      1000021   {mass}.0     # ~g
       1000022   {massn}     # Neutralino
@@ -32,21 +32,23 @@ def run_mass(mass: int):
     with open("particles.txt","w") as f:
         f.write(parttemp.format(mass=mass,massn=mass/2.))
 
-    betas = range(4*1,4*99)
-    betas = [b/400. for b in betas]
+    betas = range(1*1,1*99)
+    betas = [b/100. for b in betas]
     add = "_m"+str(mass)
     
     
     
-    maxpar = min(len(betas),30)
+    #maxpar = min(len(betas),30)
     print('running',len(betas),'jobs')
-    p = Pool(maxpar)
+    p = Pool()
     ret = p.map(worker, range(len(betas)))
     
     
 
 for mass in [5,10,20,40,80,160,320,640,1280,2560]:
-    run_mass(mass)
+    run_mass(mass) 
+    time.sleep(1) #some time before next mass point 
+    
 
 
 
