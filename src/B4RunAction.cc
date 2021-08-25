@@ -76,21 +76,8 @@ B4RunAction::B4RunAction(B4PartGeneratorBase *gen, B4aEventAction* ev, G4String 
   analysisManager->CreateNtuple("B4", "B4");
 
   analysisManager->CreateNtupleDColumn("true_energy");
-  analysisManager->CreateNtupleIColumn("Nevents");
-  analysisManager->CreateNtupleDColumn("mass");
-  analysisManager->CreateNtupleDColumn("beta");
-
-
-  G4cout << "creating stop branches "<< G4endl;
-  for( auto& p: eventact_->hit_stopped_){
-      G4String name=p.first+"_stopped";
-      G4cout << "created branch " << name << G4endl;
-      analysisManager->CreateNtupleIColumn(name,p.second);
-
-  }
-  //vectors
-  analysisManager->CreateNtupleIColumn("pdgIds",eventact_->pdgids_);
-  analysisManager->CreateNtupleIColumn("layerNo",eventact_->hit_layer_);
+  analysisManager->CreateNtupleDColumn("LAr_energy");
+  analysisManager->CreateNtupleDColumn("Rod_energy");
 
   analysisManager->FinishNtuple();
 
@@ -126,27 +113,13 @@ void B4RunAction::BeginOfRunAction(const G4Run* /*run*/)
 
 void B4RunAction::EndOfRunAction(const G4Run* /*run*/)
 {
-  // print histogram statistics
-  //
-  auto analysisManager = G4AnalysisManager::Instance();
-  if (false && analysisManager->GetH1(1) ) {
-    
-  }
-
-  //write only one event, containing all sums
-
-  analysisManager->FillNtupleDColumn(0,generator_->getEnergy()/GeV);
-  analysisManager->FillNtupleIColumn(1,eventact_->nevents_);
-  analysisManager->FillNtupleDColumn(2,generator_->getGun()->GetParticleDefinition()->GetPDGMass());
-  analysisManager->FillNtupleDColumn(3,B4PartGeneratorBase::beta);
-  analysisManager->AddNtupleRow();
-
 
 
   ///standard
 
   // save histograms & ntuple
   //
+  auto analysisManager = G4AnalysisManager::Instance();
   analysisManager->Write();
   analysisManager->CloseFile();
 }

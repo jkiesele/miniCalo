@@ -83,7 +83,7 @@ B4PrimaryGeneratorAction::B4PrimaryGeneratorAction()
     // default particle kinematic
     //
     auto particleDefinition
-    = G4ParticleTable::GetParticleTable()->FindParticle("Neutralino");
+    = G4ParticleTable::GetParticleTable()->FindParticle("kaon0L");
   //  G4ParticleTable::GetParticleTable()->DumpTable();
     fParticleGun->SetParticleDefinition(particleDefinition);
     fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
@@ -112,12 +112,7 @@ B4PrimaryGeneratorAction::~B4PrimaryGeneratorAction()
 }
 std::vector<G4String> B4PrimaryGeneratorAction::generateAvailableParticles()const{
 	std::vector<G4String> out;
-	for(const auto& p:availParticles_){
-	    auto s = p.first;
-	    if(s.at(0) == '-')
-	        s[0]='m';
-		out.push_back(p.first);
-	}
+
 	return out;
 }
 
@@ -174,22 +169,28 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
  // G4cout << "shooting.. ";
   // Set gun position
 
+  std::vector<G4String> useparts=
+  {"kaon0L","kaon0S","pi0","pi+"};
+  int partidx = G4INCL::Random::shootInteger(3);
+  auto partstr = useparts.at(partidx);
+  setParticle(partstr);
+  double energy_max=10;
+  double energy_min=1;
 
-  setParticle(particle);
 
-
-  //this is kinetic energy
-  G4double gamma = 1 / sqrt(1 - beta*beta);
-  energy_ = (gamma-1.)*fParticleGun->GetParticleDefinition()->GetPDGMass();
-
+  energy_=10001;
+  while(energy_>energy_max){//somehow sometimes the random gen shoots >1??
+      G4double rand =  G4INCL::Random::shoot();
+      energy_=(energy_max)*rand+energy_min;
+  }
 
   fParticleGun->SetParticleMomentumDirection(G4ThreeVector(1,0,0));
-  fParticleGun->SetParticleEnergy(energy_ * MeV);
+  fParticleGun->SetParticleEnergy(energy_ * GeV);
   fParticleGun->SetParticlePosition(G4ThreeVector(0,0,0));
   fParticleGun->GeneratePrimaryVertex(anEvent);
 
 
- // G4cout << "energy: " << energy_ <<  G4endl;
+  G4cout << "energy: " << energy_ << " part " << partstr<< G4endl;
 }
 
 

@@ -84,6 +84,7 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
 
     const std::vector<sensorContainer>* getActiveSensors()const;
 
+    static G4double LArTankSize;
      
   private:
     // methods
@@ -134,6 +135,10 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
     G4VPhysicalVolume* createBottle(
             G4ThreeVector position,
             G4LogicalVolume* worldLV);
+
+    G4VPhysicalVolume* createDetection(
+                G4ThreeVector position,
+                G4LogicalVolume* worldLV);
   
 
 
@@ -160,6 +165,8 @@ class B4DetectorConstruction : public G4VUserDetectorConstruction
 
     G4double limit_in_calo_time_max_, limit_in_calo_energy_max_;
     G4double limit_world_time_max_,limit_world_energy_max_;
+
+
 
 
 };

@@ -87,6 +87,8 @@ static G4String createString(const T& i){
 }
 
 
+G4double B4DetectorConstruction::LArTankSize=0*m;
+
 B4DetectorConstruction::B4DetectorConstruction()
 : G4VUserDetectorConstruction(),
   fCheckOverlaps(false),
@@ -97,8 +99,6 @@ B4DetectorConstruction::B4DetectorConstruction()
   m_cu(0)
 
 {
-
-
     limit_in_calo_time_max_=100.*ms;//this could be more low energy stuff
     limit_in_calo_energy_max_=.01*eV;
     limit_world_time_max_=100.*ms; //either got there or not (30ns should be easily sufficient
@@ -422,6 +422,71 @@ G4VPhysicalVolume* B4DetectorConstruction::createBottle(
 
 }
 
+
+G4VPhysicalVolume* B4DetectorConstruction::createDetection(
+            G4ThreeVector position,
+            G4LogicalVolume* worldLV){
+
+    G4double xz = LArTankSize; //6*m;
+    G4LogicalVolume * larlv=0;
+    auto larpv = createBox("LarTank",position, {xz,2*m,xz},m_lar,worldLV, larlv);
+
+    activecells_.push_back(
+            sensorContainer(
+                    larpv,
+                    0,//sensor size   // G4double dimxy
+                    0,                              // G4double dimz,
+                    0,       // G4double area,
+                    0,                   // G4double posx,
+                    0,                   // G4double posy,
+                    0,                   // G4double posz,
+                    0,
+                    0 //copyno
+            ));
+
+
+    //create the rods
+    G4ThreeVector rodpos(0.5*cm-xz/2.,0,0.5*cm-xz/2.);
+    G4ThreeVector rodposorig=rodpos;
+    for(size_t rodi=0;rodi<200;rodi++){
+        for(size_t rodj=0;rodj<200;rodj++){
+
+            G4LogicalVolume * rodlv=0;
+            G4String rodname="rod_";
+            rodname+=std::to_string(rodi);
+            rodname+="_";
+            rodname+=std::to_string(rodj);
+
+            auto rodpv = createBox(rodname, rodpos, {1*cm,2*m,1*cm},m_brass,larlv,rodlv);
+
+            auto simpleBoxVisAtt= new G4VisAttributes(G4Colour(.7,0.65,0.26));
+            simpleBoxVisAtt->SetVisibility(true);
+            simpleBoxVisAtt->SetForceSolid(true);
+            rodpv->GetLogicalVolume()->SetVisAttributes(simpleBoxVisAtt);
+
+            activecells_.push_back(
+                        sensorContainer(
+                                rodpv,
+                                0,//sensor size   // G4double dimxy
+                                0,                              // G4double dimz,
+                                0,       // G4double area,
+                                0,                   // G4double posx,
+                                0,                   // G4double posy,
+                                0,                   // G4double posz,
+                                1,
+                                0 //copyno
+                        ));
+
+            rodpos += G4ThreeVector(0,0,xz/200.);
+
+        }
+        rodpos = rodposorig;
+        rodpos += G4ThreeVector(xz/200.*(rodi+1.),0,0);
+    }
+
+
+}
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void B4DetectorConstruction::DefineMaterials()
@@ -530,9 +595,10 @@ G4VPhysicalVolume* B4DetectorConstruction::DefineVolumes()
 	//
 	// Calorimeter
 	//
-	createCMS(G4ThreeVector(0,0,0),worldLV);
-	createBottle(G4ThreeVector(6*m,0,0),worldLV);
+	//createCMS(G4ThreeVector(0,0,0),worldLV);
+	//createBottle(G4ThreeVector(6*m,0,0),worldLV);
 
+	createDetection(G4ThreeVector(0,0,0),worldLV);
 
 
 	G4cout << "created in total "<< activecells_.size()<<" sensors" <<G4endl;

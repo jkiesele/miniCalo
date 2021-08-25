@@ -56,6 +56,7 @@
 #include "G4RandomTools.hh"
 
 //limiter stuff
+#include "G4SystemOfUnits.hh"
 
 #include "G4PhysicsListHelper.hh"
 #include "G4StepLimiterPhysics.hh"
@@ -145,6 +146,9 @@ int main(int argc,char** argv)
   B4PartGeneratorBase::particle = "~g_rho0";
   B4PartGeneratorBase::beta = .1;
 
+  B4DetectorConstruction::LArTankSize = 6*m;
+
+
 #ifdef G4MULTITHREADED
   G4int nThreads = 0;
 #endif
@@ -163,8 +167,8 @@ int main(int argc,char** argv)
     else if (G4String(argv[i]) == "-o" ) {
         rseed += atoi(argv[i+1]);
         }
-    else if (G4String(argv[i]) == "-b" ) {
-        B4PartGeneratorBase::beta = atof(argv[i+1]);
+    else if (G4String(argv[i]) == "-l" ) {
+        B4DetectorConstruction::LArTankSize = atof(argv[i+1])*m;
         betastr=argv[i+1];
         }
     else if (G4String(argv[i]) == "-a" ) {
@@ -176,7 +180,12 @@ int main(int argc,char** argv)
     }
   }  
 
-  betastr="_beta_"+betastr+"_";
+  if(B4DetectorConstruction::LArTankSize < 2*m){
+      G4cout << "LAr tank too small " << B4DetectorConstruction::LArTankSize  << G4endl;
+      return -1;
+  }
+
+  betastr="_tank_"+betastr+"m_x"+betastr+"m_";
 
   outfile += betastr + std::to_string(rseed)+".root";
   rseed++;
@@ -221,7 +230,9 @@ int main(int argc,char** argv)
 
   auto physicsList = new FTFP_BERT;
   physicsList->RegisterPhysics(new G4StepLimiterPhysics());
-  physicsList->RegisterPhysics(new ExRhadPhysicsList());
+
+  //noneed for detection bit
+  //physicsList->RegisterPhysics(new ExRhadPhysicsList());
 
    runManager->SetUserInitialization(physicsList);
 
