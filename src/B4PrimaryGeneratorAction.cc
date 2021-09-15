@@ -169,28 +169,42 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
  // G4cout << "shooting.. ";
   // Set gun position
 
+
   std::vector<G4String> useparts=
-  {"kaon0L","kaon0S","pi0","pi+"};
-  int partidx = G4INCL::Random::shootInteger(3);
+  {"kaon0L","kaon0S","pi0","pi+","pi+"};
+  int partidx = G4INCL::Random::shootInteger(4);
   auto partstr = useparts.at(partidx);
+
+
+  partstr="mu-";
   setParticle(partstr);
-  double energy_max=10;
+  double energy_max=10000;
   double energy_min=1;
 
+  energy_=1000001;
 
-  energy_=10001;
+  if(energy_min*GeV < fParticleGun->GetParticleDefinition()->GetPDGMass())
+      energy_min=fParticleGun->GetParticleDefinition()->GetPDGMass()/GeV;
+
   while(energy_>energy_max){//somehow sometimes the random gen shoots >1??
       G4double rand =  G4INCL::Random::shoot();
       energy_=(energy_max)*rand+energy_min;
   }
 
-  fParticleGun->SetParticleMomentumDirection(G4ThreeVector(1,0,0));
+  G4ThreeVector direction(0,0,1);//G4INCL::Random::shoot0(),G4INCL::Random::shoot0(),G4INCL::Random::shoot0());
+  direction = direction.unit();
+
+  x_component_ = direction.x();
+  y_component_ = direction.y();
+  z_component_ = direction.z();
+
+//SetParticleMomentum
+  fParticleGun->SetParticleMomentumDirection(direction);
   fParticleGun->SetParticleEnergy(energy_ * GeV);
-  fParticleGun->SetParticlePosition(G4ThreeVector(0,0,0));
+  fParticleGun->SetParticlePosition(G4ThreeVector(15*mm,0, -6*m));
   fParticleGun->GeneratePrimaryVertex(anEvent);
 
-
-  G4cout << "energy: " << energy_ << " part " << partstr<< G4endl;
+  G4cout << "energy: " << energy_ << " part " << partstr<< " " << direction << G4endl;
 }
 
 

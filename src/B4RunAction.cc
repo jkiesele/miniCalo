@@ -78,6 +78,9 @@ B4RunAction::B4RunAction(B4PartGeneratorBase *gen, B4aEventAction* ev, G4String 
   analysisManager->CreateNtupleDColumn("true_energy");
   analysisManager->CreateNtupleDColumn("LAr_energy");
   analysisManager->CreateNtupleDColumn("Rod_energy");
+  analysisManager->CreateNtupleDColumn("dir_x");
+  analysisManager->CreateNtupleDColumn("dir_y");
+  analysisManager->CreateNtupleDColumn("dir_z");
 
   analysisManager->FinishNtuple();
 

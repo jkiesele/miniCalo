@@ -81,11 +81,11 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 	size_t idx=activesensors->size();
 	for(size_t i=0;i<activesensors->size();i++){
 		if(volume == activesensors->at(i).getVol()){
-		    if(copyNo == activesensors->at(i).getCopyNo()){
+		    //if(copyNo == activesensors->at(i).getCopyNo()){
 		        idx=i;
 		        break;
 
-		    }
+		   // }
 		}
 	}
 
@@ -94,10 +94,10 @@ void B4aEventAction::accumulateVolumeInfo(G4VPhysicalVolume * volume,const G4Ste
 	auto & sensor = activesensors->at(idx);
 
 	if(sensor.getLayer() > 0){
-	    rodEnergy+= step->GetTotalEnergyDeposit();
+	    rodEnergy+= step->GetTotalEnergyDeposit()/1000.; //in GeV
 	}
 	else{
-	    LArEnergy+= step->GetTotalEnergyDeposit();
+	    LArEnergy+= step->GetTotalEnergyDeposit()/1000.;//in GeV
 	}
 }
 
@@ -133,8 +133,12 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
     analysisManager->FillNtupleDColumn(0,generator_->getEnergy());
     analysisManager->FillNtupleDColumn(1,LArEnergy);
     analysisManager->FillNtupleDColumn(2,rodEnergy);
+    analysisManager->FillNtupleDColumn(3,generator_->x_component_);
+    analysisManager->FillNtupleDColumn(4,generator_->y_component_);
+    analysisManager->FillNtupleDColumn(5,generator_->z_component_);
 
     analysisManager->AddNtupleRow();
+
 
     nevents_++;
 

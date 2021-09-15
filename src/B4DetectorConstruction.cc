@@ -48,6 +48,8 @@
 #include "G4LogicalVolumeStore.hh"
 #include "G4SolidStore.hh"
 
+#include "G4PVParameterised.hh"
+
 #include "G4VisAttributes.hh"
 #include "G4Colour.hh"
 
@@ -273,6 +275,23 @@ G4VPhysicalVolume* B4DetectorConstruction::createCMS(
 return 0;
 }
 
+static G4LogicalVolume *createBoxLV(
+        G4String name,
+        G4ThreeVector pos,
+        G4ThreeVector dxyz,
+        G4Material* m,
+        G4LogicalVolume* mother
+){
+    auto S = new G4Box(name+"_S",           // its name
+            dxyz.x()/2, dxyz.y()/2, dxyz.z()/2); // its size
+
+    auto LV = new G4LogicalVolume(
+            S,           // its solid
+            m,  // its material
+            name+"_LV");         // its name
+    return LV;
+}
+
 G4VPhysicalVolume* B4DetectorConstruction::createBox(
         G4String name,
         G4ThreeVector pos,
@@ -423,6 +442,52 @@ G4VPhysicalVolume* B4DetectorConstruction::createBottle(
 }
 
 
+class RodParameterisation2D : public G4VPVParameterisation
+{
+public:
+    RodParameterisation2D(G4ThreeVector startpos, G4int NoRodsxz, G4double spacing):G4VPVParameterisation(){
+        startpos_ =startpos;
+        nrodsxz_ = NoRodsxz;
+        spacingxz_ = spacing;
+        firstcall_=false;
+    }
+    ~RodParameterisation2D(){}
+    void ComputeTransformation (const G4int copyNo,
+            G4VPhysicalVolume* physVol) const{
+
+        int xcp = copyNo;
+        xcp = xcp % nrodsxz_;
+      //  while(xcp>=nrodsxz_)
+      //      xcp -= nrodsxz_;
+        int zcp = copyNo/nrodsxz_;
+
+        G4ThreeVector origin(((float)xcp+0.5)*spacingxz_, 0, ((float)zcp+0.5)*spacingxz_);
+        origin += startpos_;
+
+        physVol->SetTranslation(origin);
+        physVol->SetRotation(0);
+
+        if(firstcall_){
+            std::cout << xcp << " " << zcp << " " << origin << std::endl;
+        }
+
+
+        if(copyNo == nrodsxz_*nrodsxz_)
+            firstcall_=false;
+
+    }
+    void ComputeDimensions (G4Box& rod, const G4int copyNo,
+            const G4VPhysicalVolume* physVol) const{
+        //no change
+    }
+private:
+    G4ThreeVector startpos_;
+    G4int nrodsxz_;
+    G4double spacingxz_;
+    mutable bool firstcall_;
+};
+
+
 G4VPhysicalVolume* B4DetectorConstruction::createDetection(
             G4ThreeVector position,
             G4LogicalVolume* worldLV){
@@ -430,6 +495,14 @@ G4VPhysicalVolume* B4DetectorConstruction::createDetection(
     G4double xz = LArTankSize; //6*m;
     G4LogicalVolume * larlv=0;
     auto larpv = createBox("LarTank",position, {xz,2*m,xz},m_lar,worldLV, larlv);
+
+
+    auto simpleBoxVisAtt= new G4VisAttributes(G4Colour(.0,0.1,0.9));
+    simpleBoxVisAtt->SetVisibility(true);
+    simpleBoxVisAtt->SetForceSolid(true);
+    simpleBoxVisAtt->SetColour(0.,0.1,0.9,0.1);
+    larlv->SetVisAttributes(simpleBoxVisAtt);
+
 
     activecells_.push_back(
             sensorContainer(
@@ -445,6 +518,78 @@ G4VPhysicalVolume* B4DetectorConstruction::createDetection(
             ));
 
 
+
+
+
+    auto firstrodpos = position;
+    //replica way
+    //create a mother rod volume for one slice
+    auto rodlv = createBoxLV("RodLV",firstrodpos, {1*cm,2*m,1*cm},m_brass,larlv);
+
+     simpleBoxVisAtt= new G4VisAttributes(G4Colour(.7,0.65,0.26));
+    simpleBoxVisAtt->SetVisibility(true);
+    simpleBoxVisAtt->SetForceSolid(false);
+    rodlv->SetVisAttributes(simpleBoxVisAtt);
+
+    G4VPVParameterisation* rodspvp =
+            new RodParameterisation2D(
+                    G4ThreeVector(-xz/2., 0, -xz/2.),
+                    200,
+                    xz/200.
+            );
+    G4VPhysicalVolume* allrodspv =
+            new G4PVParameterised( "AllRods", rodlv,
+                    larlv, kZAxis, 200*200, rodspvp);
+
+    activecells_.push_back(
+                sensorContainer(
+                        allrodspv,
+                        0,//sensor size   // G4double dimxy
+                        0,                              // G4double dimz,
+                        0,       // G4double area,
+                        0,                   // G4double posx,
+                        0,                   // G4double posy,
+                        0,                   // G4double posz,
+                        1,
+                        0 //copyno
+                ));
+
+   // allrodspv->CheckOverlaps(1000000, 0., true);
+
+    return allrodspv;
+
+    auto slicelv = createBoxLV("SliceLV",firstrodpos, {xz,2*m,1*cm},m_vacuum,larlv);
+    simpleBoxVisAtt= new G4VisAttributes(G4Colour(.7,0.65,0.26));
+    simpleBoxVisAtt->SetVisibility(false);
+    slicelv->SetVisAttributes(simpleBoxVisAtt);
+
+
+    auto rodspv = new G4PVReplica("RodsPV",rodlv,slicelv,kXAxis,200,xz/200.,0.);
+  //  auto repllv = rodspv->GetLogicalVolume();
+
+    auto rodspv2 = new G4PVReplica("RodsPV2",slicelv,larlv,kZAxis,200,xz/200.,0.);
+
+   // rodspv = new G4PVReplica("RodsPV2",rodspv->GetLogicalVolume(),larlv,kZAxis,200,xz/200.,0.);
+   // rodspv->SetTranslation(G4ThreeVector(0,0,-xz/2.));
+
+    //rodspv-> CheckOverlaps(1000000, 0., true);
+    G4int maxcopies = rodspv->GetMultiplicity();
+    //same in both directions
+    activecells_.push_back(
+            sensorContainer(
+                    rodspv2,
+                    0,//sensor size   // G4double dimxy
+                    0,                              // G4double dimz,
+                    0,       // G4double area,
+                    0,                   // G4double posx,
+                    0,                   // G4double posy,
+                    0,                   // G4double posz,
+                    1,
+                    0 //copyno
+            ));
+
+
+    /* direct way
     //create the rods
     G4ThreeVector rodpos(0.5*cm-xz/2.,0,0.5*cm-xz/2.);
     G4ThreeVector rodposorig=rodpos;
@@ -483,6 +628,7 @@ G4VPhysicalVolume* B4DetectorConstruction::createDetection(
         rodpos = rodposorig;
         rodpos += G4ThreeVector(xz/200.*(rodi+1.),0,0);
     }
+    */
 
 
 }

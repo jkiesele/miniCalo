@@ -15,7 +15,7 @@ class G4ParticleGun;
 
 class B4PartGeneratorBase : public G4VUserPrimaryGeneratorAction{
 public:
-    B4PartGeneratorBase(): G4VUserPrimaryGeneratorAction(),energy_(0){}
+    B4PartGeneratorBase(): G4VUserPrimaryGeneratorAction(),energy_(0),x_component_(0),y_component_(0),z_component_(0){}
 
     virtual ~B4PartGeneratorBase(){};
 
@@ -50,6 +50,8 @@ protected:
     std::vector<int> availPids_;
 
     G4double energy_;
+public:
+    G4double x_component_, y_component_, z_component_;
 
 };
 

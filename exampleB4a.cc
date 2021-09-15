@@ -147,6 +147,7 @@ int main(int argc,char** argv)
   B4PartGeneratorBase::beta = .1;
 
   B4DetectorConstruction::LArTankSize = 6*m;
+  betastr="6";
 
 
 #ifdef G4MULTITHREADED
