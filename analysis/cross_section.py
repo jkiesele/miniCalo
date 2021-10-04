@@ -133,6 +133,25 @@ def nEventsNeeded(
     return N
 
 
+
+########### bkg calculations
+
+# number of cosmic background events, given certain detection time
+def nBkgEvents(
+        detection_time_days,
+        cosmicRate = 1, # events/sec/m^2
+        effRpc = 0.99, # efficiency of 1 RPC
+        nRpcs = 4, #number of RPCs
+        M = 2, #number of RPCs that detected the muon, must be at least 2
+        absorberSurfaceArea = 4, #m^2 (2m x 2m)
+        ):
+
+    detection_time_seconds = detection_time_days*3600.*24.
+    N = nRpcs - M #number of RPCs that didn't detect the muon
+
+    return cosmicRate * (1-effRpc)**N * absorberSurfaceArea * detection_time_seconds
+
+
 ########### THE STUFF BELOW IS JUST FOR TESTING
 
 
@@ -276,7 +295,14 @@ def makeplots(position):
 
 
             
-            
+
+def printBkgEvents():
+
+    print("number of bkg events is: "+str(int(nBkgEvents(detection_time_days = 30)))+" for 30 days detection time and 4 RPCs, 2 of which detected the muon")
+    print("number of bkg events is: "+str(int(nBkgEvents(M = 3, detection_time_days = 30)))+" for 30 days detection time and 4 RPCs, 3 of which detected the muon")
+    print("number of bkg events is: "+str(int(nBkgEvents(M = 4, detection_time_days = 30)))+" for 30 days detection time and 4 RPCs, 4 of which detected the muon")
     
+
+printBkgEvents()
 makeplots(0) #comment to use it as a package
 makeplots(1)
