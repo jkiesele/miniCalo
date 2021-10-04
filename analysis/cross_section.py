@@ -200,100 +200,113 @@ def makeplots(position):
     plt.savefig('efficiencyVsMass_pos'+str(position)+'.pdf')
     
     for lifetime_days in [7., 30., 365]:
-        for construction_time_days in [7.]:
+        for NRpcsFiring in [2, 3, 4]:
+            for construction_time_days in [7.]:
         
-            x, y = np.meshgrid(np.linspace(lifetime_days/7., 15*lifetime_days, 200), 
-                                           np.linspace(lifetime_days/7., 30.*lifetime_days, 200))
+                x, y = np.meshgrid(np.linspace(lifetime_days/7., 15*lifetime_days, 200), 
+                                   np.linspace(lifetime_days/7., 30.*lifetime_days, 200))
             
-            z = crossSectionNeededFb(
-                massClass(massOfAveEff,position),
-                lifetime_seconds = 3600.*24*lifetime_days,
-                target_events_to_be_detected = 3.,
-                absorption_time_days = x,
-                construction_time_days = construction_time_days,
-                detection_time_days = y
+                z = crossSectionNeededFb(
+                    massClass(massOfAveEff,position),
+                    lifetime_seconds = 3600.*24*lifetime_days,
+                    target_events_to_be_detected = 3.,
+                    absorption_time_days = x,
+                    construction_time_days = construction_time_days,
+                    detection_time_days = y
                 )
             
-            fig, ax = plt.subplots()
-            minzidx = np.unravel_index(np.argmin(z),shape=z.shape) 
+                fig, ax = plt.subplots()
+                minzidx = np.unravel_index(np.argmin(z),shape=z.shape) 
             
-            print('min',x.shape,)
+                print('min',x.shape,)
             
-            z = np.log10(z)            
+                z = np.log10(z)            
             
-            c = ax.pcolormesh(x, y, z, cmap='viridis', vmin=np.min(z), vmax=np.max(z))
+                c = ax.pcolormesh(x, y, z, cmap='viridis', vmin=np.min(z), vmax=np.max(z))
             
-            # set the limits of the plot to the limits of the data
-            ax.axis([x.min(), x.max(), y.min(), y.max()])
-            ax.set_yscale('log')
-            ax.set_xscale('log')
-            ax.set_xlabel("Absorption time [days]")
-            ax.set_ylabel("Detection time [days]")
-            ax.set_title('lifetime '+str(lifetime_days)+', construction '+str(construction_time_days)+' [days]')
-            fig.colorbar(c, ax=ax,label='Log10 cross section [fb]')
-            ax.scatter(x[minzidx],y[minzidx])
+                # set the limits of the plot to the limits of the data
+                ax.axis([x.min(), x.max(), y.min(), y.max()])
+                ax.set_yscale('log')
+                ax.set_xscale('log')
+                ax.set_xlabel("Absorption time [days]")
+                ax.set_ylabel("Detection time [days]")
+                ax.set_title('lifetime '+str(lifetime_days)+', construction '+str(construction_time_days)+' [days]')
+                fig.colorbar(c, ax=ax,label='Log10 cross section [fb]')
+                ax.scatter(x[minzidx],y[minzidx])
+                
             
-            
-            plt.savefig("times_"+str(lifetime_days)+'_'+str(construction_time_days)+"_pos"+str(position)+'.pdf')
+                plt.savefig("times_"+str(lifetime_days)+'_'+str(construction_time_days)+"_pos"+str(position)+'.pdf')
 
 
-            #sensitivity plot:
-            xPoints, yPoints = np.meshgrid(np.logspace(0,np.log10(3000)),np.logspace(0,np.log10(3000)))
-            #print (xPoints, yPoints)
+                #sensitivity plot:
+                xPoints, yPoints = np.meshgrid(np.logspace(0,np.log10(3000)),np.logspace(0,np.log10(3000)))
+                #print (xPoints, yPoints)
             
-            nEvents = np.zeros((len(xPoints),len(xPoints)))
-            minEvents = 1e6
-            maxEvents = 1e-6
-            for j in range(len(xPoints)):
-                for i in range(j+1):
-                    if yPoints[i,j]< xPoints[i,j]-3: #assume deltaM is 3 GeV, which is the minimum energy we think we can detect
-                        nEvents[i,j] = nEventsNeeded(
-                            massClass(xPoints[i,j],position),
-                            lifetime_seconds = 3600.*24*lifetime_days,
-                            absorption_time_days = 2*lifetime_days,
-                            construction_time_days = construction_time_days,
-                            detection_time_days = 30
-                        )
-                        if nEvents[i,j]< minEvents and nEvents[i,j] != 0:
-                            minEvents = nEvents[i,j]
-                        elif nEvents[i,j]>maxEvents:
-                            maxEvents = nEvents[i,j]
-                        #print("for gluino mass: "+str(xPoints[i,j])+", nEvents["+str(i)+","+str(j)+"] is: "+str(nEvents[i,j]))
-                        #if i>10:
-                        #    exit()
+                nEvents = np.zeros((len(xPoints),len(xPoints)))
+                minEvents = 1e6
+                maxEvents = 1e-6
+                for j in range(len(xPoints)):
+                    for i in range(j+1):
+                        if yPoints[i,j]< xPoints[i,j]-3: #assume deltaM is 3 GeV, which is the minimum energy we think we can detect
+                            nEvents[i,j] = nEventsNeeded(
+                                massClass(xPoints[i,j],position),
+                                lifetime_seconds = 3600.*24*lifetime_days,
+                                absorption_time_days = 2*lifetime_days,
+                                construction_time_days = construction_time_days,
+                                detection_time_days = 30
+                            )
+                            if nEvents[i,j]< minEvents and nEvents[i,j] != 0:
+                                minEvents = nEvents[i,j]
+                            elif nEvents[i,j]>maxEvents:
+                                maxEvents = nEvents[i,j]
+                            #print("for gluino mass: "+str(xPoints[i,j])+", nEvents["+str(i)+","+str(j)+"] is: "+str(nEvents[i,j]))
+                            #if i>10:
+                            #    exit()
 
-            nEvents = np.where(nEvents==0, np.nan, nEvents)
+                nSigEvents = np.where(nEvents==0, np.nan, nEvents)
 
-            nEvents = np.log10(nEvents)
-            #print("min and max of nEvents:")
-            #print(minEvents, maxEvents)
+                #nSigEvents = np.log10(nSigEvents)
+                #print("min and max of nEvents:")
+                #print(minEvents, maxEvents)
+
+
+                #significance = S/sqrt(S+B)
+                signif = nSigEvents/np.sqrt(nSigEvents+nBkgEvents(detection_time_days = 30, M = NRpcsFiring))
             
-            fig2, ax2 = plt.subplots()
+                fig2, ax2 = plt.subplots()
                         
-            c2 = ax2.pcolormesh(xPoints, yPoints, nEvents, cmap='viridis', vmin=np.log10(minEvents), vmax=np.log10(maxEvents))
+                #c2 = ax2.pcolormesh(xPoints, yPoints, nEvents, cmap='viridis', vmin=np.log10(minEvents), vmax=np.log10(maxEvents))
+                c2 = ax2.pcolormesh(xPoints, yPoints, signif, cmap='viridis', vmin=0, vmax=6)
             
-            # set the limits of the plot to the limits of the data
-            ax2.axis([np.min(xPoints), np.max(xPoints), np.min(yPoints), np.max(yPoints)])
-            ax2.set_xlabel("Gluino mass [GeV]")
-            ax2.set_ylabel("Neutralino mass [GeV]")
-            ax2.set_xscale('log')
-            ax2.set_yscale('log')
-            ax2.set_title('lifetime '+str(lifetime_days)+', const. '+str(construction_time_days)+', absorption '+str(2*lifetime_days)+', detection '+str(30)+' [days]')
-            fig2.colorbar(c2, ax=ax2,label='log(Number of events)')
+                # set the limits of the plot to the limits of the data
+                ax2.axis([np.min(xPoints), np.max(xPoints), np.min(yPoints), np.max(yPoints)])
+                ax2.set_xlabel("Gluino mass [GeV]")
+                ax2.set_ylabel("Neutralino mass [GeV]")
+                ax2.set_xscale('log')
+                ax2.set_yscale('log')
+                #ax2.set_title('lifetime '+str(lifetime_days)+', const. '+str(construction_time_days)+', absorption '+str(2*lifetime_days)+', detection '+str(30)+' [days]')
+                #fig2.colorbar(c2, ax=ax2,label='log(Number of events)')
+                fig2.colorbar(c2, ax=ax2,label='$S/\sqrt{S+B}$')
             
-            #triangle showing kinematically forbidden area
-            tri = Polygon(np.array([[np.min(xPoints),np.min(yPoints)], [np.max(xPoints),np.max(yPoints)], [np.min(xPoints),np.max(yPoints)]]), closed=False, fc='lightgrey', ec=None)
-            ax2.add_patch(tri)
-            ax2.text(20, 27, "Kinematically forbidden", rotation=44, rotation_mode='anchor')
+                #triangle showing kinematically forbidden area
+                tri = Polygon(np.array([[np.min(xPoints),np.min(yPoints)], [np.max(xPoints),np.max(yPoints)], [np.min(xPoints),np.max(yPoints)]]), closed=False, fc='lightgrey', ec=None)
+                ax2.add_patch(tri)
+                ax2.text(20, 27, "Kinematically forbidden", rotation=44, rotation_mode='anchor')
 
-            #triangle showing CMS observed limits (doi:10.1007/JHEP05(2018)127)
-            cms = Polygon(np.array([[200,1], [1400,1], [1400,1250]]), closed=True, fc="none", ec='red')
-            ax2.add_patch(cms)
-            ax2.text(300, 1.3, "CMS 95% CL observed limits", color='red', rotation=74, rotation_mode='anchor')
+                #superimpose CMS observed limits (doi:10.1007/JHEP05(2018)127, https://www.hepdata.net/record/ins1645630?version=1&table=Table%2018)
+                cmsFile = np.genfromtxt('HEPData-ins1645630-v1-Table_18.csv', delimiter=",", names=["x", "y"])
+                cms = plt.plot(cmsFile['x'],cmsFile['y'], color='red')
+                ax2.text(370, 1.3, "CMS 95% CL observed limits", color='red', rotation=90, rotation_mode='anchor')
+
+                ax2.text(1.5, 300, 'Lifetime = '+str(lifetime_days)+
+                         ' days\nConstruction time = '+str(construction_time_days)+
+                         ' days\nAbsorption time = '+str(2*lifetime_days)+
+                         ' days\nDetection time = '+str(30)+
+                         ' days\nNumber of RPCs detecting = '+str(NRpcsFiring)+
+                         ' \nPosition '+str(position)
+                )
             
-            plt.savefig("sensitivity_"+str(lifetime_days)+'_'+str(construction_time_days)+"_pos"+str(position)+'.pdf')
-
-
+                plt.savefig("plots/sensitivity_"+str(lifetime_days)+'_'+str(construction_time_days)+"_pos"+str(position)+'_nRpcFiring'+str(NRpcsFiring)+'.pdf')
             
 
 def printBkgEvents():
@@ -303,6 +316,6 @@ def printBkgEvents():
     print("number of bkg events is: "+str(int(nBkgEvents(M = 4, detection_time_days = 30)))+" for 30 days detection time and 4 RPCs, 4 of which detected the muon")
     
 
-printBkgEvents()
+#printBkgEvents()
 makeplots(0) #comment to use it as a package
 makeplots(1)
