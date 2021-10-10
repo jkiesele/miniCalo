@@ -44,8 +44,8 @@ def MuonSpectrum(p):
 
 
 def getMuonsPerSecAboveThreshold(
-        min_detection_energy,
-        detector_area_in_sqm,
+        min_detection_energy : float,
+        detector_area_in_sqm : float,
                       ):
     '''
     numerically integrate over spectrum and energy 
@@ -76,7 +76,19 @@ def getMuonsPerSecAboveThreshold(
     return 2.*3.1415*sqcm*N
     
 
-
+muonlut={}
+def getMuonsPerSecAboveThresholdBuffered(
+        min_detection_energy : float,
+        detector_area_in_sqm : float,
+        ):
+    global muonlut
+    if min_detection_energy in muonlut.keys():
+        return muonlut[min_detection_energy]*detector_area_in_sqm
+    else:
+        n = getMuonsPerSecAboveThreshold(min_detection_energy,1.)
+        muonlut[min_detection_energy] = n
+        return n*detector_area_in_sqm
+    
 
 
 def test_spectrum():
@@ -91,6 +103,30 @@ def test_spectrum():
     plt.show()
 
 
+
+def loadLUT():
+    import pickle
+    global muonlut
+    with open('cosmics_lut.pkl','rb') as f:
+        muonlut = pickle.load(f)
+        
+def createLUT():
+    import tqdm
+    import pickle
+    
+    xPoints, yPoints = np.meshgrid(np.logspace(0,np.log10(3000),num=400),np.logspace(0,np.log10(3000),num=400))
+    for j in tqdm.tqdm(range(len(xPoints))):
+        for i in range(j+1):
+            deltam = xPoints[i,j] - yPoints[i,j]
+            getMuonsPerSecAboveThresholdBuffered(
+                                    deltam/2.,
+                                    1. #for 1 m2 since it's already in the function
+                                    )
+    with open('cosmics_lut.pkl','wb') as f:
+        pickle.dump(muonlut,f)
+ 
+#createLUT()  
+loadLUT()
 #print(getMuonsPerSecAboveThreshold(3, 16))
 
 
