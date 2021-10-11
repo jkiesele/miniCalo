@@ -79,7 +79,7 @@ def getMuonsPerSecAboveThreshold(
 muonlut={}
 def getMuonsPerSecAboveThresholdBuffered(
         min_detection_energy : float,
-        detector_area_in_sqm : float,
+        detector_area_in_sqm : float = 1.,
         ):
     global muonlut
     if min_detection_energy in muonlut.keys():

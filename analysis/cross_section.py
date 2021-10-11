@@ -4,6 +4,9 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
+from muon_spectrum import getMuonsPerSecAboveThresholdBuffered
+import os
+os.system('mkdir -p plots')
 
 def hasDecayedProb(t, lifetime):
     scaledlt = t*math.log(2)
@@ -111,7 +114,7 @@ def crossSectionNeededFb(
     return events_needed/lumiInTimeFb(abstime_seconds)
     
 
-def nEventsNeeded( 
+def nEventsDetectable( 
         mass : massClass,
         lifetime_seconds : float,
         absorption_time_days,
@@ -141,7 +144,7 @@ def nEventsNeeded(
 ########### bkg calculations
 
 # number of cosmic background events, given certain detection time
-def nBkgEvents(
+def calcNBkgEvents(
         detection_time_days,
         cosmicRate = 1, # events/sec/m^2
         effRpc = 0.99, # efficiency of 1 RPC
@@ -198,7 +201,7 @@ def makeplots(position):
     axEff.set_xlabel("Mass [GeV]")
     axEff.set_ylabel("Acceptance times efficiency")
                         
-    plt.savefig('efficiencyVsMass_pos'+str(position)+'.pdf')
+    plt.savefig('plots/efficiencyVsMass_pos'+str(position)+'.pdf')
     
     for lifetime_days in [7, 30, 365]:
     #for lifetime_days in [7]:
@@ -238,24 +241,35 @@ def makeplots(position):
                 ax.scatter(x[minzidx],y[minzidx])
                 
             
-                plt.savefig("times_"+str(lifetime_days)+'_'+str(construction_time_days)+"_pos"+str(position)+'.pdf')
+                plt.savefig("plots/times_"+str(lifetime_days)+'_'+str(construction_time_days)+"_pos"+str(position)+'.pdf')
 
 
                 #sensitivity plot:
                 xPoints, yPoints = np.meshgrid(np.logspace(0,np.log10(3000)),np.logspace(0,np.log10(3000)))
                 #print (xPoints, yPoints)
                 nEvents = np.zeros((len(xPoints),len(xPoints)))
+                nBkgEvents = np.zeros_like(nEvents)
 
                 for j in range(len(xPoints)):
                     for i in range(j+1):
                         if yPoints[i,j]< xPoints[i,j]-3: #assume deltaM is 3 GeV, which is the minimum energy we think we can detect
-                            nEvents[i,j] = nEventsNeeded(
+                            nEvents[i,j] = nEventsDetectable(
                                 massClass(xPoints[i,j],position),
                                 lifetime_seconds = 3600.*24*lifetime_days,
                                 absorption_time_days = 2*lifetime_days,
                                 construction_time_days = construction_time_days,
                                 detection_time_days = 30
                             )
+                            
+                            deltam = xPoints[i,j] - yPoints[i,j]
+                            nBkgEvents[i,j] = calcNBkgEvents(
+                                detection_time_days = 30,
+                                M = NRpcsFiring,
+                                cosmicRate = getMuonsPerSecAboveThresholdBuffered(
+                                    deltam/2.,
+                                    1. #for 1 m2 since it's already in the function
+                                    )
+                                )
 
                             #print("for gluino mass: "+str(xPoints[i,j])+", nEvents["+str(i)+","+str(j)+"] is: "+str(nEvents[i,j]))
                             #if i>10:
@@ -264,7 +278,7 @@ def makeplots(position):
                 nSigEvents = np.where(nEvents==0, np.nan, nEvents)
 
                 #significance = S/sqrt(S+B)
-                signif = nSigEvents/np.sqrt(nSigEvents+nBkgEvents(detection_time_days = 30, M = NRpcsFiring))
+                signif = nSigEvents/np.sqrt(nSigEvents+nBkgEvents)
             
                 fig2, ax2 = plt.subplots()
                         
@@ -299,30 +313,40 @@ def makeplots(position):
             
                 plt.savefig("plots/sensitivity_"+str(lifetime_days)+'_'+str(construction_time_days)+"_pos"+str(position)+'_nRpcFiring'+str(NRpcsFiring)+'.pdf')
                 
-def makeLifetimePlots(position):
+def makeLifetimePlots(position, deltam=3.):
 
     #for NRpcsFiring in [2, 3, 4]:
     for NRpcsFiring in [2]:
-        for construction_time_days in [7]:
-            for absorption_time_days in [14]:
+        for construction_time_days in [0,7]:
+            for absorption_time_days in [7,14,30]:
 
                 xPoints, yPoints = np.meshgrid(np.logspace(0,np.log10(1000)),np.logspace(0,np.log10(1500)))
                 nSigEvents = np.zeros((len(xPoints),len(yPoints)))
+                nBkgEvents = np.zeros_like(nSigEvents)
             
                 for l in range(len(xPoints)):
                     for m in range(len(yPoints)):
                         if xPoints[m,l]!=0.:
-                            nSigEvents[m,l] = nEventsNeeded(
+                            nSigEvents[m,l] = nEventsDetectable(
                                 massClass(yPoints[m,l],position),
                                 lifetime_seconds = 3600.*24*xPoints[m,l],
                                 absorption_time_days = absorption_time_days,
                                 construction_time_days = construction_time_days,
                                 detection_time_days = 30
                             )
+
+                            nBkgEvents[m,l] = calcNBkgEvents(
+                                detection_time_days = 30,
+                                M = NRpcsFiring,
+                                cosmicRate = getMuonsPerSecAboveThresholdBuffered(
+                                    deltam/2.,
+                                    1. #for 1 m2 since it's already in the function
+                                    )
+                                )
                             #print("for lifetime of "+str(xPoints[m,l])+" days, gluino mass of "+str(yPoints[m,l])+", nSigEvents["+str(m)+","+str(l)+"] is: "+str(nSigEvents[m,l])) 
 
                 #nSigEvents = np.where(nSigEvents==0, np.nan, nSigEvents)
-                signif = nSigEvents/np.sqrt(nSigEvents+nBkgEvents(detection_time_days = 30, M = NRpcsFiring))
+                signif = nSigEvents/np.sqrt(nSigEvents+nBkgEvents)
             
                 fig, ax = plt.subplots()
                 c = ax.pcolormesh(xPoints, yPoints, signif, cmap='viridis', vmin=0, vmax=5)
@@ -348,19 +372,20 @@ def makeLifetimePlots(position):
                 )
 
 
-                plt.savefig("plots/sensitivityVsLifetime_pos"+str(position)+'_absTime'+str(absorption_time_days)+'_nRpcFiring'+str(NRpcsFiring)+'.pdf')
+                plt.savefig("plots/sensitivityVsLifetime_pos"+str(position)+'_absTime'+str(absorption_time_days)+'_nRpcFiring'+str(NRpcsFiring)+'_deltam'+str(deltam)+ '_constrTime'+str(construction_time_days)+ '.pdf')
 
 
 def printBkgEvents():
 
-    print("number of bkg events is: "+str(int(nBkgEvents(detection_time_days = 30)))+" for 30 days detection time and 4 RPCs, 2 of which detected the muon")
-    print("number of bkg events is: "+str(int(nBkgEvents(M = 3, detection_time_days = 30)))+" for 30 days detection time and 4 RPCs, 3 of which detected the muon")
-    print("number of bkg events is: "+str(int(nBkgEvents(M = 4, detection_time_days = 30)))+" for 30 days detection time and 4 RPCs, 4 of which detected the muon")
+    print("number of bkg events is: "+str(int(calcNBkgEvents(detection_time_days = 30)))+" for 30 days detection time and 4 RPCs, 2 of which detected the muon")
+    print("number of bkg events is: "+str(int(calcNBkgEvents(M = 3, detection_time_days = 30)))+" for 30 days detection time and 4 RPCs, 3 of which detected the muon")
+    print("number of bkg events is: "+str(int(calcNBkgEvents(M = 4, detection_time_days = 30)))+" for 30 days detection time and 4 RPCs, 4 of which detected the muon")
     
 
 #printBkgEvents()
-makeplots(0) #comment to use it as a package
-makeplots(1)
-#makeLifetimePlots(0)
-#makeLifetimePlots(1)
+#makeplots(0) #comment to use it as a package
+#makeplots(1)
+#makeLifetimePlots(0, deltam=3.)
+makeLifetimePlots(1, deltam=1.)
+makeLifetimePlots(1, deltam=30.)
 
