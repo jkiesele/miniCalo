@@ -2,9 +2,12 @@ import math
 
 import numpy as np
 
+import matplotlib.pyplot as plt
+from matplotlib.patches import Polygon
+
 def hasDecayedProb(t, lifetime):
     scaledlt = t*math.log(2)
-    return 1. - np.exp( -t/lifetime ) #FIXME: check
+    return 1. - np.exp( -t/lifetime )
 
 class massClass(object):
     def __init__(self, mass, position : int=0):
@@ -125,7 +128,8 @@ def nEventsNeeded(
     decays_before_detection_prob = hasDecayedProb(absdecay_seconds+consdecays_seconds,lifetime_seconds)
     decays_total_prob = hasDecayedProb(absdecay_seconds+consdecays_seconds+detdecays_seconds,lifetime_seconds)
     
-    decays_during_detection_prob = decays_total_prob-decays_before_detection_prob    
+    decays_during_detection_prob = decays_total_prob-decays_before_detection_prob
+    #print("for lifetime "+str(lifetime_seconds/3600/24)+" days, decays_before_detection_prob is: "+str(decays_before_detection_prob)+", decays_during_detection_prob is: "+str(decays_during_detection_prob)+", decays_total_prob is: "+str(decays_total_prob))
 
     #N = acc*xs*Lint
     N = decays_during_detection_prob * mass.eff() * mass.xs() * lumiInTimeFb(abstime_seconds)
@@ -157,9 +161,6 @@ def nBkgEvents(
 
 def makeplots(position):
     
-    import matplotlib.pyplot as plt
-    from matplotlib.patches import Polygon
-
     #efficiency vs mass
     m = [5, 10, 20, 40, 80, 160, 320, 640, 1280, 2560]
     if position==0:
@@ -199,9 +200,11 @@ def makeplots(position):
                         
     plt.savefig('efficiencyVsMass_pos'+str(position)+'.pdf')
     
-    for lifetime_days in [7., 30., 365]:
+    for lifetime_days in [7, 30, 365]:
+    #for lifetime_days in [7]:
         for NRpcsFiring in [2, 3, 4]:
-            for construction_time_days in [7.]:
+        #for NRpcsFiring in [2]:
+            for construction_time_days in [7]:
         
                 x, y = np.meshgrid(np.linspace(lifetime_days/7., 15*lifetime_days, 200), 
                                    np.linspace(lifetime_days/7., 30.*lifetime_days, 200))
@@ -241,10 +244,8 @@ def makeplots(position):
                 #sensitivity plot:
                 xPoints, yPoints = np.meshgrid(np.logspace(0,np.log10(3000)),np.logspace(0,np.log10(3000)))
                 #print (xPoints, yPoints)
-            
                 nEvents = np.zeros((len(xPoints),len(xPoints)))
-                minEvents = 1e6
-                maxEvents = 1e-6
+
                 for j in range(len(xPoints)):
                     for i in range(j+1):
                         if yPoints[i,j]< xPoints[i,j]-3: #assume deltaM is 3 GeV, which is the minimum energy we think we can detect
@@ -255,28 +256,19 @@ def makeplots(position):
                                 construction_time_days = construction_time_days,
                                 detection_time_days = 30
                             )
-                            if nEvents[i,j]< minEvents and nEvents[i,j] != 0:
-                                minEvents = nEvents[i,j]
-                            elif nEvents[i,j]>maxEvents:
-                                maxEvents = nEvents[i,j]
+
                             #print("for gluino mass: "+str(xPoints[i,j])+", nEvents["+str(i)+","+str(j)+"] is: "+str(nEvents[i,j]))
                             #if i>10:
                             #    exit()
 
                 nSigEvents = np.where(nEvents==0, np.nan, nEvents)
 
-                #nSigEvents = np.log10(nSigEvents)
-                #print("min and max of nEvents:")
-                #print(minEvents, maxEvents)
-
-
                 #significance = S/sqrt(S+B)
                 signif = nSigEvents/np.sqrt(nSigEvents+nBkgEvents(detection_time_days = 30, M = NRpcsFiring))
             
                 fig2, ax2 = plt.subplots()
                         
-                #c2 = ax2.pcolormesh(xPoints, yPoints, nEvents, cmap='viridis', vmin=np.log10(minEvents), vmax=np.log10(maxEvents))
-                c2 = ax2.pcolormesh(xPoints, yPoints, signif, cmap='viridis', vmin=0, vmax=6)
+                c2 = ax2.pcolormesh(xPoints, yPoints, signif, cmap='viridis', vmin=0, vmax=5)
             
                 # set the limits of the plot to the limits of the data
                 ax2.axis([np.min(xPoints), np.max(xPoints), np.min(yPoints), np.max(yPoints)])
@@ -284,10 +276,8 @@ def makeplots(position):
                 ax2.set_ylabel("Neutralino mass [GeV]")
                 ax2.set_xscale('log')
                 ax2.set_yscale('log')
-                #ax2.set_title('lifetime '+str(lifetime_days)+', const. '+str(construction_time_days)+', absorption '+str(2*lifetime_days)+', detection '+str(30)+' [days]')
-                #fig2.colorbar(c2, ax=ax2,label='log(Number of events)')
                 fig2.colorbar(c2, ax=ax2,label='$S/\sqrt{S+B}$')
-            
+
                 #triangle showing kinematically forbidden area
                 tri = Polygon(np.array([[np.min(xPoints),np.min(yPoints)], [np.max(xPoints),np.max(yPoints)], [np.min(xPoints),np.max(yPoints)]]), closed=False, fc='lightgrey', ec=None)
                 ax2.add_patch(tri)
@@ -296,9 +286,10 @@ def makeplots(position):
                 #superimpose CMS observed limits (doi:10.1007/JHEP05(2018)127, https://www.hepdata.net/record/ins1645630?version=1&table=Table%2018)
                 cmsFile = np.genfromtxt('HEPData-ins1645630-v1-Table_18.csv', delimiter=",", names=["x", "y"])
                 cms = plt.plot(cmsFile['x'],cmsFile['y'], color='red')
-                ax2.text(370, 1.3, "CMS 95% CL observed limits", color='red', rotation=90, rotation_mode='anchor')
+                ax2.text(370, 1.2, "CMS 95% CL observed limits", color='red', rotation=90, rotation_mode='anchor')
 
-                ax2.text(1.5, 300, 'Lifetime = '+str(lifetime_days)+
+            
+                ax2.text(1.2, 350, 'Proper lifetime = '+str(lifetime_days)+
                          ' days\nConstruction time = '+str(construction_time_days)+
                          ' days\nAbsorption time = '+str(2*lifetime_days)+
                          ' days\nDetection time = '+str(30)+
@@ -307,7 +298,58 @@ def makeplots(position):
                 )
             
                 plt.savefig("plots/sensitivity_"+str(lifetime_days)+'_'+str(construction_time_days)+"_pos"+str(position)+'_nRpcFiring'+str(NRpcsFiring)+'.pdf')
+                
+def makeLifetimePlots(position):
+
+    #for NRpcsFiring in [2, 3, 4]:
+    for NRpcsFiring in [2]:
+        for construction_time_days in [7]:
+            for absorption_time_days in [14]:
+
+                xPoints, yPoints = np.meshgrid(np.logspace(0,np.log10(1000)),np.logspace(0,np.log10(1500)))
+                nSigEvents = np.zeros((len(xPoints),len(yPoints)))
             
+                for l in range(len(xPoints)):
+                    for m in range(len(yPoints)):
+                        if xPoints[m,l]!=0.:
+                            nSigEvents[m,l] = nEventsNeeded(
+                                massClass(yPoints[m,l],position),
+                                lifetime_seconds = 3600.*24*xPoints[m,l],
+                                absorption_time_days = absorption_time_days,
+                                construction_time_days = construction_time_days,
+                                detection_time_days = 30
+                            )
+                            #print("for lifetime of "+str(xPoints[m,l])+" days, gluino mass of "+str(yPoints[m,l])+", nSigEvents["+str(m)+","+str(l)+"] is: "+str(nSigEvents[m,l])) 
+
+                #nSigEvents = np.where(nSigEvents==0, np.nan, nSigEvents)
+                signif = nSigEvents/np.sqrt(nSigEvents+nBkgEvents(detection_time_days = 30, M = NRpcsFiring))
+            
+                fig, ax = plt.subplots()
+                c = ax.pcolormesh(xPoints, yPoints, signif, cmap='viridis', vmin=0, vmax=5)
+            
+                ax.axis([np.min(xPoints), np.max(xPoints), np.min(yPoints), np.max(yPoints)])
+                ax.set_xlabel("Proper lifetime [days]")
+                ax.set_ylabel("Gluino mass [GeV]")
+                ax.set_xscale('log')
+                ax.set_yscale('log')
+                fig.colorbar(c, ax=ax,label='$S/\sqrt{S+B}$')
+
+                #superimpose CMS observed limits (doi:10.1007/JHEP05(2018)127, https://www.hepdata.net/record/ins1645630?version=1&table=Table%2015)
+                cmsFile = np.genfromtxt('HEPData-ins1645630-v1-Table_15.csv', delimiter=",", names=["x", "y"])
+                cms = plt.plot(cmsFile['x']/3600/24,cmsFile['y'], color='red')
+                ax.text(1.2, 700, "CMS 95% CL\nobserved limits", color='red')
+
+                ax.text(10, 2,
+                        'Construction time = '+str(construction_time_days)+
+                        ' days\nAbsorption time = '+str(absorption_time_days)+
+                        ' days\nDetection time = '+str(30)+
+                        ' days\nNumber of RPCs detecting = '+str(NRpcsFiring)+
+                        ' \nPosition '+str(position)
+                )
+
+
+                plt.savefig("plots/sensitivityVsLifetime_pos"+str(position)+'_absTime'+str(absorption_time_days)+'_nRpcFiring'+str(NRpcsFiring)+'.pdf')
+
 
 def printBkgEvents():
 
@@ -319,3 +361,6 @@ def printBkgEvents():
 #printBkgEvents()
 makeplots(0) #comment to use it as a package
 makeplots(1)
+#makeLifetimePlots(0)
+#makeLifetimePlots(1)
+
