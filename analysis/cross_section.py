@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 from muon_spectrum import getMuonsPerSecAboveThresholdBuffered
+import styles
 import os
 os.system('mkdir -p plots')
 
@@ -150,7 +151,7 @@ def calcNBkgEvents(
         effRpc = 0.99, # efficiency of 1 RPC
         nRpcs = 4, #number of RPCs
         M = 2, #number of RPCs that detected the muon, must be at least 2
-        absorberSurfaceArea = 4, #m^2 (2m x 2m)
+        absorberSurfaceArea = 16, #m^2 (4m x 4m)
         ):
 
     detection_time_seconds = detection_time_days*3600.*24.
@@ -286,8 +287,8 @@ def makeplots(position):
             
                 # set the limits of the plot to the limits of the data
                 ax2.axis([np.min(xPoints), np.max(xPoints), np.min(yPoints), np.max(yPoints)])
-                ax2.set_xlabel("Gluino mass [GeV]")
-                ax2.set_ylabel("Neutralino mass [GeV]")
+                ax2.set_xlabel(r"$m_{\widetilde{g}}$"+" [GeV]")
+                ax2.set_ylabel(r"$m_{\widetilde{\chi^0}}$"+" [GeV]")
                 ax2.set_xscale('log')
                 ax2.set_yscale('log')
                 fig2.colorbar(c2, ax=ax2,label='$S/\sqrt{S+B}$')
@@ -295,7 +296,8 @@ def makeplots(position):
                 #triangle showing kinematically forbidden area
                 tri = Polygon(np.array([[np.min(xPoints),np.min(yPoints)], [np.max(xPoints),np.max(yPoints)], [np.min(xPoints),np.max(yPoints)]]), closed=False, fc='lightgrey', ec=None)
                 ax2.add_patch(tri)
-                ax2.text(20, 27, "Kinematically forbidden", rotation=44, rotation_mode='anchor')
+                #ax2.text(20, 27, "Kinematically forbidden", rotation=44, rotation_mode='anchor')
+                ax2.text(20, 25, "Kinematically forbidden", rotation=43, rotation_mode='anchor')
 
                 #superimpose CMS observed limits (doi:10.1007/JHEP05(2018)127, https://www.hepdata.net/record/ins1645630?version=1&table=Table%2018)
                 cmsFile = np.genfromtxt('HEPData-ins1645630-v1-Table_18.csv', delimiter=",", names=["x", "y"])
@@ -303,20 +305,23 @@ def makeplots(position):
                 ax2.text(370, 1.2, "CMS 95% CL observed limits", color='red', rotation=90, rotation_mode='anchor')
 
             
-                ax2.text(1.2, 350, 'Proper lifetime = '+str(lifetime_days)+
+                ax2.text(1.2, 200,
+                         r'$\widetilde{g} \to g \widetilde{\chi^0}$' +
+                         '\nProper lifetime = '+str(lifetime_days)+
                          ' days\nConstruction time = '+str(construction_time_days)+
                          ' days\nAbsorption time = '+str(2*lifetime_days)+
                          ' days\nDetection time = '+str(30)+
                          ' days\nNumber of RPCs detecting = '+str(NRpcsFiring)+
                          ' \nPosition '+str(position)
                 )
-            
+
+                plt.tight_layout()
                 plt.savefig("plots/sensitivity_"+str(lifetime_days)+'_'+str(construction_time_days)+"_pos"+str(position)+'_nRpcFiring'+str(NRpcsFiring)+'.pdf')
                 
 def makeLifetimePlots(position, deltam=3.):
 
-    #for NRpcsFiring in [2, 3, 4]:
-    for NRpcsFiring in [2]:
+    for NRpcsFiring in [2, 3, 4]:
+    #for NRpcsFiring in [2]:
         for construction_time_days in [0,7]:
             for absorption_time_days in [7,14,30]:
 
@@ -353,25 +358,27 @@ def makeLifetimePlots(position, deltam=3.):
             
                 ax.axis([np.min(xPoints), np.max(xPoints), np.min(yPoints), np.max(yPoints)])
                 ax.set_xlabel("Proper lifetime [days]")
-                ax.set_ylabel("Gluino mass [GeV]")
+                ax.set_ylabel(r"$m_{\widetilde{g}}$"+" [GeV]")
                 ax.set_xscale('log')
                 ax.set_yscale('log')
                 fig.colorbar(c, ax=ax,label='$S/\sqrt{S+B}$')
 
                 #superimpose CMS observed limits (doi:10.1007/JHEP05(2018)127, https://www.hepdata.net/record/ins1645630?version=1&table=Table%2015)
-                cmsFile = np.genfromtxt('HEPData-ins1645630-v1-Table_15.csv', delimiter=",", names=["x", "y"])
-                cms = plt.plot(cmsFile['x']/3600/24,cmsFile['y'], color='red')
-                ax.text(1.2, 700, "CMS 95% CL\nobserved limits", color='red')
+                #cmsFile = np.genfromtxt('HEPData-ins1645630-v1-Table_15.csv', delimiter=",", names=["x", "y"])
+                #cms = plt.plot(cmsFile['x']/3600/24,cmsFile['y'], color='red')
+                #ax.text(1.2, 700, "CMS 95% CL\nobserved limits", color='red')
 
                 ax.text(10, 2,
-                        'Construction time = '+str(construction_time_days)+
+                        r'$\widetilde{g} \to g \widetilde{\chi^0}$' +
+                        '\n' + r'$m_{\widetilde{g}}-m_{\widetilde{\chi^0}} = $'+str(deltam)+
+                        ' GeV\nConstruction time = '+str(construction_time_days)+
                         ' days\nAbsorption time = '+str(absorption_time_days)+
                         ' days\nDetection time = '+str(30)+
                         ' days\nNumber of RPCs detecting = '+str(NRpcsFiring)+
                         ' \nPosition '+str(position)
                 )
 
-
+                plt.tight_layout()
                 plt.savefig("plots/sensitivityVsLifetime_pos"+str(position)+'_absTime'+str(absorption_time_days)+'_nRpcFiring'+str(NRpcsFiring)+'_deltam'+str(deltam)+ '_constrTime'+str(construction_time_days)+ '.pdf')
 
 
@@ -385,7 +392,10 @@ def printBkgEvents():
 #printBkgEvents()
 #makeplots(0) #comment to use it as a package
 #makeplots(1)
-#makeLifetimePlots(0, deltam=3.)
-makeLifetimePlots(1, deltam=1.)
-makeLifetimePlots(1, deltam=30.)
+#makeLifetimePlots(0, deltam=3)
+#makeLifetimePlots(1, deltam=1)
+#makeLifetimePlots(1, deltam=3)
+#makeLifetimePlots(0, deltam=30)
+#makeLifetimePlots(0, deltam=300)
+
 
