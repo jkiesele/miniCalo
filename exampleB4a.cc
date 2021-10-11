@@ -146,8 +146,8 @@ int main(int argc,char** argv)
   B4PartGeneratorBase::particle = "~g_rho0";
   B4PartGeneratorBase::beta = .1;
 
-  B4DetectorConstruction::LArTankSize = 6*m;
-  betastr="6";
+  B4DetectorConstruction::LArTankSize = 4*m;
+  betastr="4";
 
 
 #ifdef G4MULTITHREADED

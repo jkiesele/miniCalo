@@ -178,8 +178,8 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
   partstr="mu-";
   setParticle(partstr);
-  double energy_max=10000;
-  double energy_min=1;
+  double energy_max=50000;
+  double energy_min=50;
 
   energy_=1000001;
 
@@ -191,8 +191,10 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
       energy_=(energy_max)*rand+energy_min;
   }
 
-  G4ThreeVector direction(0,0,1);//G4INCL::Random::shoot0(),G4INCL::Random::shoot0(),G4INCL::Random::shoot0());
+  G4ThreeVector direction(1,0,1);
   direction = direction.unit();
+
+  G4ThreeVector position(-3*m,0, -3*m);
 
   x_component_ = direction.x();
   y_component_ = direction.y();
@@ -201,7 +203,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 //SetParticleMomentum
   fParticleGun->SetParticleMomentumDirection(direction);
   fParticleGun->SetParticleEnergy(energy_ * GeV);
-  fParticleGun->SetParticlePosition(G4ThreeVector(15*mm,0, -6*m));
+  fParticleGun->SetParticlePosition(position);
   fParticleGun->GeneratePrimaryVertex(anEvent);
 
   G4cout << "energy: " << energy_ << " part " << partstr<< " " << direction << G4endl;
