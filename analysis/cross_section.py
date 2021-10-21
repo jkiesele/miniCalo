@@ -4,6 +4,7 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
+
 from muon_spectrum import getMuonsPerSecAboveThresholdBuffered
 import styles
 import os
@@ -23,7 +24,7 @@ class massClass(object):
             3.236e10,
             2.422e9,
             1.443e8,
-            2.673e5,
+            6.615e6,
             2.163e5,
             4.221e3,
             3.254e1,
@@ -143,6 +144,27 @@ def nEventsDetectable(
 
 
 ########### bkg calculations
+def comb(n,k):
+    import math
+    return math.factorial(n) // math.factorial(k) // math.factorial(n - k)
+
+
+#cache at least M out of N
+at_least_k_of_n_cache={}
+def at_least_k_of_n(k, n, eff):
+    import math
+    global at_least_k_of_n_cache
+    if (k,n) in at_least_k_of_n_cache.keys():
+        return at_least_k_of_n_cache[(k,n)]
+    
+    def k_of_n(kk,nn,efff):
+        return comb(nn, kk)*efff**kk*(1-efff)**(nn-kk)
+    out=0
+    for i in range(k,n+1):
+        out += k_of_n(i,n,eff)
+    at_least_k_of_n_cache[(k,n)]=out
+    return out
+    
 
 # number of cosmic background events, given certain detection time
 def calcNBkgEvents(
@@ -151,14 +173,22 @@ def calcNBkgEvents(
         effRpc = 0.99, # efficiency of 1 RPC
         nRpcs = 4, #number of RPCs
         M = 2, #number of RPCs that detected the muon, must be at least 2
-        absorberSurfaceArea = 16, #m^2 (4m x 4m)
+        absorberSurfaceArea = 4, #m^2 (2m x 2m)
+        sameOnTopAndBottom=True
         ):
 
     detection_time_seconds = detection_time_days*3600.*24.
     N = nRpcs - M #number of RPCs that didn't detect the muon
+    
+    mod = 1. - at_least_k_of_n(M,nRpcs,effRpc)
+    if sameOnTopAndBottom:
+        if M%2 or N%2:
+            raise ValueError("can't calculate odd number of RPCs with sameOnTopAndBottom=True")
+        #at least M//2 out of nRpcs//2 on the top AND on the bottom
+        mod = 1. - (at_least_k_of_n(M//2,nRpcs//2,effRpc) * at_least_k_of_n(M//2,nRpcs//2,effRpc))
 
-    return cosmicRate * (1-effRpc)**N * absorberSurfaceArea * detection_time_seconds
 
+    return cosmicRate * mod * absorberSurfaceArea * detection_time_seconds
 
 ########### THE STUFF BELOW IS JUST FOR TESTING
 
@@ -204,10 +234,10 @@ def makeplots(position):
                         
     plt.savefig('plots/efficiencyVsMass_pos'+str(position)+'.pdf')
     
-    for lifetime_days in [7, 30, 365]:
-    #for lifetime_days in [7]:
-        for NRpcsFiring in [2, 3, 4]:
-        #for NRpcsFiring in [2]:
+    #for lifetime_days in [7, 30, 365]:
+    for lifetime_days in [7]:
+        #for NRpcsFiring in [2, 4]:
+        for NRpcsFiring in [2]:
             for construction_time_days in [7]:
         
                 x, y = np.meshgrid(np.linspace(lifetime_days/7., 15*lifetime_days, 200), 
@@ -288,7 +318,7 @@ def makeplots(position):
                 # set the limits of the plot to the limits of the data
                 ax2.axis([np.min(xPoints), np.max(xPoints), np.min(yPoints), np.max(yPoints)])
                 ax2.set_xlabel(r"$m_{\widetilde{g}}$"+" [GeV]")
-                ax2.set_ylabel(r"$m_{\widetilde{\chi^0}}$"+" [GeV]")
+                ax2.set_ylabel(r"$m_{\widetilde{\chi}^0}$"+" [GeV]")
                 ax2.set_xscale('log')
                 ax2.set_yscale('log')
                 fig2.colorbar(c2, ax=ax2,label='$S/\sqrt{S+B}$')
@@ -306,80 +336,94 @@ def makeplots(position):
 
             
                 ax2.text(1.2, 200,
-                         r'$\widetilde{g} \to g \widetilde{\chi^0}$' +
-                         '\nProper lifetime = '+str(lifetime_days)+
+                         r'$\widetilde{g} \to g \widetilde{\chi}^0$' +
+                         '\n'+r'$\tau_{\widetilde{g}}= $'+str(lifetime_days)+
                          ' days\nConstruction time = '+str(construction_time_days)+
                          ' days\nAbsorption time = '+str(2*lifetime_days)+
                          ' days\nDetection time = '+str(30)+
-                         ' days\nNumber of RPCs detecting = '+str(NRpcsFiring)+
+                         ' days\nNumber of RPC hits required = '+str(NRpcsFiring)+
                          ' \nPosition '+str(position)
                 )
 
                 plt.tight_layout()
                 plt.savefig("plots/sensitivity_"+str(lifetime_days)+'_'+str(construction_time_days)+"_pos"+str(position)+'_nRpcFiring'+str(NRpcsFiring)+'.pdf')
                 
-def makeLifetimePlots(position, deltam=3.):
+def makeLifetimePlots(position):
 
-    for NRpcsFiring in [2, 3, 4]:
-    #for NRpcsFiring in [2]:
-        for construction_time_days in [0,7]:
-            for absorption_time_days in [7,14,30]:
+    fig, ax = plt.subplots()
+    ax.set_aspect('equal')
+    
+    for NRpcsFiring in [2]:
+        for construction_time_days in [7]:
+            for absorption_time_days in [14]:
+                for detection_time_days in [30]:
+                    for deltam in [3, 300]:
 
-                xPoints, yPoints = np.meshgrid(np.logspace(0,np.log10(1000)),np.logspace(0,np.log10(1500)))
-                nSigEvents = np.zeros((len(xPoints),len(yPoints)))
-                nBkgEvents = np.zeros_like(nSigEvents)
+                        xPoints, yPoints = np.meshgrid(np.logspace(0,np.log10(1000)),np.logspace(0,np.log10(1000)))
+                        nSigEvents = np.zeros((len(xPoints),len(yPoints)))
+                        nBkgEvents = np.zeros_like(nSigEvents)
             
-                for l in range(len(xPoints)):
-                    for m in range(len(yPoints)):
-                        if xPoints[m,l]!=0.:
-                            nSigEvents[m,l] = nEventsDetectable(
-                                massClass(yPoints[m,l],position),
-                                lifetime_seconds = 3600.*24*xPoints[m,l],
-                                absorption_time_days = absorption_time_days,
-                                construction_time_days = construction_time_days,
-                                detection_time_days = 30
-                            )
-
-                            nBkgEvents[m,l] = calcNBkgEvents(
-                                detection_time_days = 30,
-                                M = NRpcsFiring,
-                                cosmicRate = getMuonsPerSecAboveThresholdBuffered(
-                                    deltam/2.,
-                                    1. #for 1 m2 since it's already in the function
+                        for l in range(len(xPoints)):
+                            for m in range(len(yPoints)):
+                                if xPoints[m,l]!=0.:
+                                    nSigEvents[m,l] = nEventsDetectable(
+                                        massClass(yPoints[m,l],position),
+                                        lifetime_seconds = 3600.*24*xPoints[m,l],
+                                        absorption_time_days = absorption_time_days,
+                                        construction_time_days = construction_time_days,
+                                        detection_time_days = detection_time_days
                                     )
-                                )
-                            #print("for lifetime of "+str(xPoints[m,l])+" days, gluino mass of "+str(yPoints[m,l])+", nSigEvents["+str(m)+","+str(l)+"] is: "+str(nSigEvents[m,l])) 
 
-                #nSigEvents = np.where(nSigEvents==0, np.nan, nSigEvents)
-                signif = nSigEvents/np.sqrt(nSigEvents+nBkgEvents)
+                                    nBkgEvents[m,l] = calcNBkgEvents(
+                                        detection_time_days = detection_time_days,
+                                        M = NRpcsFiring,
+                                        cosmicRate = getMuonsPerSecAboveThresholdBuffered(
+                                            deltam/2.,
+                                            1. #for 1 m2 since it's already in the function
+                                        )
+                                    )
+                                    #print("for lifetime of "+str(xPoints[m,l])+" days, gluino mass of "+str(yPoints[m,l])+", nSigEvents["+str(m)+","+str(l)+"] is: "+str(nSigEvents[m,l])) 
+
+                        #nSigEvents = np.where(nSigEvents==0, np.nan, nSigEvents)
+                        signif = nSigEvents/np.sqrt(nSigEvents+nBkgEvents)
             
-                fig, ax = plt.subplots()
-                c = ax.pcolormesh(xPoints, yPoints, signif, cmap='viridis', vmin=0, vmax=5)
+                        if deltam == 3:
+                            color = 'b'
+                            manual_locations = [(200,500),(500,300)]
+                            ax.text(8,300,r'$\Delta m = 3$'+' GeV',color=color)
+                        elif deltam == 300:
+                            color = 'k'
+                            manual_locations = [(200,800),(500,500)]
+                            ax.text(1.7,700,r'$\Delta m = 300$'+' GeV',color=color)
+
+                        #c = ax.pcolormesh(xPoints, yPoints, signif, cmap='viridis', vmin=0, vmax=5)
+                        c = ax.contour(xPoints, yPoints, signif, levels=[3,5], colors=color, linestyles=('dashed','solid'))
+                        ax.clabel(c, inline=True, fmt='%1.1f', fontsize='smaller', inline_spacing=17, use_clabeltext=True, manual=manual_locations)
             
-                ax.axis([np.min(xPoints), np.max(xPoints), np.min(yPoints), np.max(yPoints)])
-                ax.set_xlabel("Proper lifetime [days]")
-                ax.set_ylabel(r"$m_{\widetilde{g}}$"+" [GeV]")
-                ax.set_xscale('log')
-                ax.set_yscale('log')
-                fig.colorbar(c, ax=ax,label='$S/\sqrt{S+B}$')
+                        ax.axis([np.min(xPoints), np.max(xPoints), 10, np.max(yPoints)])
+                        ax.set_xlabel(r"$\tau_{\widetilde{g}}$"+" [days]")
+                        ax.set_ylabel(r"$m_{\widetilde{g}}$"+" [GeV]")
+                        ax.set_xscale('log')
+                        ax.set_yscale('log')
 
-                #superimpose CMS observed limits (doi:10.1007/JHEP05(2018)127, https://www.hepdata.net/record/ins1645630?version=1&table=Table%2015)
-                #cmsFile = np.genfromtxt('HEPData-ins1645630-v1-Table_15.csv', delimiter=",", names=["x", "y"])
-                #cms = plt.plot(cmsFile['x']/3600/24,cmsFile['y'], color='red')
-                #ax.text(1.2, 700, "CMS 95% CL\nobserved limits", color='red')
+                        #fig.colorbar(c, ax=ax,label='$S/\sqrt{S+B}$')
 
-                ax.text(10, 2,
-                        r'$\widetilde{g} \to g \widetilde{\chi^0}$' +
-                        '\n' + r'$m_{\widetilde{g}}-m_{\widetilde{\chi^0}} = $'+str(deltam)+
-                        ' GeV\nConstruction time = '+str(construction_time_days)+
-                        ' days\nAbsorption time = '+str(absorption_time_days)+
-                        ' days\nDetection time = '+str(30)+
-                        ' days\nNumber of RPCs detecting = '+str(NRpcsFiring)+
-                        ' \nPosition '+str(position)
-                )
+                        #superimpose CMS observed limits (doi:10.1007/JHEP05(2018)127, https://www.hepdata.net/record/ins1645630?version=1&table=Table%2015)
+                        #cmsFile = np.genfromtxt('HEPData-ins1645630-v1-Table_15.csv', delimiter=",", names=["x", "y"])
+                        #cms = plt.plot(cmsFile['x']/3600/24,cmsFile['y'], color='red')
+                        #ax.text(1.2, 700, "CMS 95% CL\nobserved limits", color='red')
 
-                plt.tight_layout()
-                plt.savefig("plots/sensitivityVsLifetime_pos"+str(position)+'_absTime'+str(absorption_time_days)+'_nRpcFiring'+str(NRpcsFiring)+'_deltam'+str(deltam)+ '_constrTime'+str(construction_time_days)+ '.pdf')
+    ax.text(2, 20,
+            r'$\widetilde{g} \to g \widetilde{\chi}^0$' +
+            '\nConstruction time = '+str(construction_time_days)+
+            ' days\nAbsorption time = '+str(absorption_time_days)+
+            ' days\nDetection time = '+str(30)+
+            ' days'+'\nNumber of RPC hits required = '+str(NRpcsFiring)+
+            ' \nPosition '+str(position)
+    )
+
+    plt.tight_layout()
+    plt.savefig("plots/sensitivityVsLifetime_pos"+str(position)+'_absTime'+str(absorption_time_days)+'_nRpcFiring'+str(NRpcsFiring)+'_constrTime'+str(construction_time_days)+ '.pdf')
 
 
 def printBkgEvents():
@@ -390,12 +434,9 @@ def printBkgEvents():
     
 
 #printBkgEvents()
-#makeplots(0) #comment to use it as a package
+makeplots(0) #comment to use it as a package
 #makeplots(1)
-#makeLifetimePlots(0, deltam=3)
-#makeLifetimePlots(1, deltam=1)
-#makeLifetimePlots(1, deltam=3)
-#makeLifetimePlots(0, deltam=30)
-#makeLifetimePlots(0, deltam=300)
+makeLifetimePlots(0)
+#makeLifetimePlots(1)
 
 
