@@ -7,6 +7,7 @@ import pandas
 import glob
 import plotly.express as px
 import math 
+import styles
 
 
 def readFile(filename):
@@ -113,7 +114,7 @@ fig.write_html("/eos/home-j/jkiesele/www/files/test.html")
 #now some standard plots
 masses = np.unique(df['mass'])
 
-def makeAbsPlot(fieldname,xfieldname):
+def makeAbsPlot(fieldname,xfieldname,**kwargs):
     plt.close()
     betas_m, abs_m= {},{}
     for m in masses:
@@ -127,17 +128,20 @@ def makeAbsPlot(fieldname,xfieldname):
         abs_m[m] = abs
         plt.plot(betas, abs,label=str(int(round(m-0.7)))+' GeV')
     
-    plt.legend(title=r'$\tilde{g}$ mass')
+    plt.legend(**kwargs)
     plt.xlabel(r"$\beta$")
     plt.ylabel("Absorption efficiency")
+    plt.xlim(0.1,1.)
     return betas_m, abs_m
     
    
 for x in ['beta','energy']: 
     print('printing',x)
-    betas, abs = makeAbsPlot('totalabs',x)
-    plt.title("2 m brass")
-    plt.ylim([0,0.13])
+    betas, abs = makeAbsPlot('totalabs',x,ncol=2)
+    #print(abs)
+    #plt.title("2 m brass")
+    plt.ylim([0,0.1599])
+    #plt.ylim([0,0.13])
     if x == 'energy':
         plt.xlabel(r"$E_{kin} = p_{T}$ [GeV]")
         plt.xlim([0,100])
