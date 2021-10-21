@@ -337,7 +337,7 @@ def makeplots(position):
             
                 ax2.text(1.2, 200,
                          r'$\widetilde{g} \to g \widetilde{\chi}^0$' +
-                         '\nProper lifetime = '+str(lifetime_days)+
+                         '\n'+r'$\tau_{\widetilde{g}}= $'+str(lifetime_days)+
                          ' days\nConstruction time = '+str(construction_time_days)+
                          ' days\nAbsorption time = '+str(2*lifetime_days)+
                          ' days\nDetection time = '+str(30)+
@@ -401,7 +401,7 @@ def makeLifetimePlots(position):
                         ax.clabel(c, inline=True, fmt='%1.1f', fontsize='smaller', inline_spacing=17, use_clabeltext=True, manual=manual_locations)
             
                         ax.axis([np.min(xPoints), np.max(xPoints), 10, np.max(yPoints)])
-                        ax.set_xlabel("Proper lifetime [days]")
+                        ax.set_xlabel(r"$\tau_{\widetilde{g}}$"+" [days]")
                         ax.set_ylabel(r"$m_{\widetilde{g}}$"+" [GeV]")
                         ax.set_xscale('log')
                         ax.set_yscale('log')
