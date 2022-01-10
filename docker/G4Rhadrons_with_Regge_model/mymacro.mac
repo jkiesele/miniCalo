@@ -1,0 +1,37 @@
+# Setting up geometry
+
+/Rhad/det/setBox1Mat Galactic
+/Rhad/det/setBox2Mat Iron
+/Rhad/det/setBox3Mat Galactic
+/Rhad/det/setBox4Mat Galactic
+/Rhad/det/setWorldSize 10 m
+/Rhad/det/setBox1Size 1 cm
+/Rhad/det/setBox2Size 9 m
+/Rhad/det/setBox3Size 1 cm
+/Rhad/det/setBox4Size 1 cm
+/Rhad/det/setBox1Pos -990 cm
+/Rhad/det/setBox2Pos 0 cm
+/Rhad/det/setBox3Pos 970 cm
+/Rhad/det/setBox4Pos 990 cm
+
+/Rhad/det/update
+
+#Setting up the particle gun
+
+/gun/particle ~g_rho+
+#/gun/particle ~g_Lambda0
+
+/Rhad/gun/position 0 cm
+/Rhad/gun/flatenergy 1 TeV # Flat distribution
+#/gun/energy  1000 GeV # Constant kinetic energy
+
+/tracking/verbose 1
+
+# Disabling ionisation
+#/process/inactivate hhIoni
+
+# Running the simulation job
+/run/beamOn 1000
+
+exit
+

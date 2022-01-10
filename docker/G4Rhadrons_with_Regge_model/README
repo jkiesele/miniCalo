@@ -1,0 +1,115 @@
+ADDING R-HADRONS TO GEANT4
+
+This is an example of how to add gluino and stop R-hadrons to
+Geant4. The code contained within this example is described in 
+
+R. Mackeprang and A. Rizzi,
+"Interactions of Coloured Heavy Stable Particles in Matter",
+Eur.Phys.J.C50:353-362,2007
+
+For more details the reader is referred to
+
+R. Mackeprang, "Heavy Stable Hadrons in ATLAS", Ph.D. thesis,
+http://cern.ch/r-hadrons/download/mackeprang_thesis.pdf
+
+
+INTRODUCTION:
+
+The code in this example is based upon the N03 novice example so the
+similarities in the basic structure is no coincidence. Our additions
+to the code fall into three cathegories:
+
+1) Adding particles to Geant4 at run-time.
+
+This is done by introducing the CustomParticle class which inherits
+from G4ParticleDefinition. The CustomParticleFactory then selectively
+breaks the singleton property of the class based on configuration
+files.
+
+2) Adding processes (and possibly decays) for the new particles.
+
+In the naming convention here there are two possible hadronic
+processes. These are:
+
+- G4GenericHadronicProcess: A full parametrised process which is used
+  in publications.
+
+- GenericHadronicProcess: A toy-model which is somewhat easier to
+  understand. The model is described in publications but is not used
+  for physics conclusions.
+
+They are added to instantiated CustomParticles in
+ExRhadPhysicsList.cc. The default process is the full parametrised
+process.
+
+
+SETTING UP THE EXAMPLE
+
+- Configuration
+
+The example is configured using the setup.sh script. No csh-style
+script has been made yet. The user needs to set the G4INSTALL and
+ROOTSYS variables in the script or set them manually and comment out
+the corresponding lines in the file.
+
+Now write:
+
+. setup.sh
+make
+
+
+The last two lines of the output should be:
+
+
+Linking exampleRhad ...
+... Done!
+
+
+- Physics Configuration
+
+The package relies on four run-time text files to specify the physics configuration. These are:
+
+particles.txt: 
+The list of heavy hadrons. The heavy parton *must* be the first in the
+list.
+
+RhadronProcessList.txt:
+The list of hadronic processes possible.
+
+PhysicsConfiguration.txt:
+Sets up cross section resonances and charge exchange suppression factors.
+
+decays.txt:
+Contains the list of possible decays of particles
+
+
+The data directory contains setups for gluinos @ 200, 300, 500 & 800 GeV, stops @ 
+
+
+RUNNING THE EXAMPLE
+
+The mymacro.mac file illustrates the use of the package. It sets up a
+geometry (a block of iron) and runs 1000 ~g_rho+ particles through
+it with a flat distribution in kinetic energies. Assuming this is run
+on a Linux machine it is run by writing:
+
+exampleRhad mymacro.mac
+
+(The executable should have been added to your path)
+
+A couple of things should be noted about the default configuration:
+
+- Stepping and stacking actions are in place discarding all particles
+  which are not R-hadrons. They can be commented out in the main
+  program. The relevant classes are:
+	ExRhadSteppingAction
+	MyStackingAction
+
+- Classes exemplifying the use of sensitive volumes and hits are
+  available and the use of them is illustrated in an analysis
+  class. The relevant classes are:
+	MySensitiveTracker
+	MyTrackerHit
+	MyAnalysis
+
+Best of luck.

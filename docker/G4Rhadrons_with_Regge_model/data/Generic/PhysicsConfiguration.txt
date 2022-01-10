@@ -1,0 +1,5 @@
+Resonant = 0.
+ResonanceEnergy = 200.
+Gamma = 0.1
+Amplitude = 100.
+ReggeSuppression = 0.

@@ -1,0 +1,2 @@
+~g_Lambda0 neutron Neutralino 0.5
+~g_Lambda0 neutron pi0 Neutralino 0.5
