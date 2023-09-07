@@ -62,6 +62,14 @@ foreach(_script ${EXAMPLEB4A_SCRIPTS})
     )
 endforeach()
 
+
+add_subdirectory(lib/pybind11)
+pybind11_add_module(compiled ${PROJECT_SOURCE_DIR} "${PROJECT_SOURCE_DIR}/bind/bindings.cpp")
+
+
+#shared lib lib
+include_directories(lib/pybind11/include)
+
 #----------------------------------------------------------------------------
 # Install the executable to 'bin' directory under CMAKE_INSTALL_PREFIX
 #
