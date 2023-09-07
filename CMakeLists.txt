@@ -62,9 +62,9 @@ foreach(_script ${EXAMPLEB4A_SCRIPTS})
     )
 endforeach()
 
-
+file(GLOB_RECURSE SOURCES "${PROJECT_SOURCE_DIR}/src/*.cc" )
 add_subdirectory(lib/pybind11)
-pybind11_add_module(compiled ${PROJECT_SOURCE_DIR} "${PROJECT_SOURCE_DIR}/bind/bindings.cpp")
+pybind11_add_module(compiled ${SOURCES} "${PROJECT_SOURCE_DIR}/bind/bindings.cpp")
 
 
 #shared lib lib
